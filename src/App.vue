@@ -1,7 +1,7 @@
 <template>
   <b-container fluid id="app">
     <b-row>
-      <b-col md="3" lg="2" id="navigation">
+      <b-col md="3" lg="2" id="navigation" >
         <b-row>
           <b-col>
             <div id="logoDiv">
@@ -22,8 +22,8 @@
         </div>
 
       </b-col>
-      <b-col>
-        <b-row id="nav-info">
+      <b-col id="mainCol">
+        <b-row id="nav-info" class="shadow">
           <b-col id="currentPage" class="text-left">
             <h4>{{current}}</h4>
           </b-col>
@@ -32,7 +32,9 @@
           </b-col>
         </b-row>
         <div id="routerContent">
-        <router-view/>
+          <transition name="component-fade" mode="out-in">
+            <router-view/>
+          </transition>
         </div>
       </b-col>
     </b-row>
@@ -73,6 +75,7 @@
         UserName: 'John Doe',
         navLinks: [
           'Datasources',
+          'Connections',
           'Intents',
           'Entities',
           'Users',
@@ -121,12 +124,18 @@
 </script>
 
 <style lang="less">
+  // Variables for Merck CI
   @richPurple: #503291;
+  @richPurpleDarker: darken(@richPurple, 5%);
+  @richPurpleLighter: lighten(@richPurple, 10%);
   @vibCyan: #2dbecd;
+  @vibCyanDarker: darken(@vibCyan, 5%);
+  @vibCyanLighter: lighten(@vibCyan, 10%);
   @vibGreen: #a5cd50;
-
+  @vibGreenDarker: darken(@vibGreen, 10%);
   @font: 'Verdana';
 
+  // global settings
   #app {
     font-family: @font, 'Avenir', Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
@@ -135,16 +144,22 @@
     background: #fffffa;
   }
 
+  html {
+    @media(min-width: 576px) {
+      overflow: hidden;
+    }
+  }
+
+  // wrapper
   #navigation {
     background: @richPurple;
     height: 100vh;
-    color: @vibGreen;
+    color: white;
     z-index: 1;
-    position: -webkit-sticky;
   }
 
   #nav-info {
-    min-height: 3em;
+    height: 3em;
   }
 
   #emdlogo {
@@ -207,14 +222,80 @@
   }
 
   #nav-info {
-    background: white;
-    border-bottom: 2px solid lightgrey;
+    background: @richPurple;
+    color: white;
+    border-bottom: 2px solid @richPurple;
     padding-top: .5em;
+    z-index: 3;
   }
 
   #routerContent {
-    padding: 2em;
     text-align: left;
+    height: 93vh;
+    overflow-y: auto;
+    padding-right: 2em;
+    padding-left: 1em;
   }
+
+  #mainCol {
+    padding: 0;
+  }
+
+  #userInfo {
+    margin-right: 1em;
+  }
+
+
+  // buttons
+  .btn-primary {
+    background-color: @richPurple;
+    border-color: @richPurple;
+    &:hover {
+      background-color: @richPurpleDarker;
+      border-color: @richPurpleDarker;
+    }
+    &[disabled] {
+      background-color: @richPurpleLighter;
+      border-color: @richPurpleLighter;
+    }
+  }
+
+  .btn-info {
+    background: @vibCyan;
+    border-color: @vibCyan;
+    &:hover {
+      background-color: @vibCyanDarker;
+      border-color: @vibCyanDarker;
+    }
+    &[disabled] {
+      background-color: @vibCyanLighter;
+      border-color: @vibCyanLighter;
+    }
+  }
+
+  .btn {
+    float: right;
+    margin-left: .5em;
+  }
+
+  //tabs
+  .nav-item a {
+    color: black !important;
+  }
+
+  //icons
+  .controlicon {
+    width: 1em;
+  }
+
+  //transitions
+  .component-fade-enter-active, .component-fade-leave-active {
+    transition: opacity .2s ease;
+  }
+  .component-fade-enter, .component-fade-leave-to
+    /* .component-fade-leave-active below version 2.1.8 */ {
+    opacity: 0;
+  }
+
 
 </style>

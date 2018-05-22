@@ -4,7 +4,7 @@
 
 <script>
   export default {
-    name: "intents"
+    name: "Connections.vue"
   }
 </script>
 
