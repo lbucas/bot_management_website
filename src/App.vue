@@ -1,7 +1,7 @@
 <template>
   <b-container fluid id="app">
     <b-row>
-      <b-col md="3" lg="2" id="navigation" >
+      <b-col md="3" lg="2" id="sidenavigation" >
         <b-row>
           <b-col>
             <div id="logoDiv">
@@ -10,7 +10,7 @@
           </b-col>
         </b-row>
         <h5>Bot Management</h5>
-        <h6 id="projectTitle" @click="projectDialog"><img src="./assets/icons/projects.svg" id="projectIcon"/>
+        <h6 id="projectTitle" @click="$root.projectDialog"><img src="./assets/icons/projects.svg" id="projectIcon"/>
           {{$root.project.title}}</h6>
         <div id="links">
           <ul v-for="nl in navLinks">
@@ -39,8 +39,8 @@
       </b-col>
     </b-row>
 
-    <b-modal size="lg" id="projectModal" title="Choose your project" no-close-on-esc no-close-on-backdrop
-             hide-header-close>
+    <b-modal size="lg" id="projectModal" title="Choose your project"  cancel-disabled no-close-on-esc no-close-on-backdrop
+             hide-header-close ok-disabled>
       <div class="table-responsive">
         <table class="table table-hover">
           <thead>
@@ -82,7 +82,7 @@
           'Settings'
         ],
         projects: [
-          {id: 1, title: 'Rebate Data', role: 'Member'},
+          {id: '5b04364241b70a008681ddc8', title: 'Rebate Data', role: 'Member'},
           {id: 2, title: 'Sales Data', role: 'Creator'}
         ]
       }
@@ -102,23 +102,10 @@
         this.$root.project = p
         this.route('/')
         this.$root.setCookie('project', JSON.stringify(p))
-      },
-      checkProject() {
-        var t = this
-        try {
-          var p = JSON.parse(t.$root.getCookie('project'))
-          this.$root.project = p
-        } catch (e) {
-          t.projectDialog()
-        }
-        console.log(p)
-      },
-      projectDialog() {
-        this.$root.modalOpen('projectModal')
       }
     },
     mounted() {
-      this.checkProject()
+      this.$root.checkProject()
     }
   }
 </script>
@@ -132,6 +119,7 @@
   @vibCyanDarker: darken(@vibCyan, 5%);
   @vibCyanLighter: lighten(@vibCyan, 10%);
   @vibGreen: #a5cd50;
+  @vibGreenLighter: lighten(@vibGreen, 10%);
   @vibGreenDarker: darken(@vibGreen, 10%);
   @font: 'Verdana';
 
@@ -151,7 +139,7 @@
   }
 
   // wrapper
-  #navigation {
+  #sidenavigation {
     background: @richPurple;
     height: 100vh;
     color: white;
@@ -270,6 +258,19 @@
     &[disabled] {
       background-color: @vibCyanLighter;
       border-color: @vibCyanLighter;
+    }
+  }
+
+  .btn-success {
+    background: @vibGreen;
+    border-color: @vibGreen;
+    &:hover {
+      background-color: @vibGreenDarker;
+      border-color: @vibGreenDarker;
+    }
+    &[disabled] {
+      background-color: @vibGreenLighter;
+      border-color: @vibGreenLighter;
     }
   }
 

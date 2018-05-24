@@ -1,12 +1,7 @@
 <template>
-  <MasterDetail :addnew="addIntent" tableheading="Intents">
-    <tbody slot="table">
-    <tr v-for="intent in intents">
-      <td>{{intent.name}}</td>
-    </tr>
-    </tbody>
+  <MasterDetail :addnew="addIntent" tableheading="Intents" :selected="chooseIntent" :tablecontent="intents">
 
-    <div slot="detail">
+    <div >
       p <br>
       p <br>
       p <br>
@@ -64,19 +59,23 @@
       return {
         intents: [
           {
+            id: 'i1',
             name: 'Intent 1'
           },
           {
+            id: 'i2',
             name: 'Intent 2'
           },
           {
+            id: 'i3',
             name: 'Intent 3'
           }
         ]
       }
     },
     methods: {
-      addIntent() {}
+      addIntent() {},
+      chooseIntent(i) {}
     }
   }
 </script>

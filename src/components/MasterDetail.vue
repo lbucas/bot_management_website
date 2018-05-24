@@ -4,17 +4,24 @@
       <b-col lg="4" class="mdtable">
         <h5>
           <span class="tabHeading">{{tableheading}}</span>
-          <b-button size="sm" variant="primary" @click="addnew">+</b-button>
+          <b-button size="sm" variant="primary" @click="addNewWrapper">+</b-button>
         </h5>
+        <Loader :loading="loading"/>
         <div class="table-responsive">
           <table class="table table-hover">
-            <slot name="table"></slot>
+            <span v-if="!loading && tclength == 0">There's nothing to show.</span>
+            <tr v-for="(t, id) in tablecontent" @click="chooseEntry(id)" v-bind:active="(id == activeId)">
+              <td>
+                <span class="tablePrimary float-left">{{t.name}}</span>
+                <span class="tableSecondary float-right">{{t[secondary]}}</span>
+              </td>
+            </tr>
           </table>
         </div>
       </b-col>
       <b-col lg="8">
-        <div class="mddetail">
-          <slot name="detail"></slot>
+        <div class="mddetail" v-if="detailsVisible">
+          <slot></slot>
         </div>
       </b-col>
     </b-row>
@@ -22,12 +29,52 @@
 </template>
 
 <script>
+  import Loader from './Loader'
   export default {
+    components: {Loader},
     props: {
       'tableheading': String,
-      'addnew': Function
+      'tablecontent': Object,
+      'addnew': Function,
+      'selected': Function,
+      'manualchoose': String,
+      'secondary': {
+        type: String,
+        default: ''
+      },
+      'loading': Boolean
     },
-    name: "masterdetail"
+    name: "masterdetail",
+    methods: {
+      chooseEntry(id) {
+        this.activeId = id
+        this.detailsVisible = true
+        this.$props.selected(this.tablecontent[id])
+      },
+      addNewWrapper() {
+        this.detailsVisible = true
+        this.activeId = ''
+        this.$props.addnew()
+      }
+    },
+    data() {
+      return {
+        activeId: '',
+        detailsVisible: false
+      }
+    },
+    computed: {
+      tclength() {
+        return Object.keys(this.tablecontent).length
+      }
+    },
+    watch: {
+      manualchoose(id) {
+        if (id !== '') {
+          this.chooseEntry(id)
+        }
+      }
+    }
   }
 </script>
 
@@ -35,7 +82,12 @@
   @richPurple: #503291;
 
   .mdtable {
-    overflow-scrolling: auto;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
     h5 {
       margin-top: 1em;
     }
@@ -55,6 +107,9 @@
           font-weight: bold;
         }
       }
+      &:hover {
+        background: rgba(0,0,0,.075);
+      }
     }
   @media-bottom (max-width: 991px) {
     margin-bottom: 2em;
@@ -63,6 +118,7 @@
       margin-bottom: 1em;
     }
     @media (min-width: 992px) {
+      min-height: 93vh;
       border-right: 1px solid lightgrey;
     }
   }
