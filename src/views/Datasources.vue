@@ -73,7 +73,7 @@
           </b-button>
           <b-button variant="info" @click="testConnection" v-if="!connectionTested">{{connectionTestLabel}}</b-button>
           <b-button variant="success" v-if="connectionTested" @click="connectionTested=false">Success!</b-button>
-          <b-button variant="secondary" v-if="(onEdit&&!dsDetails.id=='')" @click="onEdit=false">Cancel</b-button>
+          <b-button variant="secondary" v-if="(onEdit&&!dsDetails.id=='')" @click="onEdit=false; chooseDs(datasources[activeId])">Cancel</b-button>
         </b-tab>
         <b-tab class="tabTitle" title="Tables" v-if="showTables">
           <ul id="tables" v-for="tab in dsDetails.tables">
@@ -182,7 +182,10 @@
         this.$root.getAndSet(
           'projects/--projectid--/dataSources',
           t.datasources,
-          null,
+          function (d) {
+            // array to object
+            return d
+          },
           function () {
             t.loading = false
             if (showAfterLoading) {
@@ -206,7 +209,7 @@
         )
       },
       chooseDs(ds) {
-        this.dsDetails = ds
+        this.$root.clone(this.dsDetails, ds)
         this.showTables = true
         this.onEdit = false
         this.activeId = ds.id
@@ -215,14 +218,14 @@
         this.onEdit = true
         this.dsSelected = true
         this.dsDetails = {
-          name: 'test' + Math.floor((Math.random() * 1000)),
+          name: '',
           datasourceTypeId: '5b0435bc41b70a008681ddc7',
           connectionObj: {
-            host: 'abc.de',
-            user: 'usr',
-            password: 'password',
-            port: '1234',
-            db: 'test'
+            host: '',
+            user: '',
+            password: '',
+            port: '',
+            db: ''
           }
         }
         this.showTables = false

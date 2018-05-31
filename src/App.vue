@@ -11,7 +11,7 @@
         </b-row>
         <h5>Bot Management</h5>
         <h6 id="projectTitle" @click="$root.projectDialog"><img src="./assets/icons/projects.svg" id="projectIcon"/>
-          {{$root.project.title}}</h6>
+          {{$root.project.name}}</h6>
         <div id="links">
           <ul v-for="nl in navLinks">
             <li class="navLink font-weight-light" @click="route(nl)">
@@ -42,6 +42,7 @@
     <b-modal size="lg" id="projectModal" title="Choose your project"  cancel-disabled no-close-on-esc no-close-on-backdrop
              hide-header-close ok-disabled>
       <div class="table-responsive">
+        <Loader :loading="projectsLoading"/>
         <table class="table table-hover">
           <thead>
           <th>Title</th>
@@ -49,11 +50,23 @@
           </thead>
           <tbody>
           <tr v-for="p in projects" @click="chooseProject(p)">
-            <td>{{p.title}}</td>
+            <td>{{p.name}}</td>
             <td>{{p.role}}</td>
+          </tr>
+          <tr  v-if="createProject">
+            <td>
+              <div class="form-group">
+                <input  v-model="newProjectName" placeholder="Provide a name for the project" class="form-control">
+              </div>
+            </td>
+            <td>
+              <b-button variant="primary" id="saveProject"  @click="saveProject" >Save</b-button>
+            </td>
           </tr>
           </tbody>
         </table>
+        <b-button variant="primary" class="cpButton"  @click="createProject=true" v-if="!createProject" >Create a project</b-button>
+        <b-button variant="secondary" class="cpButton" @click="createProject=false" v-if="createProject" >Cancel</b-button>
       </div>
     </b-modal>
 
@@ -67,8 +80,10 @@
 </template>
 
 <script>
+  import Loader from "./components/Loader"
   export default {
     name: 'app',
+    components: {Loader},
     data() {
       return {
         current: 'Home',
@@ -76,15 +91,15 @@
         navLinks: [
           'Datasources',
           'Connections',
-          'Intents',
+          'Questions',
           'Entities',
           'Users',
           'Settings'
         ],
-        projects: [
-          {id: '5b04364241b70a008681ddc8', title: 'Rebate Data', role: 'Member'},
-          {id: 2, title: 'Sales Data', role: 'Creator'}
-        ]
+        projects: {},
+        createProject: false,
+        newProjectName: '',
+        projectsLoading: ''
       }
     },
     methods: {
@@ -102,26 +117,55 @@
         this.$root.project = p
         this.route('/')
         this.$root.setCookie('project', JSON.stringify(p))
+        this.$root.post(
+          'projects/changeProject',
+          {projectId: p.id}
+        )
+      },
+      loadProjects() {
+        var t = this
+        t.$root.getAndSet(
+          'projects',
+          t.projects,
+          function (p) {
+            for (var id in p) {
+              p[id].role = 'Creator'
+            }
+            return p
+          },
+          function () {
+            t.projectsLoading = false
+          }
+        )
+      },
+      saveProject() {
+        var t = this
+        var project = {
+          name: t.newProjectName,
+          merckUserId: '5b05b7a0fb4d7f003e792ffa'
+        }
+        t.projectsLoading = true
+        t.$root.post(
+          'projects',
+          project,
+          function (p) {
+            t.$set(t.projects, p.id, p)
+            t.createProject = false
+            t.projectsLoading = false
+          }
+        )
       }
     },
     mounted() {
       this.$root.checkProject()
+      this.loadProjects()
     }
   }
 </script>
 
 <style lang="less">
-  // Variables for Merck CI
-  @richPurple: #503291;
-  @richPurpleDarker: darken(@richPurple, 5%);
-  @richPurpleLighter: lighten(@richPurple, 10%);
-  @vibCyan: #2dbecd;
-  @vibCyanDarker: darken(@vibCyan, 5%);
-  @vibCyanLighter: lighten(@vibCyan, 10%);
-  @vibGreen: #a5cd50;
-  @vibGreenLighter: lighten(@vibGreen, 10%);
-  @vibGreenDarker: darken(@vibGreen, 10%);
-  @font: 'Verdana';
+  // Variables for Merck CI;
+  @import "assets/ci/ci";
 
   // global settings
   #app {
@@ -144,6 +188,12 @@
     height: 100vh;
     color: white;
     z-index: 1;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
   }
 
   #nav-info {
@@ -233,50 +283,10 @@
     margin-right: 1em;
   }
 
-
-  // buttons
-  .btn-primary {
-    background-color: @richPurple;
-    border-color: @richPurple;
-    &:hover {
-      background-color: @richPurpleDarker;
-      border-color: @richPurpleDarker;
-    }
-    &[disabled] {
-      background-color: @richPurpleLighter;
-      border-color: @richPurpleLighter;
-    }
-  }
-
-  .btn-info {
-    background: @vibCyan;
-    border-color: @vibCyan;
-    &:hover {
-      background-color: @vibCyanDarker;
-      border-color: @vibCyanDarker;
-    }
-    &[disabled] {
-      background-color: @vibCyanLighter;
-      border-color: @vibCyanLighter;
-    }
-  }
-
-  .btn-success {
-    background: @vibGreen;
-    border-color: @vibGreen;
-    &:hover {
-      background-color: @vibGreenDarker;
-      border-color: @vibGreenDarker;
-    }
-    &[disabled] {
-      background-color: @vibGreenLighter;
-      border-color: @vibGreenLighter;
-    }
-  }
-
   .btn {
     float: right;
     margin-left: .5em;
+    display: inline-block;
   }
 
   //tabs
@@ -296,6 +306,14 @@
   .component-fade-enter, .component-fade-leave-to
     /* .component-fade-leave-active below version 2.1.8 */ {
     opacity: 0;
+  }
+
+  .cpButton {
+    margin: 5px;
+  }
+
+  #saveProject {
+    float: left;
   }
 
 

@@ -88,22 +88,29 @@ new Vue({
         callback
       )
     },
-    getAndSet(route, toSet, editData, callback) {
+    delete(route, id, callback) {
+      route = route + '/' + id
+      this.apiCall(
+        'DELETE',
+        route,
+        {},
+        callback
+      )
+    },
+    getAndSet(route, toSet, editData, callback, data) {
+      var t = this
       this.apiCall(
         'GET',
         route,
-        null,
-        function (d) {
-          if (d instanceof Array) {
-            d = d.reduce(function (acc, cur, i) {
-              acc[cur.id] = cur
-              return acc
-            }, {})
+        data,
+        function (data) {
+          if (data instanceof Array) {
+            data = t.arrayToObject(data)
           }
           if (editData) {
-            editData(d)
+            data = editData(data)
           }
-          for (var k in d) Vue.set(toSet, k, d[k])
+          for (var k in data) Vue.set(toSet, k, data[k])
           if (callback) {
             callback(toSet)
           }
@@ -131,7 +138,7 @@ new Vue({
       if (this.checkProject()) {
         route = this.placeholders(route)
         var url = this.apiRoute + route
-        // url += '?access_token=' + this.token + '&'
+        url += '?access_token=' + this.token + '&'
         if (type === 'GET' && data !== undefined && data !== null) {
           for (var key in data) {
             let p = data[key]
@@ -141,10 +148,16 @@ new Vue({
             url += key + '=' + p
           }
         }
+        var callBackWrapper = function(data, suc, info) {
+          if (data === undefined) {
+            data = JSON.parse(info.responseText)
+          }
+          callback(data)
+        }
         var ajaxObj = {
           type: type,
           url: url,
-          success: callback,
+          success: callBackWrapper,
           dataType: 'json',
           error: errorCallback,
           contentType: ctype
@@ -163,16 +176,36 @@ new Vue({
             d = JSON.stringify(data)
           }
           ajaxObj.data = d
+        } else {
+          if (data !== undefined && data !== null) {
+            for (var fkey in data) {
+              let p = data[fkey]
+              if (typeof p === 'object') {
+                p = encodeURIComponent(JSON.stringify(p))
+              }
+              url += key + '=' + p
+            }
+          }
         }
       }
       jqajax.ajax(ajaxObj)
+    },
+    arrayToObject(toTransform, akey) {
+      akey = akey || 'id'
+      return toTransform.reduce(function (acc, cur, i) {
+        acc[cur[akey]] = cur
+        return acc
+      }, {})
+    },
+    clone(toSet, toClone) {
+      for (var k in toClone) Vue.set(toSet, k, toClone[k])
     }
   },
   data() {
     return {
       project: '',
       apiRoute: 'http://52.15.154.204:32006/api/',
-      token: 'test'
+      token: '1234'
     }
   }
 })

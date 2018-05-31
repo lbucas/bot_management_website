@@ -2,7 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import Dashboard from '@/views/dashboard'
 import Datasources from '@/views/datasources'
-import Intents from '@/views/intents'
+import Questions from '@/views/questions'
 import Connections from '@/views/connections'
 import Entities from '@/views/entities'
 import Settings from '@/views/settings'
@@ -20,9 +20,9 @@ export default new Router({
       component: Dashboard
     },
     {
-      path: '/intents',
-      name: 'Intents',
-      component: Intents
+      path: '/questions',
+      name: 'Qeustions',
+      component: Questions
     },
     {
       path: '/connections',

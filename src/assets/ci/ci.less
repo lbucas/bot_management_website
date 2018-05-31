@@ -1,0 +1,75 @@
+@richPurple: #503291;
+@richPurpleDarker: darken(@richPurple, 5%);
+@richPurpleLighter: lighten(@richPurple, 10%);
+@vibCyan: #2dbecd;
+@vibCyanDarker: darken(@vibCyan, 5%);
+@vibCyanLighter: lighten(@vibCyan, 10%);
+@vibGreen: #a5cd50;
+@vibGreenLighter: lighten(@vibGreen, 10%);
+@vibGreenDarker: darken(@vibGreen, 10%);
+@richBlue: #0f69af;
+@richGreen: #149b5f;
+@richRed: #e61e50;
+@richRedLighter: lighten(@richRed, 10%);
+@richRedDarker: darken(@richRed, 10%);
+@vibMagenta: #eb3c96;
+@vibYellow: #ffc832;
+@senPink: #e1c3cd;
+@senBlue: #96d7d2;
+@senGreen: #b4dc96;
+@senYellow: #ffdcb9;
+
+@font: 'Verdana';
+
+// buttons
+.btn-primary {
+  background-color: @richPurple;
+  border-color: @richPurple;
+  &:hover {
+    background-color: @richPurpleDarker;
+    border-color: @richPurpleDarker;
+  }
+  &[disabled] {
+    background-color: @richPurpleLighter;
+    border-color: @richPurpleLighter;
+  }
+}
+
+.btn-info {
+  background: @vibCyan;
+  border-color: @vibCyan;
+  &:hover {
+    background-color: @vibCyanDarker;
+    border-color: @vibCyanDarker;
+  }
+  &[disabled] {
+    background-color: @vibCyanLighter;
+    border-color: @vibCyanLighter;
+  }
+}
+
+.btn-success {
+  background: @vibGreen;
+  border-color: @vibGreen;
+  &:hover {
+    background-color: @vibGreenDarker;
+    border-color: @vibGreenDarker;
+  }
+  &[disabled] {
+    background-color: @vibGreenLighter;
+    border-color: @vibGreenLighter;
+  }
+}
+
+.btn-danger {
+  background: @richRed;
+  border-color: @richRed;
+  &:hover {
+    background-color: @richRedDarker;
+    border-color: @richRedDarker;
+  }
+  &[disabled] {
+    background-color: @richRedLighter;
+    border-color: @richRedLighter;
+  }
+}
