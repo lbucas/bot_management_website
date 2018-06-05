@@ -1,13 +1,14 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Dashboard from '@/views/dashboard'
+import Home from '@/views/home'
 import Datasources from '@/views/datasources'
 import Questions from '@/views/questions'
 import Connections from '@/views/connections'
 import Entities from '@/views/entities'
 import Settings from '@/views/settings'
 import Users from '@/views/users'
-import SignIn from '@/views/SignIn'
+import SignIn from '@/views/signIn'
+import SignedIn from '@/views/signedIn'
 
 Vue.use(Router)
 
@@ -16,8 +17,8 @@ export default new Router({
   routes: [
     {
       path: '/',
-      name: 'Dashboard',
-      component: Dashboard
+      name: 'Home',
+      component: Home
     },
     {
       path: '/questions',
@@ -53,6 +54,11 @@ export default new Router({
       path: '/signin',
       name: 'SignIn',
       component: SignIn
+    },
+    {
+      path: '/signedin',
+      name: 'SignedIn',
+      component: SignedIn
     }
   ]
 })

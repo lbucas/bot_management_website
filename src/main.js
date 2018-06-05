@@ -17,6 +17,14 @@ new Vue({
   router,
   template: '<App/>',
   components: {App},
+  data() {
+    return {
+      project: '',
+      apiRoute: 'https://api.emd-databots.com/',
+      token: '',
+      signingIn: false
+    }
+  },
   methods: {
     modalOpen(id) {
       this.$emit('bv::show::modal', id)
@@ -46,14 +54,25 @@ new Vue({
     clearCookie(sName) {
       this.setCookie(sName, '')
     },
-    checkProject() {
+    checkSigninAndProject() {
       var t = this
-      if (t.project === '') {
+      if (t.$root.token === '') {
+        let token = t.$root.getCookie('access_token')
+        let d = t.$root.getCookie('access_token_validUntil')
+        if (token === undefined || d < new Date()) {
+          this.$root.$router.push('/signin')
+          return false
+        } else {
+          t.$root.token = token
+        }
+      }
+      if (t.$root.project === '') {
         try {
           var p = JSON.parse(t.$root.getCookie('project'))
           this.project = p
         } catch (e) {
           t.projectDialog()
+          return false
         }
       }
       return true
@@ -80,12 +99,13 @@ new Vue({
         contentType
       )
     },
-    patch(route, data, callback) {
+    patch(route, data, callback, error) {
       this.apiCall(
         'PATCH',
         route,
         data,
-        callback
+        callback,
+        error
       )
     },
     delete(route, id, callback) {
@@ -110,7 +130,7 @@ new Vue({
           if (editData) {
             data = editData(data)
           }
-          for (var k in data) Vue.set(toSet, k, data[k])
+          t.clone(toSet, data)
           if (callback) {
             callback(toSet)
           }
@@ -124,71 +144,73 @@ new Vue({
         [t.project.id]
       )
     },
-    apiCall: function (type, route, data, callback, errorCallback, formdata) {
-      var ctype
-      if (formdata) {
-        ctype = 'application/x-www-form-urlencoded'
-      } else {
-        ctype = 'application/json'
-      }
-      data = data || {}
-      errorCallback = errorCallback || function (err) {
-        console.log(err)
-      }
-      if (this.checkProject()) {
-        route = this.placeholders(route)
-        var url = this.apiRoute + route
-        url += '?access_token=' + this.token + '&'
-        if (type === 'GET' && data !== undefined && data !== null) {
-          for (var key in data) {
-            let p = data[key]
-            if (typeof p === 'object') {
-              p = encodeURIComponent(JSON.stringify(p))
-            }
-            url += key + '=' + p
-          }
-        }
-        var callBackWrapper = function(data, suc, info) {
-          if (data === undefined) {
-            data = JSON.parse(info.responseText)
-          }
-          callback(data)
-        }
-        var ajaxObj = {
-          type: type,
-          url: url,
-          success: callBackWrapper,
-          dataType: 'json',
-          error: errorCallback,
-          contentType: ctype
-        }
-        if (type !== 'GET') {
-          var d
-          if (formdata) {
-            d = []
-            for (var dkey in data) {
-              let fd = new FormData()
-              fd.set(dkey, data[dkey])
-              d.push(fd)
-            }
-            ajaxObj.processData = false
-          } else {
-            d = JSON.stringify(data)
-          }
-          ajaxObj.data = d
+    apiCall (type, route, data, callback, errorCallback, formdata) {
+      if (!this.signingIn) {
+        var ctype
+        if (formdata) {
+          ctype = 'application/x-www-form-urlencoded'
         } else {
-          if (data !== undefined && data !== null) {
-            for (var fkey in data) {
-              let p = data[fkey]
+          ctype = 'application/json'
+        }
+        data = data || {}
+        errorCallback = errorCallback || function (err) {
+          console.log(err)
+        }
+        if (route === 'projects' || this.checkSigninAndProject()) {
+          route = this.placeholders(route)
+          var url = this.apiRoute + route + '?accessToken=' + this.token + '&'
+          if (type === 'GET' && data !== undefined && data !== null) {
+            for (var key in data) {
+              let p = data[key]
               if (typeof p === 'object') {
                 p = encodeURIComponent(JSON.stringify(p))
               }
               url += key + '=' + p
             }
           }
+          var callBackWrapper = function(data, suc, info) {
+            if (data === undefined) {
+              data = JSON.parse(info.responseText)
+            }
+            callback = callback || function () {}
+            callback(data)
+          }
+          var ajaxObj = {
+            type: type,
+            url: url,
+            success: callBackWrapper,
+            dataType: 'json',
+            error: errorCallback,
+            contentType: ctype
+          }
+          if (type !== 'GET') {
+            var d
+            if (formdata) {
+              d = []
+              for (var dkey in data) {
+                let fd = new FormData()
+                fd.set(dkey, data[dkey])
+                d.push(fd)
+              }
+              ajaxObj.processData = false
+            } else {
+              d = JSON.stringify(data)
+            }
+            ajaxObj.data = d
+          } else {
+            if (data !== undefined && data !== null) {
+              for (var fkey in data) {
+                let p = data[fkey]
+                if (typeof p === 'object') {
+                  p = encodeURIComponent(JSON.stringify(p))
+                }
+                url += key + '=' + p
+              }
+            }
+          }
         }
+        jqajax.ajax(ajaxObj)
       }
-      jqajax.ajax(ajaxObj)
     },
     arrayToObject(toTransform, akey) {
       akey = akey || 'id'
@@ -199,13 +221,11 @@ new Vue({
     },
     clone(toSet, toClone) {
       for (var k in toClone) Vue.set(toSet, k, toClone[k])
-    }
-  },
-  data() {
-    return {
-      project: '',
-      apiRoute: 'http://52.15.154.204:32006/api/',
-      token: '1234'
+      for (var s in toSet) {
+        if (!(s in toClone)) {
+          Vue.delete(toSet, s)
+        }
+      }
     }
   }
 })

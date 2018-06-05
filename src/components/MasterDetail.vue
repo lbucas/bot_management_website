@@ -5,8 +5,8 @@
         <h5>
           <span class="tabHeading">{{tableheading}}</span>
           <b-button size="sm" variant="primary" @click="addNewWrapper">+</b-button>
+          <UpdateButton :loading="loading" :update="update" size="sm" variant="secondary"></UpdateButton>
         </h5>
-        <Loader :loading="loading"/>
         <div class="table-responsive">
           <table class="table table-hover">
             <span v-if="!loading && tclength == 0">There's nothing to show.</span>
@@ -21,6 +21,7 @@
       </b-col>
       <b-col lg="8">
         <div class="mddetail" v-if="detailsVisible">
+          <Loader :loading="loading"/>
           <slot></slot>
         </div>
       </b-col>
@@ -29,13 +30,15 @@
 </template>
 
 <script>
-  import Loader from './Loader'
+  import UpdateButton from "./UpdateButton"
+  import Loader from "./Loader"
   export default {
-    components: {Loader},
+    components: {UpdateButton, Loader},
     props: {
       'tableheading': String,
       'tablecontent': Object,
       'addnew': Function,
+      'update': Function,
       'selected': Function,
       'manualchoose': String,
       'secondary': {
@@ -72,6 +75,8 @@
       manualchoose(id) {
         if (id !== '') {
           this.chooseEntry(id)
+        } else {
+          this.detailsVisible = false
         }
       }
     }

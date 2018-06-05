@@ -1,7 +1,7 @@
 <template>
   <b-container fluid id="app">
     <b-row>
-      <b-col md="3" lg="2" id="sidenavigation" >
+      <b-col md="3" lg="2" id="sidenavigation" v-if="!$root.signingIn">
         <b-row>
           <b-col>
             <div id="logoDiv">
@@ -14,7 +14,7 @@
           {{$root.project.name}}</h6>
         <div id="links">
           <ul v-for="nl in navLinks">
-            <li class="navLink font-weight-light" @click="route(nl)">
+            <li class="navLink font-weight-light" @click="route(nl)" :active="current === nl">
               <img v-bind:src="(require('./assets/icons/'+nl+'.svg'))" class="navIcon"/>
               {{nl}}
             </li>
@@ -28,7 +28,7 @@
             <h4>{{current}}</h4>
           </b-col>
           <b-col id="userInfo" class="text-right">
-            {{UserName}}
+            {{userDisplayName}}
           </b-col>
         </b-row>
         <div id="routerContent">
@@ -39,7 +39,8 @@
       </b-col>
     </b-row>
 
-    <b-modal size="lg" id="projectModal" title="Choose your project"  cancel-disabled no-close-on-esc no-close-on-backdrop
+    <b-modal size="lg" id="projectModal" title="Choose your project" cancel-disabled no-close-on-esc
+             no-close-on-backdrop
              hide-header-close ok-disabled>
       <div class="table-responsive">
         <Loader :loading="projectsLoading"/>
@@ -53,20 +54,23 @@
             <td>{{p.name}}</td>
             <td>{{p.role}}</td>
           </tr>
-          <tr  v-if="createProject">
+          <tr v-if="createProject">
             <td>
               <div class="form-group">
-                <input  v-model="newProjectName" placeholder="Provide a name for the project" class="form-control">
+                <input v-model="newProjectName" placeholder="Provide a name for the project" class="form-control">
               </div>
             </td>
             <td>
-              <b-button variant="primary" id="saveProject"  @click="saveProject" >Save</b-button>
+              <b-button variant="primary" id="saveProject" @click="saveProject">Save</b-button>
             </td>
           </tr>
           </tbody>
         </table>
-        <b-button variant="primary" class="cpButton"  @click="createProject=true" v-if="!createProject" >Create a project</b-button>
-        <b-button variant="secondary" class="cpButton" @click="createProject=false" v-if="createProject" >Cancel</b-button>
+        <b-button variant="primary" class="cpButton" @click="createProject=true" v-if="!createProject">Create a
+          project
+        </b-button>
+        <b-button variant="secondary" class="cpButton" @click="createProject=false" v-if="createProject">Cancel
+        </b-button>
       </div>
     </b-modal>
 
@@ -81,13 +85,17 @@
 
 <script>
   import Loader from "./components/Loader"
+
   export default {
     name: 'app',
     components: {Loader},
     data() {
       return {
         current: 'Home',
-        UserName: 'John Doe',
+        user: {
+          firstname: '',
+          lastname: ''
+        },
         navLinks: [
           'Datasources',
           'Connections',
@@ -100,6 +108,11 @@
         createProject: false,
         newProjectName: '',
         projectsLoading: ''
+      }
+    },
+    computed: {
+      userDisplayName() {
+        return this.user.firstname + ' ' + this.user.lastname
       }
     },
     methods: {
@@ -154,11 +167,27 @@
             t.projectsLoading = false
           }
         )
+      },
+      getUser() {
+        var t = this
+        if (t.user.lastname === '') {
+          this.$root.getAndSet(
+            'merckUsers/whoAmI',
+            t.user,
+            function (d) {
+              return d.user
+            }
+          )
+        }
       }
     },
-    mounted() {
-      this.$root.checkProject()
-      this.loadProjects()
+    created() {
+      if (!this.$root.getCookie('signingIn')) {
+        this.$root.checkSigninAndProject()
+        this.loadProjects()
+        this.getUser()
+        this.current = this.$router.history.current.name
+      }
     }
   }
 </script>
@@ -177,7 +206,7 @@
   }
 
   html {
-    @media(min-width: 576px) {
+    @media (min-width: 576px) {
       overflow: hidden;
     }
   }
@@ -224,6 +253,9 @@
       font-size: 1em;
       cursor: pointer;
       transition: font-size 300ms;
+      &[active] {
+        font-size: 1.1em;
+      }
     }
     li:hover {
       font-size: 1.1em;
@@ -286,6 +318,7 @@
   .btn {
     float: right;
     margin-left: .5em;
+    margin-bottom: 1em;
     display: inline-block;
   }
 
@@ -303,6 +336,7 @@
   .component-fade-enter-active, .component-fade-leave-active {
     transition: opacity .2s ease;
   }
+
   .component-fade-enter, .component-fade-leave-to
     /* .component-fade-leave-active below version 2.1.8 */ {
     opacity: 0;

@@ -63,7 +63,7 @@
                           v-model="editjoin.id1"
                           v-bind:disabled="!editing && editjoin.joinId !== ''">
                     <option value="none"></option>
-                    <option v-for="a in table1.attributes" v-bind:value="a.id">{{a.name}}</option>
+                    <option v-for="a in table1.attributes" v-bind:value="a.id">{{a.name}} ({{a.datatype}})</option>
                   </select>
                 </b-col>
                 <b-col cols="1">
@@ -79,18 +79,16 @@
                           v-model="editjoin.id2"
                           v-bind:disabled="!editing && editjoin.joinId !== ''">
                     <option value="none"></option>
-                    <option v-for="a in table2.attributes" v-bind:value="a.id">{{a.name}}</option>
+                    <option v-for="a in table2.attributes" v-bind:value="a.id">{{a.name}} ({{a.datatype}})</option>
                   </select>
                 </b-col>
               </b-row>
               <div>
-                <b-button id="saveConnection" variant="primary" @click="save"
+                <b-button class="connectionBtns" variant="primary" @click="save"
                           v-bind:disabled="(editjoin.id1 === 'none') || (editjoin.id2 === 'none') || (!editing && editjoin.joinId !== '')">
                   Save
                 </b-button>
-                <b-button id="saveConnection" variant="danger" @click="deleteConnection" v-if="editjoin.joinId !== ''">
-                  Delete Connection
-                </b-button>
+                <DeleteButton class="connectionBtns" :on-delete="deleteConnection" v-if="editjoin.joinId !== ''" />
               </div>
             </b-col>
           </b-row>
@@ -124,7 +122,7 @@
             </table>
           </b-col>
           <b-col ref="dragDrop">
-            <svg id="connectionSvg" v-bind:class="{'dragging': dragged}" @mouseup="undrag()">
+            <svg id="connectionSvg" v-bind:class="{'dragging': dragged}" @mouseup="undrag()" @mousemove="currentXY">
 
               <line class="joinline" v-for="(j,id) in joins"
                     v-if="tables[j.d1].tables[j.t1].visible && tables[j.d2].tables[j.t2].visible"
@@ -152,14 +150,6 @@
                   <rect class="dragDetector" :width="tableWidth" :height="tableHeight"/>
                 </g>
               </g>
-              <g>
-                <g v-for="i in (blocksInRow*blocksInRow)">
-                  <rect :width="blockWidth" :height="blockWidth" :x="(i%blocksInRow)*blockWidth"
-                        :y="(Math.floor(i/blocksInRow))*blockWidth" class="mouseTracker"
-                        v-if="currentY != (Math.floor(i/blocksInRow))*blockWidth || currentX != (i%blocksInRow)*blockWidth"
-                        @mouseover="currentXY((i%blocksInRow)*blockWidth, (Math.floor(i/blocksInRow))*blockWidth)"></rect>
-                </g>
-              </g>
 
             </svg>
           </b-col>
@@ -171,10 +161,10 @@
 
 <script>
   import Loader from "../components/Loader"
-
+  import DeleteButton from "../components/DeleteButton"
   export default {
-    name: "Connections.vue",
-    components: {Loader},
+    name: "test.vue",
+    components: {DeleteButton, Loader},
     data() {
       return {
         tableWidth: 120, // this.$refs.dragDrop.clientWidth,
@@ -215,11 +205,30 @@
         connectionLoading: true
       }
     },
-    mounted() {
+    created() {
       this.getTables()
     },
     methods: {
       getTables() {
+        /* {
+              "include": {
+                "relation": "tables",
+                "scope": {
+                  "include": [{
+                    "relation": "joins",
+                    "scope": {
+                      "include": {
+                        "relation": "attributes",
+                        "scope": {
+                          "fields": ["id", "tableId"]
+                        }
+                      }
+                    }
+                  }, {"relation": "attributes"}
+                  ]
+                }
+              }
+            } */
         var t = this
         t.connectionLoading = true
         this.$root.getAndSet(
@@ -244,17 +253,7 @@
             }
           },
           {
-            filter: {
-              "include": {
-                "relation": "tables",
-                "scope": {
-                  "include": [{
-                    "relation": "joins",
-                    "scope": {"include": {"relation": "attributes", "scope": {"fields": ["id", "tableId"]}}}
-                  }, {"relation": "attributes"}]
-                }
-              }
-            }
+            filter: '{"include":{"relation":"tables","scope":{"include":[{"relation":"joins","scope":{"include":{"relation":"attributes","scope":{"fields":["id","tableId"]}}}},{"relation":"attributes"}]}}}'
           }
         )
       },
@@ -272,7 +271,10 @@
         this.draggedElement = null
         this.dragged = false
       },
-      currentXY(x, y) {
+      currentXY(event) {
+        console.log(event)
+        let x = event.layerX
+        let y = event.layerY
         this.currentX = x
         this.currentY = y
         if (this.dragged) {
@@ -305,17 +307,37 @@
       save() {
         var t = this
         t.connectionLoading = true
-        this.$root.post(
-          'joins',
-          {
-            "attributeIds": [
-              t.editjoin.id1, t.editjoin.id2
-            ]
-          },
-          function (d) {
-            t.getTables()
-          }
-        )
+        if (t.editjoin.joinId === '') {
+          this.$root.post(
+            'joins',
+            {
+              "attributeIds": [
+                t.editjoin.id1, t.editjoin.id2
+              ]
+            },
+            function (d) {
+              t.getTables()
+            },
+            function (err) {
+              t.handleJoinErr(err)
+            }
+          )
+        } else {
+          this.$root.patch(
+            'joins/' + t.editjoin.joinId,
+            {
+              "attributeIds": [
+                t.editjoin.id1, t.editjoin.id2
+              ]
+            },
+            function (d) {
+              t.getTables()
+            },
+            function (err) {
+              t.handleJoinErr(err)
+            }
+          )
+        }
       },
       deleteConnection() {
         var t = this
@@ -373,6 +395,9 @@
             this.editjoin.joinId = ''
           }
         }
+      },
+      handleJoinErr(err) {
+        console.log(err.responseJSON.error.message)
       }
     },
     computed: {
@@ -452,7 +477,7 @@
             d2: j.d1,
             a1: j.a2,
             a2: j.a1,
-            joinId: j.id
+            joinId: j.joinId
           }
           jpt[j.t2][j.t1] = jSwapped
         }
@@ -644,7 +669,7 @@
     select {
       margin-top: .5em;
     }
-    #saveConnection {
+    .connectionBtns {
       margin-top: 1em;
     }
     #editConnection {

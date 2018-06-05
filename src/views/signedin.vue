@@ -4,25 +4,34 @@
       <img src="../assets/logo/emdgreen.png"/>
       <h6>Signing you in automatically..</h6>
     </div>
-
   </div>
-
 </template>
 
 <script>
   export default {
-    name: "signin"
+    name: "signedin",
+    mounted() {
+      this.$root.clearCookie('signingIn')
+      let token = this.$route.query.accessToken
+      let today = new Date()
+      this.$root.token = token
+      this.$root.signingIn = false
+      this.$root.setCookie('access_token', token)
+      this.$root.setCookie('access_token_validUntil', today.setDate(today.getDate() + 14))
+      this.$parent.loadProjects()
+      this.$router.push('/')
+    }
   }
 </script>
 
-<style lang="less">
+<style lang="less" scoped>
   @richPurple: #503291;
 
   #signin {
     background: @richPurple;
     background-repeat: no-repeat;
     background-attachment: fixed;
-    width: 100%;
+    width: 100vw;
     height: 100vh;
     display: block;
     overflow: auto;
@@ -35,7 +44,7 @@
     bottom: 0;
   }
 
-  #navigation {
+  #sidenavigation {
     display: none;
   }
 
@@ -47,13 +56,13 @@
     text-align: center;
     margin-bottom: 1em;
     padding: 2em;
-    img {
-      width: 50%;
-      margin: auto;
-    }
-    h6 {
-      margin-top: 3em;
-    }
+  img {
+    width: 50%;
+    margin: auto;
+  }
+  h6 {
+    margin-top: 3em;
+  }
   }
 
 </style>
