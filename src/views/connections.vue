@@ -18,8 +18,7 @@
                     <b-collapse v-bind:id="'tablesFor1' + id" class="mt-2">
                       <ul>
                         <li v-for="t in ds.tables" @click="choose(1, t)"
-                            v-bind:active="table1.id == t.id"
-                            v-bind:class="{'disabledTable': table2.id == t.id}">
+                            v-bind:active="table1.id == t.id">
                           {{t.name}}
                         </li>
                       </ul>
@@ -54,10 +53,10 @@
               </table>
             </b-col>
             <b-col lg="6" id="selectionCol">
-              <h6>Choose attributes to connect</h6>
+              <h6>Choose attributes to connect the tables</h6>
               <b-row>
                 <b-col class="text-center">
-                  <span class="selectNote" v-if="table1.name == ''">Please choose</span>
+                  <span class="selectNote" v-if="table1.name == ''">Please choose a table from the left side</span>
                   <span v-if="!(table1.name == '')">{{table1.name}}</span>
                   <select class="form-control" v-if="!((table1.name == '') || (table2.name == ''))"
                           v-model="editjoin.id1"
@@ -73,7 +72,7 @@
                   </button>
                 </b-col>
                 <b-col class="text-center">
-                  <span class="selectNote" v-if="table2.name == ''">Please choose</span>
+                  <span class="selectNote" v-if="table2.name == ''">Please choose a table from the right side</span>
                   <span v-if="!(table2.name == '')">{{table2.name}}</span>
                   <select class="form-control" v-if="!((table1.name == '') || (table2.name == ''))"
                           v-model="editjoin.id2"
@@ -210,25 +209,6 @@
     },
     methods: {
       getTables() {
-        /* {
-              "include": {
-                "relation": "tables",
-                "scope": {
-                  "include": [{
-                    "relation": "joins",
-                    "scope": {
-                      "include": {
-                        "relation": "attributes",
-                        "scope": {
-                          "fields": ["id", "tableId"]
-                        }
-                      }
-                    }
-                  }, {"relation": "attributes"}
-                  ]
-                }
-              }
-            } */
         var t = this
         t.connectionLoading = true
         this.$root.getAndSet(
@@ -394,6 +374,15 @@
             this.editjoin.id2 = "none"
             this.editjoin.joinId = ''
           }
+        } else {
+          if (oneOrTwo !== 2) {
+            let table2 = {
+              id: '',
+              name: ''
+            }
+            this.$root.clone(this.table2, table2)
+            this.$root.clone(this.table1, table)
+          }
         }
       },
       handleJoinErr(err) {
@@ -488,7 +477,8 @@
 </script>
 
 <style lang="less">
-  @import "../assets/ci/ci";
+  @import "../assets/less/ci";
+  @import "../assets/less/mixins";
 
   #connectionTabs {
     .nav-tabs {
@@ -507,37 +497,19 @@
   }
 
   .draggable {
-    cursor: move; /* fallback if grab cursor is unsupported */
-    cursor: grab;
-    cursor: -moz-grab;
-    cursor: -webkit-grab;
+    #dragCursor
   }
 
   .dragging {
-    cursor: grabbing !important;
-    cursor: -moz-grabbing !important;
-    cursor: -webkit-grabbing !important;
+    #draggingCursor
   }
 
   .tableName {
     font: 1em @font;
     fill: black;
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
+    #noUserSelect;
     user-select: none;
-    &.color1 {
-      fill: white;
-    }
-    &.color2 {
-      fill: white;
-    }
-    &.color3 {
-      fill: white;
-    }
-    &.color4 {
+    &.color1, &.color2, &.color4, &.color4{
       fill: white;
     }
   }
@@ -624,12 +596,7 @@
   }
 
   .connectionTable {
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
+    #noUserSelect
     span {
       cursor: pointer;
     }
@@ -661,6 +628,7 @@
   }
 
   #selectionCol {
+    text-align: center;
     .selectNote {
       font-weight: 100;
       color: gray;
@@ -675,6 +643,10 @@
     #editConnection {
       margin-top: .5em;
     }
+  }
+
+  #editConnections {
+    margin-top: 1em;
   }
 
   .table-fade-enter-active, .table-fade-leave-active {

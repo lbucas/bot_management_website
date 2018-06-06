@@ -21,6 +21,7 @@ new Vue({
     return {
       project: '',
       apiRoute: 'https://api.emd-databots.com/',
+      devApiRoute: 'https://api.emd-databots.com/',
       token: '',
       signingIn: false
     }
@@ -158,7 +159,8 @@ new Vue({
         }
         if (route === 'projects' || this.checkSigninAndProject()) {
           route = this.placeholders(route)
-          var url = this.apiRoute + route + '?accessToken=' + this.token + '&'
+          let apiRoute = (window.location.hostname === 'webdev.emd-databots.com' ? this.devApiRoute : this.apiRoute)
+          var url = apiRoute + route + '?accessToken=' + this.token + '&'
           if (type === 'GET' && data !== undefined && data !== null) {
             for (var key in data) {
               let p = data[key]

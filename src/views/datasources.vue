@@ -1,26 +1,25 @@
 <template>
   <div>
     <MasterDetail tableheading="Available Datasources" :addnew="addDs" :selected="chooseDs" :tablecontent="datasources"
-                  :loading="loading" :manualchoose="manualDsChoose" :update="getDS">
+                  :loading="loading" :manualchoose="manualDsChoose" :update="upadateDatasources">
       <b-tabs id="dsDetails">
         <b-tab class="tabTitle" title="General" active>
-          <form id="dsform">
+          <CustomForm id="dsform">
             <FormRowInput label="Title" v-model="dsDetails.name" :on-edit="onEdit"/>
             <FormRowInput label="DB-Name" v-model="dsDetails.connectionObj.db" :on-edit="onEdit"
-                     :change="connectionNotTested"/>
-            <FormRowBlank label="Type">
-              <input v-if="!onEdit" type="text" readonly class="form-control-plaintext" v-model="currentDsType">
-              <select class="form-control" v-if="onEdit" v-model="dsDetails.datasourceTypeId"
-                      @input="connectionTested=false">
-                <option v-for="(type, id) in datasourcetypes" v-bind:value="id">{{type.name}}</option>
-              </select>
-            </FormRowBlank>
-            <FormRowInput label="Host" v-model="dsDetails.connectionObj.host" :on-edit="onEdit" :change="connectionNotTested"/>
-            <FormRowInput label="Port" v-model="dsDetails.connectionObj.port" :on-edit="onEdit" :change="connectionNotTested"/>
-            <FormRowInput label="User" v-model="dsDetails.connectionObj.user" :on-edit="onEdit" :change="connectionNotTested"/>
-            <FormRowInput label="User" v-model="dsDetails.connectionObj.user" :on-edit="onEdit" inputtype="password"
-                     :change="connectionNotTested"/>
-          </form>
+                          :change="connectionNotTested"/>
+            <FormRowSelect v-model="dsDetails.datasourceTypeId" :on-edit="onEdit" :list="datasourcetypes" label="Type"
+                           :display-value="currentDsType" list-display-value="name" :change="connectionNotTested" />
+            <FormRowInput label="Host" v-model="dsDetails.connectionObj.host" :on-edit="onEdit" big
+                          :change="connectionNotTested"/>
+            <FormRowInput label="Port" v-model="dsDetails.connectionObj.port" :on-edit="onEdit"
+                          :change="connectionNotTested"/>
+            <FormRowInput label="User" v-model="dsDetails.connectionObj.user" :on-edit="onEdit"
+                          :change="connectionNotTested"/>
+            <FormRowInput label="Password" v-model="dsDetails.connectionObj.password" :on-edit="onEdit"
+                          inputtype="password"
+                          :change="connectionNotTested"/>
+          </CustomForm>
           <b-button variant="primary" @click="(onEdit=true)" v-if="!onEdit">Edit</b-button>
           <b-button variant="primary" id="saveDS" @click="createOrEditDs" :disabled="!connectionTested"
                     v-if="onEdit" data-toggle="tooltip" data-placement="bottom"
@@ -29,6 +28,8 @@
           </b-button>
           <b-button variant="info" @click="testConnection" v-if="!connectionTested">{{connectionTestLabel}}</b-button>
           <b-button variant="success" v-if="connectionTested" @click="connectionTested=false">Success!</b-button>
+
+          <DeleteButton :on-delete="deleteDS" v-if="!onEdit"/>
           <b-button variant="secondary" v-if="(onEdit&&!dsDetails.id=='')"
                     @click="onEdit=false; chooseDs(datasources[activeId])">Cancel
           </b-button>
@@ -63,7 +64,7 @@
             </tr>
             </tbody>
           </table>
-          <UpdateButton :loading="loading" :update="updateTables" text="Update Tables"/>
+          <UpdateButton :loading="tablesLoading" :update="updateTables" text="Update Tables"/>
         </b-tab>
       </b-tabs>
     </MasterDetail>
@@ -81,10 +82,16 @@
   import Loader from "../components/Loader"
   import FormRowInput from "../components/FormRowInput"
   import FormRowBlank from "../components/FormRowBlank"
+  import DeleteButton from "../components/DeleteButton"
+  import FormRowSelect from "../components/FormRowSelect"
+  import CustomForm from "../components/CustomForm"
 
   export default {
     name: 'datasources',
     components: {
+      CustomForm,
+      FormRowSelect,
+      DeleteButton,
       FormRowBlank,
       FormRowInput,
       UpdateButton,
@@ -117,7 +124,8 @@
         connectionTestLabel: 'Test Connection',
         connectionErr: '',
         expanded: {},
-        upadatingAttr: {}
+        upadatingAttr: {},
+        tablesLoading: false
       }
     },
     methods: {
@@ -133,6 +141,7 @@
           },
           function () {
             t.loading = false
+            t.tablesLoading = false
             for (let tid in t.upadatingAttr) {
               t.upadatingAttr[tid] = false
             }
@@ -142,6 +151,9 @@
           },
           {filter: {include: {tables: "attributes"}}}
         )
+      },
+      upadateDatasources() {
+        this.getDS(this.dsDetails.id)
       },
       createOrEditDs() {
         if (this.activeId === '') {
@@ -205,6 +217,17 @@
           }
         )
       },
+      deleteDS() {
+        var t = this
+        t.loading = true
+        t.$root.delete(
+          'datasources',
+          t.dsDetails.id,
+          function () {
+            t.getDS('')
+          }
+        )
+      },
       testConnection() {
         var t = this
         t.connectionTestLabel = 'Testing..'
@@ -228,7 +251,7 @@
         )
       },
       updateTables() {
-        this.loading = true
+        this.tablesLoading = true
         var t = this
         this.$root.post(
           'datasources/updateTables',

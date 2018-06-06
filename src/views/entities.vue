@@ -4,8 +4,8 @@
                   :addnew="createEntity" :update="getEntities" :manualchoose="manualEntityChoose">
       <b-tabs id="dsDetails">
         <b-tab class="tabTitle" title="General" active>
-          <form id="entityForm">
-            <FormRow v-model="entityDetail.name" label="Title" :on-edit="onEdit"/>
+          <CustomForm id="entityForm">
+            <FormRow v-model="entityDetail.name" label="Title" :on-edit="onEdit" :editable="!(entityDetail.id)"/>
             <FormRow v-model="entityDetail.description" label="Description" :on-edit="onEdit" big/>
             <FormRowBlank label="Connected Attribute">
               <input v-if="!onEdit" type="text" readonly class="form-control-plaintext"
@@ -28,7 +28,7 @@
                 </b-col>
               </b-row>
             </FormRowBlank>
-          </form>
+          </CustomForm>
           <b-button variant="primary" @click="(onEdit=true)" v-if="!onEdit">Edit</b-button>
           <DeleteButton :on-delete="deleteEntity" v-if="!onEdit"/>
           <b-button variant="primary" id="saveEntity" @click="saveEntity" :disabled="noAttrSelected"
@@ -36,6 +36,7 @@
           </b-button>
           <b-button variant="sencondary" @click="cancelEdit" v-if="onEdit">Cancel</b-button>
         </b-tab>
+        <b-tab class="tabTitle" title="Keywords"></b-tab>
       </b-tabs>
     </MasterDetail>
   </div>
@@ -48,9 +49,11 @@
   import Loader from '../components/Loader'
   import FormRowBlank from "../components/FormRowBlank"
   import DeleteButton from "../components/DeleteButton"
+  import CustomForm from "../components/CustomForm"
 
   export default {
     components: {
+      CustomForm,
       DeleteButton,
       FormRowBlank,
       Loader,
@@ -135,11 +138,10 @@
       },
       chooseEntity(e) {
         var t = this
+        t.onEdit = false
         this.$root.clone(this.entityDetail, e)
         let aid = this.entityDetail.attributeId
-        let ds
-        let table
-        let attr
+        let ds, table, attr
         for (let datasourceId in this.datasources) {
           ds = this.datasources[datasourceId]
           for (let tabind = 0; tabind < ds.tables.length; tabind++) {
@@ -157,6 +159,8 @@
             }
           }
         }
+        this.datasourceId = ''
+        this.tableId = ''
       },
       saveEntity() {
         var t = this

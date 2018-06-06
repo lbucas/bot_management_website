@@ -1,10 +1,11 @@
 <template>
   <FormRowBlank :label="label">
-    <input v-if="!big"  :type="inputtype" v-bind:readonly="!onEdit"
-           :class="{ 'form-control-plaintext': !onEdit, 'form-control': onEdit }" v-model="inputValue"/>
+    <input v-if="!big" :type="inputtype" v-bind:readonly="!onEdit"
+           :class="{ 'form-control-plaintext': !onEdit || !editable, 'form-control': onEdit && editable }"
+           v-model="inputValue"/>
     <textarea v-if="big" :type="inputtype" v-bind:readonly="!onEdit"
-           :class="{ 'form-control-plaintext': !onEdit, 'form-control': onEdit }" v-model="inputValue"/>
-
+              :class="{ 'form-control-plaintext': !onEdit || !editable, 'form-control': onEdit && editable }"
+              v-model="inputValue"/>
   </FormRowBlank>
 </template>
 
@@ -17,11 +18,18 @@
     props: {
       label: String,
       value: String,
-      onEdit: Boolean,
+      onEdit: {
+        type: Boolean,
+        default: true
+      },
       change: {
         type: Function,
         default: function () {
         }
+      },
+      editable: {
+        type: Boolean,
+        default: true
       },
       inputtype: {
         type: String,

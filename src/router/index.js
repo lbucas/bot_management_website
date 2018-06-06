@@ -22,7 +22,7 @@ export default new Router({
     },
     {
       path: '/questions',
-      name: 'Qeustions',
+      name: 'Questions',
       component: Questions
     },
     {

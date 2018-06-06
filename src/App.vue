@@ -99,8 +99,8 @@
         navLinks: [
           'Datasources',
           'Connections',
-          'Questions',
           'Entities',
+          'Questions',
           'Users',
           'Settings'
         ],
@@ -155,7 +155,7 @@
         var t = this
         var project = {
           name: t.newProjectName,
-          merckUserId: '5b05b7a0fb4d7f003e792ffa'
+          merckUserId: t.user.id
         }
         t.projectsLoading = true
         t.$root.post(
@@ -194,7 +194,8 @@
 
 <style lang="less">
   // Variables for Merck CI;
-  @import "assets/ci/ci";
+  @import "assets/less/ci";
+  @import "assets/less/mixins";
 
   // global settings
   #app {
@@ -217,12 +218,7 @@
     height: 100vh;
     color: white;
     z-index: 1;
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
+    #noUserSelect
   }
 
   #nav-info {
