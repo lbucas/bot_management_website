@@ -101,8 +101,8 @@
 </script>
 
 <style lang="less" scoped>
-  @import "../assets/less/mixins";
-  @import "../assets/less/ci";
+  @import "../../assets/less/mixins";
+  @import "../../assets/less/colors";
 
   .arrayInputDisplay {
     width: 100%;

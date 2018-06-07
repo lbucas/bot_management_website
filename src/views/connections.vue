@@ -160,7 +160,7 @@
 
 <script>
   import Loader from "../components/Loader"
-  import DeleteButton from "../components/DeleteButton"
+  import DeleteButton from "../components/buttons/DeleteButton"
   export default {
     name: "test.vue",
     components: {DeleteButton, Loader},
@@ -477,7 +477,7 @@
 </script>
 
 <style lang="less">
-  @import "../assets/less/ci";
+  @import "../assets/less/colors";
   @import "../assets/less/mixins";
 
   #connectionTabs {

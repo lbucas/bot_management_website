@@ -107,7 +107,8 @@
         projects: {},
         createProject: false,
         newProjectName: '',
-        projectsLoading: ''
+        projectsLoading: '',
+        datasources: {}
       }
     },
     computed: {
@@ -179,14 +180,41 @@
             }
           )
         }
+      },
+      getDatasources() {
+        var t = this
+        t.connectionLoading = true
+        this.$root.getAndSet(
+          'projects/--projectid--/datasources',
+          t.datasources,
+          function (data) {
+            for (var k in data) {
+              data[k].tables = t.$root.arrayToObject(data[k].tables)
+              for (var id in data[k].tables) {
+                data[k].tables[id].datasourceId = k
+                data[k].tables[id].x = Math.floor(Math.random() * Math.floor(600))
+                data[k].tables[id].y = Math.floor(Math.random() * Math.floor(500))
+                data[k].tables[id].visible = false
+                data[k].tables[id].attributes = t.$root.arrayToObject(data[k].tables[id].attributes)
+              }
+            }
+            return data
+          },
+          function () {},
+          {
+            filter: '{"include":{"relation":"tables","scope":{"include":[{"relation":"joins","scope":{"include":{"relation":"attributes","scope":{"fields":["id","tableId"]}}}},{"relation":"attributes"}]}}}'
+          }
+        )
       }
     },
     created() {
+      debugger
       if (!this.$root.getCookie('signingIn')) {
         this.$root.checkSigninAndProject()
         this.loadProjects()
         this.getUser()
         this.current = this.$router.history.current.name
+        this.getDatasources()
       }
     }
   }
@@ -194,7 +222,7 @@
 
 <style lang="less">
   // Variables for Merck CI;
-  @import "assets/less/ci";
+  @import "assets/less/colors";
   @import "assets/less/mixins";
 
   // global settings
@@ -203,7 +231,7 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-align: center;
-    background: #fffffa;
+    background: @background;
   }
 
   html {

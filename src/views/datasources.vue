@@ -78,13 +78,13 @@
 
 <script>
   import MasterDetail from '../components/MasterDetail'
-  import UpdateButton from "../components/UpdateButton"
+  import UpdateButton from "../components/buttons/UpdateButton"
   import Loader from "../components/Loader"
-  import FormRowInput from "../components/FormRowInput"
-  import FormRowBlank from "../components/FormRowBlank"
-  import DeleteButton from "../components/DeleteButton"
-  import FormRowSelect from "../components/FormRowSelect"
-  import CustomForm from "../components/CustomForm"
+  import FormRowInput from "../components/form/FormRowInput"
+  import FormRowBlank from "../components/form/FormRowBlank"
+  import DeleteButton from "../components/buttons/DeleteButton"
+  import FormRowSelect from "../components/form/FormRowSelect"
+  import CustomForm from "../components/form/CustomForm"
 
   export default {
     name: 'datasources',
@@ -308,10 +308,7 @@
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="less">
-
-  #dsform {
-    margin-top: 1em;
-  }
+  @import "../assets/less/mixins";
 
   .nav-tabs {
     a {
@@ -320,7 +317,6 @@
   }
 
   #tables {
-    margin-top: 1em;
     list-style: none;
     .tablename {
       cursor: pointer;
@@ -342,12 +338,7 @@
   #dsTables {
     span {
       cursor: pointer;
-      -webkit-touch-callout: none;
-      -webkit-user-select: none;
-      -khtml-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
-      user-select: none;
+      #noUserSelect
     }
     ul {
       list-style: none;

@@ -27,8 +27,8 @@
 </template>
 
 <script>
-  import FormRowInput from "../components/FormRowInput"
-  import FormRowBlank from "../components/FormRowBlank"
+  import FormRowInput from "../components/form/FormRowInput"
+  import FormRowBlank from "../components/form/FormRowBlank"
   import Loader from "../components/Loader"
   export default {
     name: 'settings',

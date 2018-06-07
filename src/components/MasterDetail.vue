@@ -30,7 +30,7 @@
 </template>
 
 <script>
-  import UpdateButton from "./UpdateButton"
+  import UpdateButton from "./buttons/UpdateButton"
   import Loader from "./Loader"
   export default {
     components: {UpdateButton, Loader},

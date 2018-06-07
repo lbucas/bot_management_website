@@ -45,11 +45,11 @@
 
 <script>
   import MasterDetail from '../components/MasterDetail.vue'
-  import FormRow from '../components/FormRowInput'
+  import FormRow from '../components/form/FormRowInput'
   import Loader from '../components/Loader'
-  import FormRowBlank from "../components/FormRowBlank"
-  import DeleteButton from "../components/DeleteButton"
-  import CustomForm from "../components/CustomForm"
+  import FormRowBlank from "../components/form/FormRowBlank"
+  import DeleteButton from "../components/buttons/DeleteButton"
+  import CustomForm from "../components/form/CustomForm"
 
   export default {
     components: {

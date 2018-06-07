@@ -22,11 +22,11 @@
 
 <script>
   import MasterDetail from '../components/MasterDetail.vue'
-  import FormRowInput from "../components/FormRowInput"
-  import FormRowSelect from "../components/FormRowSelect"
-  import SuggestionSelect from "../components/SuggestionSelect"
-  import FormRowArrayInput from "../components/FormRowArrayInput"
-  import CustomForm from "../components/CustomForm"
+  import FormRowInput from "../components/form/FormRowInput"
+  import FormRowSelect from "../components/form/FormRowSelect"
+  import SuggestionSelect from "../components/form/SuggestionSelect"
+  import FormRowArrayInput from "../components/form/FormRowArrayInput"
+  import CustomForm from "../components/form/CustomForm"
 
   export default {
     components: {

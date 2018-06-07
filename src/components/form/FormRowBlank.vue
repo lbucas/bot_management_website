@@ -1,6 +1,6 @@
 <template>
   <tr>
-    <td>
+    <td class="formTableTd">
       <div class="form-group row customFormRow">
         <label class="col-sm-2 col-form-label">{{label}}</label>
         <div class="col-sm-10">
@@ -21,7 +21,7 @@
   }
 </script>
 
-<style scoped>
+<style lang="less" scoped>
   .customFormRow {
     margin-bottom: 0;
   }

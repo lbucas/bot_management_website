@@ -9,6 +9,7 @@ import Settings from '@/views/settings'
 import Users from '@/views/users'
 import SignIn from '@/views/signIn'
 import SignedIn from '@/views/signedIn'
+import Test from '@/views/test'
 
 Vue.use(Router)
 
@@ -59,6 +60,11 @@ export default new Router({
       path: '/signedin',
       name: 'SignedIn',
       component: SignedIn
+    },
+    {
+      path: '/test',
+      name: 'Test',
+      component: Test
     }
   ]
 })

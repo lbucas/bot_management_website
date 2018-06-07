@@ -1,7 +1,7 @@
 <template>
     <b-button variant="primary" :size="size" :variant="variant" @click="startUpdate">
-      <img class="updateImg" src="../assets/icons/update.svg" v-if="!loading"/>
-      <img class="updateImg" src="../assets/icons/updating.svg" v-if="loading" :size="size" :variant="variant"/>
+      <img class="updateImg" src="../../assets/icons/update.svg" v-if="!loading"/>
+      <img class="updateImg" src="../../assets/icons/updating.svg" v-if="loading" :size="size" :variant="variant"/>
       {{text}}
     </b-button>
 </template>
