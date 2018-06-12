@@ -1,7 +1,6 @@
 <template>
   <div>
-    <MasterDetail tableheading="Entities" :tablecontent="entities" :selected="chooseEntity" :loading="loadingEntities"
-                  :addnew="createEntity" :update="getEntities" :manualchoose="manualEntityChoose">
+    <MasterDetail tableheading="Available Entities" route="entities">
       <b-tabs id="dsDetails">
         <b-tab class="tabTitle" title="General" active>
           <CustomForm id="entityForm">
@@ -29,12 +28,12 @@
               </b-row>
             </FormRowBlank>
           </CustomForm>
-          <b-button variant="primary" @click="(onEdit=true)" v-if="!onEdit">Edit</b-button>
+          <b-button variant="primary" @click="$store.commit('editing', 'entities')" v-if="!onEdit">Edit</b-button>
           <DeleteButton :on-delete="deleteEntity" v-if="!onEdit"/>
           <b-button variant="primary" id="saveEntity" @click="saveEntity" :disabled="noAttrSelected"
                     v-if="onEdit">Save
           </b-button>
-          <b-button variant="sencondary" @click="cancelEdit" v-if="onEdit">Cancel</b-button>
+          <b-button variant="sencondary" @click="$store.dispatch('setBackEditing', 'entities')" v-if="onEdit">Cancel</b-button>
         </b-tab>
         <b-tab class="tabTitle" title="Keywords"></b-tab>
       </b-tabs>
@@ -44,12 +43,12 @@
 </template>
 
 <script>
-  import MasterDetail from '../components/MasterDetail.vue'
-  import FormRow from '../components/form/FormRowInput'
-  import Loader from '../components/Loader'
-  import FormRowBlank from "../components/form/FormRowBlank"
-  import DeleteButton from "../components/buttons/DeleteButton"
-  import CustomForm from "../components/form/CustomForm"
+  import MasterDetail from '../../components/MasterDetail.vue'
+  import FormRow from '../../components/form/FormRowInput'
+  import Loader from '../../components/Loader'
+  import FormRowBlank from "../../components/form/FormRowBlank"
+  import DeleteButton from "../../components/buttons/DeleteButton"
+  import CustomForm from "../../components/form/CustomForm"
 
   export default {
     components: {
@@ -63,17 +62,6 @@
     name: "entities",
     data() {
       return {
-        entities: {},
-        datasources: {},
-        loadingEntities: true,
-        entityDetail: {
-          id: '',
-          name: '',
-          description: '',
-          attributeId: '',
-          onEdit: false
-        },
-        onEdit: false,
         datasourceId: '',
         dsname: '',
         tableId: '',
@@ -84,13 +72,22 @@
       }
     },
     computed: {
+      entities() {
+        return this.$store.state.entities
+      },
+      datasources() {
+        return this.$store.state.datasources
+      },
+      onEdit() {
+        return this.$store.state.onEdit.entities
+      },
       tables() {
         var datasourceId = this.datasourceId
         var ds = this.datasources[datasourceId]
         if (ds === undefined) {
           return []
         } else {
-          return this.$root.arrayToObject(ds.tables)
+          return ds.tables
         }
       },
       attributes() {
@@ -102,8 +99,17 @@
           return this.$root.arrayToObject(t.attributes)
         }
       },
+      entityDetail() {
+        return this.$store.state.detailItem.entities
+      },
+      loadingEntities() {
+        return this.$store.state.loaders.entities
+      },
       currentAttributeFullName() {
         return this.dsname + ' - ' + this.tablename + ' - ' + this.attributeName
+      },
+      entityAttrId() {
+        return this.entityDetail.attributeId
       }
     },
     created() {
@@ -111,44 +117,38 @@
       this.getDatasources()
     },
     methods: {
-      getEntities(chooseEntity) {
-        var t = this
-        this.$root.getAndSet(
-          'projects/--projectid--/entities',
-          t.entities,
-          null,
-          function (d) {
-            t.loadingEntities = false
-            t.onEdit = false
-            if (chooseEntity !== undefined) {
-              t.manualEntityChoose = chooseEntity
-            }
-          }
-        )
+      getEntities() {
+        this.$store.dispatch('load', 'entities')
       },
       getDatasources() {
-        var t = this
-        this.$root.getAndSet(
-          'projects/--projectid--/dataSources',
-          t.datasources,
-          null,
-          null,
-          {filter: {include: {tables: "attributes"}}}
-        )
+        this.$store.dispatch('load', 'datasources')
       },
-      chooseEntity(e) {
+      saveEntity() {
         var t = this
-        t.onEdit = false
-        this.$root.clone(this.entityDetail, e)
-        let aid = this.entityDetail.attributeId
+        if (t.entityDetail.id === '' || t.entityDetail.id === undefined) {
+          t.$store.dispatch('create', {route: 'entities', toCreate: t.entityDetail})
+        } else {
+          t.$store.dispatch('patch', {route: 'entities', toPatch: t.entityDetail})
+        }
+      },
+      cancelEdit() {
+        this.onEdit = false
+        this.manualEntityChoose = this.entityDetail.id
+      },
+      deleteEntity() {
+        this.$store.dispatch('delete', {route: 'entities', toDelete: this.entityDetail.id})
+      }
+    },
+    watch: {
+      entityAttrId(id) {
         let ds, table, attr
         for (let datasourceId in this.datasources) {
           ds = this.datasources[datasourceId]
-          for (let tabind = 0; tabind < ds.tables.length; tabind++) {
-            table = ds.tables[tabind]
-            for (let aind = 0; aind < table.attributes.length; aind++) {
-              attr = table.attributes[aind]
-              if (attr.id === this.entityDetail.attributeId) {
+          for (let tabid in ds.tables) {
+            table = ds.tables[tabid]
+            for (let aid in table.attributes) {
+              attr = table.attributes[aid]
+              if (attr.id === id) {
                 this.datasourceId = ds.id
                 this.dsname = ds.name
                 this.tableId = table.id
@@ -161,67 +161,9 @@
         }
         this.datasourceId = ''
         this.tableId = ''
-      },
-      saveEntity() {
-        var t = this
-        t.loadingEntities = true
-        var editEnities = function (d) {
-          t.getEntities(d.id)
-        }
-        if (t.entityDetail.id === '' || t.entityDetail.id === undefined) {
-          t.$root.post(
-            'entities',
-            t.entityDetail,
-            function (d) {
-              editEnities(d)
-            }
-          )
-        } else {
-          t.$root.patch(
-            'entities/' + t.entityDetail.id,
-            t.entityDetail,
-            function (d) {
-              editEnities(d)
-            }
-          )
-        }
-      },
-      createEntity() {
-        this.onEdit = true
-        var t = this
-        let newEntity = {
-          name: '',
-          description: '',
-          attributeId: '',
-          projectId: t.$root.project.id
-        }
-        this.$root.clone(this.entityDetail, newEntity)
-      },
-      cancelEdit() {
-        this.onEdit = false
-        this.manualEntityChoose = this.entityDetail.id
-      },
-      deleteEntity() {
-        var t = this
-        t.loadingEntities = true
-        this.$root.delete(
-          'entities',
-          t.entityDetail.id,
-          function () {
-            t.getEntities('')
-          }
-        )
-      }
-    },
-    watch: {
-      datasourceId() {
-        this.dsname = this.datasources[this.datasourceId].name
-      },
-      tableId(tid) {
-        this.tablename = this.tables[tid].name
-      },
-      attrId(attrId) {
-        this.attributeName = this.attributes[attrId].name
+        this.dsname = ''
+        this.tablename = ''
+        this.attributeName = ''
       }
     }
   }

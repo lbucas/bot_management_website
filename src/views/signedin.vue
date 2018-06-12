@@ -10,15 +10,14 @@
 <script>
   export default {
     name: "signedin",
-    mounted() {
-      this.$root.clearCookie('signingIn')
+    created() {
+      this.$tools.cookies.clear('signingIn')
       let token = this.$route.query.accessToken
+      this.$store.dispatch('setAccessToken', token)
       let today = new Date()
-      this.$root.token = token
-      this.$root.signingIn = false
-      this.$root.setCookie('access_token', token)
-      this.$root.setCookie('access_token_validUntil', today.setDate(today.getDate() + 14))
-      this.$parent.loadProjects()
+      this.$tools.cookies.set('access_token', token)
+      this.$tools.cookies.set('access_token_validUntil', today.setDate(today.getDate() + 14))
+      this.$parent.projectCheck()
       this.$router.push('/')
     }
   }

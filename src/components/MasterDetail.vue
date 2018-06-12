@@ -4,13 +4,13 @@
       <b-col lg="4" class="mdtable">
         <h5>
           <span class="tabHeading">{{tableheading}}</span>
-          <b-button size="sm" variant="primary" @click="addNewWrapper">+</b-button>
+          <b-button size="sm" variant="primary" @click="addNew">+</b-button>
           <UpdateButton :loading="loading" :update="update" size="sm" variant="secondary"></UpdateButton>
         </h5>
         <div class="table-responsive">
           <table class="table table-hover">
             <span v-if="!loading && tclength == 0">There's nothing to show.</span>
-            <tr v-for="(t, id) in tablecontent" @click="chooseEntry(id)" v-bind:active="(id == activeId)">
+            <tr v-for="(t, id) in tablecontent" @click="chooseEntry(t)" v-bind:active="(id == activeId)">
               <td>
                 <span class="tablePrimary float-left">{{t.name}}</span>
                 <span class="tableSecondary float-right">{{t[secondary]}}</span>
@@ -35,29 +35,37 @@
   export default {
     components: {UpdateButton, Loader},
     props: {
-      'tableheading': String,
-      'tablecontent': Object,
-      'addnew': Function,
-      'update': Function,
-      'selected': Function,
-      'manualchoose': String,
-      'secondary': {
+      route: String,
+      tableheading: {
+        type: String,
+        default: this.route
+      },
+      secondary: {
         type: String,
         default: ''
-      },
-      'loading': Boolean
+      }
     },
     name: "masterdetail",
     methods: {
-      chooseEntry(id) {
-        this.activeId = id
-        this.detailsVisible = true
-        this.$props.selected(this.tablecontent[id])
+      chooseEntry(entry) {
+        if (entry) {
+          this.activeId = entry.id
+          this.detailsVisible = true
+          this.$store.commit('endEditing', this.route)
+          this.$store.commit('setDetailItem', {route: this.route, item: entry})
+        } else {
+          this.activeId = ''
+          this.detailsVisible = false
+        }
       },
-      addNewWrapper() {
+      addNew() {
         this.detailsVisible = true
         this.activeId = ''
-        this.$props.addnew()
+        this.$store.commit('editing', this.route)
+        this.$store.dispatch('newDetailItem', this.route)
+      },
+      update() {
+        this.$store.dispatch('update', this.route)
       }
     },
     data() {
@@ -67,16 +75,29 @@
       }
     },
     computed: {
+      tablecontent() {
+        return this.$store.state[this.route]
+      },
       tclength() {
         return Object.keys(this.tablecontent).length
+      },
+      loading() {
+        return this.$store.state.loaders[this.route]
       }
     },
     watch: {
       manualchoose(id) {
+        debugger
         if (id !== '') {
           this.chooseEntry(id)
         } else {
           this.detailsVisible = false
+        }
+        this.manualchoose = ''
+      },
+      forceUpdateTrigger() {
+        if (this.activeId !== '') {
+          this.chooseEntry()
         }
       }
     }

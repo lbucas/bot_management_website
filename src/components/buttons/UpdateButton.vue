@@ -1,9 +1,10 @@
 <template>
-    <b-button variant="primary" :size="size" :variant="variant" @click="startUpdate">
-      <img class="updateImg" src="../../assets/icons/update.svg" v-if="!loading"/>
-      <img class="updateImg" src="../../assets/icons/updating.svg" v-if="loading" :size="size" :variant="variant"/>
-      {{text}}
-    </b-button>
+  <b-button variant="primary" :size="size" :variant="variant" @click="startUpdate">
+    <img class="updateImg" src="../../assets/icons/update.svg" v-if="!spinning && !done"/>
+    <img class="updateImg" src="../../assets/icons/updating.svg" v-if="spinning" :size="size" :variant="variant"/>
+    <img class="updateImg" src="../../assets/icons/done.svg" v-if="done && !spinning" :size="size" :variant="variant"/>
+    {{text}}
+  </b-button>
 </template>
 
 <script>
@@ -25,9 +26,28 @@
         default: ''
       }
     },
+    data() {
+      return {
+        done: false
+      }
+    },
+    computed: {
+      spinning() {
+        return this.loading
+      }
+    },
     methods: {
       startUpdate() {
         this.update()
+      }
+    },
+    watch: {
+      loading(l) {
+        var t = this
+        t.done = true
+        setTimeout(() => {
+          t.done = false
+        }, 1000)
       }
     }
   }

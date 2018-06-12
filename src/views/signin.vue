@@ -12,11 +12,9 @@
 <script>
   export default {
     name: "signin",
-    mounted() {
-      var t = this
-      t.$root.signingIn = true
-      t.$root.setCookie('signingIn', true)
-      let apiUrl = this.$root.apiRoute
+    created() {
+      this.$cookies.set('signingIn', true)
+      let apiUrl = this.$store.state.apiUrl
       window.location.href = apiUrl + 'auth/azure'
     }
   }

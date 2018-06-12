@@ -4,12 +4,11 @@ import Home from '@/views/home'
 import Datasources from '@/views/datasources'
 import Questions from '@/views/questions'
 import Connections from '@/views/connections'
-import Entities from '@/views/entities'
+import Entities from '@/views/entities/entities'
 import Settings from '@/views/settings'
 import Users from '@/views/users'
 import SignIn from '@/views/signIn'
 import SignedIn from '@/views/signedIn'
-import Test from '@/views/test'
 
 Vue.use(Router)
 
@@ -60,11 +59,6 @@ export default new Router({
       path: '/signedin',
       name: 'SignedIn',
       component: SignedIn
-    },
-    {
-      path: '/test',
-      name: 'Test',
-      component: Test
     }
   ]
 })

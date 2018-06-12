@@ -1,18 +1,17 @@
 <template>
   <div>
-    <MasterDetail tableheading="Available Datasources" :addnew="addDs" :selected="chooseDs" :tablecontent="datasources"
-                  :loading="loading" :manualchoose="manualDsChoose" :update="upadateDatasources">
+    <MasterDetail tableheading="Available Datasources" route="datasources">
       <b-tabs id="dsDetails">
         <b-tab class="tabTitle" title="General" active>
           <CustomForm id="dsform">
             <FormRowInput label="Title" v-model="dsDetails.name" :on-edit="onEdit"/>
-            <FormRowInput label="DB-Name" v-model="dsDetails.connectionObj.db" :on-edit="onEdit"
-                          :change="connectionNotTested"/>
             <FormRowSelect v-model="dsDetails.datasourceTypeId" :on-edit="onEdit" :list="datasourcetypes" label="Type"
-                           :display-value="currentDsType" list-display-value="name" :change="connectionNotTested" />
+                           :display-value="currentDsType" list-display-value="name" :change="connectionNotTested"/>
             <FormRowInput label="Host" v-model="dsDetails.connectionObj.host" :on-edit="onEdit" big
                           :change="connectionNotTested"/>
             <FormRowInput label="Port" v-model="dsDetails.connectionObj.port" :on-edit="onEdit"
+                          :change="connectionNotTested"/>
+            <FormRowInput label="DB-Name" v-model="dsDetails.connectionObj.db" :on-edit="onEdit"
                           :change="connectionNotTested"/>
             <FormRowInput label="User" v-model="dsDetails.connectionObj.user" :on-edit="onEdit"
                           :change="connectionNotTested"/>
@@ -20,7 +19,7 @@
                           inputtype="password"
                           :change="connectionNotTested"/>
           </CustomForm>
-          <b-button variant="primary" @click="(onEdit=true)" v-if="!onEdit">Edit</b-button>
+          <b-button variant="primary" @click="$store.commit('editing', 'datasources')" v-if="!onEdit">Edit</b-button>
           <b-button variant="primary" id="saveDS" @click="createOrEditDs" :disabled="!connectionTested"
                     v-if="onEdit" data-toggle="tooltip" data-placement="bottom"
                     title="Please test the connection first!">
@@ -31,13 +30,13 @@
 
           <DeleteButton :on-delete="deleteDS" v-if="!onEdit"/>
           <b-button variant="secondary" v-if="(onEdit&&!dsDetails.id=='')"
-                    @click="onEdit=false; chooseDs(datasources[activeId])">Cancel
+                    @click="$store.dispatch('setBackEditing', 'datasources')">Cancel
           </b-button>
         </b-tab>
         <b-tab class="tabTitle" title="Tables" v-if="showTables">
           <table class="table" id="dsTables">
             <tbody>
-            <tr v-if="dsDetails.tables.length == 0" class="noEntries">
+            <tr v-if="Object.keys(dsDetails.tables).length == 0" class="noEntries">
               <td>No tables found for this datasource</td>
             </tr>
             <tr v-for="(t, id) in dsDetails.tables">
@@ -49,14 +48,14 @@
                 </span>
                 <b-collapse v-bind:id="'tables' + id" class="mt-2">
                   <ul>
-                    <li v-if="t.attributes.length == 0" class="noEntries">No attributes found for this table</li>
+                    <li v-if="Object.keys(t.attributes).length == 0" class="noEntries">No attributes found for this table</li>
                     <li v-for="a in t.attributes">
                       {{a.name}} ({{a.datatype}})
                     </li>
                     <li>
                       <UpdateButton class="updateAttribute" text="Update Attributes"
                                     :update="function(){(updateAttributes(t.id))}"
-                                    :loading="upadatingAttr[t.id] || false" size="sm"/>
+                                    :loading="updatingAttr[t.id] || tablesLoading || false" size="sm"/>
                     </li>
                   </ul>
                 </b-collapse>
@@ -100,166 +99,101 @@
     },
     data() {
       return {
-        datasources: {},
-        datasourcetypes: {},
-        loading: true,
         dsSelected: false,
-        onEdit: false,
         showTables: true,
-        dsDetails: {
-          name: '',
-          datasourceTypeId: "",
-          connectionObj: {
-            host: "",
-            db: "",
-            user: "",
-            password: "",
-            port: ""
-          },
-          tables: []
-        },
         connectionTested: false,
         activeId: "",
         manualDsChoose: '',
+        forceUpdateTrigger: false,
         connectionTestLabel: 'Test Connection',
         connectionErr: '',
         expanded: {},
-        upadatingAttr: {},
+        updatingAttr: {},
         tablesLoading: false
       }
     },
-    methods: {
-      getDS(showAfterLoading) {
-        var t = this
-        t.loading = true
-        this.$root.getAndSet(
-          'projects/--projectid--/dataSources',
-          t.datasources,
-          function (d) {
-            // array to object
-            return d
-          },
-          function () {
-            t.loading = false
-            t.tablesLoading = false
-            for (let tid in t.upadatingAttr) {
-              t.upadatingAttr[tid] = false
-            }
-            if (showAfterLoading) {
-              t.manualDsChoose = showAfterLoading
-            }
-          },
-          {filter: {include: {tables: "attributes"}}}
-        )
+    computed: {
+      loading() {
+        return this.$store.state.loaders.datasources
       },
-      upadateDatasources() {
-        this.getDS(this.dsDetails.id)
+      datasources() {
+        return this.$store.state.datasources
+      },
+      datasourcetypes() {
+        return this.$store.state.datasourcetypes
+      },
+      dsDetails() {
+        return this.$store.state.detailItem.datasources
+      },
+      onEdit() {
+        return this.$store.state.onEdit.datasources
+      },
+      currentDsType() {
+        let dsid = this.dsDetails.datasourceTypeId
+        try {
+          return this.datasourcetypes[dsid]['name']
+        } catch (e) {
+          return ''
+        }
+      }
+    },
+    methods: {
+      getDS() {
+        this.$store.dispatch('load', 'datasources')
+      },
+      updateDS(showAfterLoading) {
+        var t = this
+        this.$store.dispatch('update', 'datasources')
       },
       createOrEditDs() {
-        if (this.activeId === '') {
-          this.createDs()
+        if (this.dsDetails.id) {
+          this.editDs()
         } else {
-          this.patchDs()
+          this.createDs()
         }
       },
       getDsTypes() {
-        var t = this
-        this.$root.getAndSet(
-          'datasourceTypes',
-          t.datasourcetypes
-        )
-      },
-      chooseDs(ds) {
-        this.$root.clone(this.dsDetails, ds)
-        this.showTables = true
-        this.onEdit = false
-        this.activeId = ds.id
-      },
-      addDs() {
-        this.onEdit = true
-        this.dsSelected = true
-        this.dsDetails = {
-          name: '',
-          datasourceTypeId: '5b0435bc41b70a008681ddc7',
-          connectionObj: {
-            host: '',
-            user: '',
-            password: '',
-            port: '',
-            db: ''
-          }
-        }
-        this.showTables = false
-        this.activeId = ""
+        this.$store.dispatch('load', 'datasourcetypes')
       },
       createDs() {
-        var t = this
-        t.editLoading = true
-        this.$root.post(
-          'projects/--projectid--/dataSources',
-          t.dsDetails,
-          function (res) {
-            t.getDS(res.id)
-          }
-        )
+        this.$store.dispatch('create', {route: 'datasources', toCreate: this.dsDetails})
       },
-      patchDs() {
+      editDs() {
         var t = this
         var patched = {}
         this.$root.clone(patched, this.dsDetails)
         delete patched.tables
-        t.editLoading = true
-        this.$root.patch(
-          'datasources/' + t.activeId,
-          patched,
-          function (res) {
-            t.getDS(t.activeId)
-          }
-        )
+        this.$store.dispatch('patch', {route: 'datasources', toPatch: patched})
       },
       deleteDS() {
-        var t = this
-        t.loading = true
-        t.$root.delete(
-          'datasources',
-          t.dsDetails.id,
-          function () {
-            t.getDS('')
-          }
-        )
+        this.$store.dispatch('delete', {route: 'datasources', toDelete: this.dsDetails.id})
       },
       testConnection() {
         var t = this
         t.connectionTestLabel = 'Testing..'
-        t.editLoading = true
         var details = t.dsDetails.connectionObj
         details.datasourceTypeId = t.dsDetails.datasourceTypeId
-        this.$root.post(
-          'dataSources/testconnection',
-          details,
-          function (res) {
+        this.$store.dispatch('post', {route: 'dataSources/testconnection', toPost: details})
+          .then((res) => {
             t.connectionTestLabel = "Test Connection"
             t.connectionTested = true
             t.editLoading = false
-          },
-          function (err) {
+          }, (err) => {
             t.connectionErr = err.responseJSON.error.message
             t.$root.modalOpen('connectionTestModal')
             t.connectionTestLabel = 'Test Connection'
             t.editLoading = false
-          }
-        )
+          })
       },
       updateTables() {
-        this.tablesLoading = true
         var t = this
-        this.$root.post(
-          'datasources/updateTables',
-          {datasourceId: t.dsDetails.id},
-          function () {
-            t.getDS(t.dsDetails.id)
-          }
-        )
+        let toPost = {datasourceId: t.dsDetails.id}
+        this.tablesLoading = true
+        this.$store.dispatch('post', {route: 'datasources/updateTables', toPost: toPost})
+          .then(() => {
+            t.tablesLoading = false
+            t.updateDS()
+          })
       },
       expandtable(id) {
         var e = this.expanded
@@ -271,14 +205,13 @@
       },
       updateAttributes(id) {
         var t = this
-        t.upadatingAttr[id] = true
-        this.$root.post(
-          'tables/updateAttributes',
-          {tableId: id},
-          function () {
-            t.getDS(t.dsDetails.id)
-          }
-        )
+        let toPost = {tableId: id}
+        this.$set(this.updatingAttr, id, true)
+        this.$store.dispatch('post', {route: 'tables/updateAttributes', toPost: toPost})
+          .then(() => {
+            this.$set(this.updatingAttr, id, false)
+            t.updateDS()
+          })
       },
       connectionNotTested() {
         this.connectionTested = false
@@ -287,16 +220,6 @@
     created() {
       this.getDS()
       this.getDsTypes()
-    },
-    computed: {
-      currentDsType() {
-        let dsid = this.dsDetails.datasourceTypeId
-        try {
-          return this.datasourcetypes[dsid]['name']
-        } catch (e) {
-          return ''
-        }
-      }
     },
     watch: {
       dsDetails() {

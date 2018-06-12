@@ -1,13 +1,16 @@
 <template>
   <div>
-    <input class="suseInput form-control" autocomplete="off"
+    <input :class="{'suseInput': true, 'form-control': true, 'valueSelected': valueSelected}" autocomplete="off"
            :disabled="disabled" v-model="inputValue" @click="suggestionsVisible=true"
            @keyup.up="suggestionKeyChange(false)"
            @keyup.down="suggestionKeyChange(true)" @keyup.enter="select" :placeholder="placeholder"/>
-    <div class="suggestions" v-if="suggestionsVisible">
+    <div class="suggestions" v-if="suggestionsVisible" :valueSelected="valueSelected">
+      <span class="closeSuggestions" @click.stop="suggestionsVisible=false" v-if="(Object.keys(suggestions).length !== 0)">×</span>
       <ul class="suggestionList">
-        <li v-if="(Object.keys(suggestions).length == 0) && inputValue.length > 0" class="noItems">No items to select</li>
-        <li v-for="(suggestion, id) in suggestions" :active="activeId == id" @mouseover="changedBySelection=true; activeId=id" @mouseout="activeId=''"
+        <li v-if="(Object.keys(suggestions).length == 0) && inputValue.length > 0" class="noItems">No items to select
+        </li>
+        <li v-for="(suggestion, id) in suggestions" :active="activeId == id"
+            @mouseover="activeId=id"
             @click="select">
           {{suggestion[listDisplayValue]}}
         </li>
@@ -53,9 +56,9 @@
         inputValue: '',
         suggestionsVisible: false,
         activeId: '',
-        changedBySelection: false,
         suggestions: this.$props.list,
-        valueSelected: false
+        valueSelected: false,
+        justCreated: true
       }
     },
     computed: {
@@ -91,13 +94,13 @@
         try {
           let n = this.$props.list[v][this.$props.listDisplayValue]
           this.inputValue = n
+          this.valueSelected = true
         } catch (e) {
-          this.inputValue = ''
+          this.valueSelected = false
         }
       },
       suggestionKeyChange(isDown) {
         if (this.suggestionsVisible) {
-          this.changedBySelection = true
           let toAdd = (isDown ? 1 : -1)
           try {
             let index = this.suggestionReverseIndex[this.activeId]
@@ -133,26 +136,28 @@
         this.valueSelected = true
         if (this.$props.clearAfterSelect) {
           this.inputValue = ''
+          this.valueSelected = false
         }
         this.$props.change()
       }
     },
     watch: {
       value(v) {
+        this.justCreated = true
+        this.valueSelected = true
         this.setInputValue(v)
       },
       inputValue(newI, oldI) {
-        if (!this.changedBySelection) {
-          this.activeId = ''
-          this.searchList()
-        }
-        this.changedBySelection = false
+        this.activeId = ''
+        this.searchList()
         if (newI.length === 0 && oldI.length > 0) {
           this.suggestionsVisible = false
         }
-      },
-      activeId(id) {
-        this.setInputValue(id)
+        if (this.justCreated) {
+          this.justCreated = false
+        } else {
+          this.valueSelected = false
+        }
       },
       list(l) {
         this.suggestions = l
@@ -164,6 +169,10 @@
 </script>
 
 <style lang="less" scoped>
+  .valueSelected {
+    font-weight: bold;
+  }
+
   .suggestions {
     Border-Width: 0 1px 1px 1px;
     border-color: #e6e6e6;
@@ -188,6 +197,10 @@
           background: #e6f0ff;
         }
       }
+    }
+    .closeSuggestions {
+      cursor: pointer;
+      float: right;
     }
   }
 </style>

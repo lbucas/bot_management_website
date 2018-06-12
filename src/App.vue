@@ -10,8 +10,8 @@
           </b-col>
         </b-row>
         <h5>Bot Management</h5>
-        <h6 id="projectTitle" @click="$root.projectDialog"><img src="./assets/icons/projects.svg" id="projectIcon"/>
-          {{$root.project.name}}</h6>
+        <h6 id="projectTitle" @click=" $root.modalOpen('projectModal')"><img src="./assets/icons/projects.svg" id="projectIcon"/>
+          {{project.name}}</h6>
         <div id="links">
           <ul v-for="nl in navLinks">
             <li class="navLink font-weight-light" @click="route(nl)" :active="current === nl">
@@ -33,7 +33,9 @@
         </b-row>
         <div id="routerContent">
           <transition name="component-fade" mode="out-in">
-            <router-view/>
+            <keep-alive>
+              <router-view/>
+            </keep-alive>
           </transition>
         </div>
       </b-col>
@@ -50,7 +52,7 @@
           <th>Your Role</th>
           </thead>
           <tbody>
-          <tr v-for="p in projects" @click="chooseProject(p)">
+          <tr v-for="p in projects" @click="chooseProject(p, true)">
             <td>{{p.name}}</td>
             <td>{{p.role}}</td>
           </tr>
@@ -92,10 +94,6 @@
     data() {
       return {
         current: 'Home',
-        user: {
-          firstname: '',
-          lastname: ''
-        },
         navLinks: [
           'Datasources',
           'Connections',
@@ -104,16 +102,26 @@
           'Users',
           'Settings'
         ],
-        projects: {},
+        project: {
+          name: ''
+        },
         createProject: false,
         newProjectName: '',
-        projectsLoading: '',
         datasources: {}
       }
     },
     computed: {
       userDisplayName() {
         return this.user.firstname + ' ' + this.user.lastname
+      },
+      projects() {
+        return this.$store.state.projects
+      },
+      user() {
+        return this.$store.state.user.user
+      },
+      projectsLoading() {
+        return this.$store.state.loaders.projects
       }
     },
     methods: {
@@ -126,31 +134,27 @@
         togo = togo.toLowerCase()
         this.$router.push('/' + togo)
       },
-      chooseProject(p) {
-        this.$root.modalClose('projectModal')
-        this.$root.project = p
-        this.route('/')
-        this.$root.setCookie('project', JSON.stringify(p))
-        this.$root.post(
-          'projects/changeProject',
-          {projectId: p.id}
-        )
+      projectCheck() {
+        this.loadProjects()
+        let p = this.$tools.cookies.get('project')
+        if (p) {
+          p = JSON.parse(p)
+          this.chooseProject(p)
+        }
+      },
+      chooseProject(p, onModal) {
+        this.project = p
+        this.$store.dispatch('setProjectId', p.id)
+        this.$tools.cookies.set('project', JSON.stringify(p))
+        if (onModal) {
+          this.$root.modalClose('projectModal')
+        }
+        this.$store.dispatch('post', {route: 'projects/changeProject', toPost: {projectId: p.id}})
+        this.$store.dispatch('updateProjectDependent')
       },
       loadProjects() {
         var t = this
-        t.$root.getAndSet(
-          'projects',
-          t.projects,
-          function (p) {
-            for (var id in p) {
-              p[id].role = 'Creator'
-            }
-            return p
-          },
-          function () {
-            t.projectsLoading = false
-          }
-        )
+        this.$store.dispatch('load', ['projects'])
       },
       saveProject() {
         var t = this
@@ -158,63 +162,33 @@
           name: t.newProjectName,
           merckUserId: t.user.id
         }
-        t.projectsLoading = true
-        t.$root.post(
-          'projects',
-          project,
-          function (p) {
-            t.$set(t.projects, p.id, p)
+        this.store.dispatch('create', {route: 'projects', toCreate: project})
+          .then(() => {
             t.createProject = false
-            t.projectsLoading = false
-          }
-        )
+          })
       },
       getUser() {
-        var t = this
-        if (t.user.lastname === '') {
-          this.$root.getAndSet(
-            'merckUsers/whoAmI',
-            t.user,
-            function (d) {
-              return d.user
-            }
-          )
-        }
-      },
-      getDatasources() {
-        var t = this
-        t.connectionLoading = true
-        this.$root.getAndSet(
-          'projects/--projectid--/datasources',
-          t.datasources,
-          function (data) {
-            for (var k in data) {
-              data[k].tables = t.$root.arrayToObject(data[k].tables)
-              for (var id in data[k].tables) {
-                data[k].tables[id].datasourceId = k
-                data[k].tables[id].x = Math.floor(Math.random() * Math.floor(600))
-                data[k].tables[id].y = Math.floor(Math.random() * Math.floor(500))
-                data[k].tables[id].visible = false
-                data[k].tables[id].attributes = t.$root.arrayToObject(data[k].tables[id].attributes)
-              }
-            }
-            return data
-          },
-          function () {},
-          {
-            filter: '{"include":{"relation":"tables","scope":{"include":[{"relation":"joins","scope":{"include":{"relation":"attributes","scope":{"fields":["id","tableId"]}}}},{"relation":"attributes"}]}}}'
-          }
-        )
+        this.$store.dispatch('load', {route: 'merckUsers/whoAmI', target: 'user'})
       }
     },
     created() {
-      debugger
-      if (!this.$root.getCookie('signingIn')) {
-        this.$root.checkSigninAndProject()
-        this.loadProjects()
-        this.getUser()
-        this.current = this.$router.history.current.name
-        this.getDatasources()
+      this.current = this.$router.history.current.name
+      if (!(this.current === 'SignIn' || this.current === 'SigningIn')) {
+        let at = this.$tools.cookies.get('access_token')
+        let expires = this.$tools.cookies.get('access_token_validUntil')
+        let today = new Date()
+        if (at && parseInt(expires) > new Date().getTime()) {
+          this.$store.dispatch('setAccessToken', at)
+          this.projectCheck()
+          this.getUser()
+        } else {
+          this.$router.push('/signin')
+        }
+      }
+    },
+    mounted() {
+      if (!this.project.id && !(this.current === 'SignIn' || this.current === 'SigningIn')) {
+        this.$root.modalOpen('projectModal')
       }
     }
   }

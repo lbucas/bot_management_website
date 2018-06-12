@@ -7,9 +7,8 @@
           <CustomForm id="intentDetails">
             <form-row-input v-model="intentDetail.name" label="Title" :on-edit="onEdit"/>
             <form-row-select v-model="intentDetail.charttype" label="Charttype" :on-edit="onEdit" :list="charttypes"/>
-            <form-row-array-input v-model="intentDetail.filterByIds" :lookup-list="entities" label="Groupable by"
-                                 :on-edit="onEdit" :placeholder="'Add Entities to group by'"/>
-            <form-row-array-input v-model="intentDetail.filterByIds" :lookup-list="entities" label="Filterable by"
+            <form-row-select v-model="intentDetail.groupBy" label="Group by" :on-edit="onEdit" :list="entities" />
+            <form-row-array-input v-model="intentDetail.filterByIds" :lookup-list="entitiesWithoutGroupedBy" label="Filterable by"
                                   :on-edit="onEdit" :placeholder="'Add Entities to filter by'"/>
           </CustomForm>
         </b-tab>
@@ -40,11 +39,6 @@
     name: "intents",
     data() {
       return {
-        intents: {},
-        aggregations: {},
-        entities: {},
-        datasources: {},
-        charttypes: {},
         intentDetail: {
           name: "",
           charttype: "",
@@ -53,6 +47,7 @@
           targetValueIds: [
             ''
           ],
+          groupBy: '',
           filterByIds: [
             ''
           ],
@@ -60,11 +55,25 @@
           aggregationId: "string"
         },
         manualIntentChoose: '',
-        loading: true,
         onEdit: false
       }
     },
     computed: {
+      intents() {
+        return this.$store.state.intents
+      },
+      aggregations() {
+        return this.$store.state.aggregations
+      },
+      entities() {
+        return this.$store.state.entities
+      },
+      datasources() {
+        return this.$store.state.datasources
+      },
+      charttypes() {
+        return this.$store.state.charttypes
+      },
       currentChartType() {
         let ctname
         try {
@@ -73,6 +82,21 @@
           ctname = ''
         }
         return ctname
+      },
+      loading() {
+        return this.$store.state.loaders.intents
+      },
+      entitiesWithoutGroupedBy() {
+        let e = {}
+        for (let eid in this.entities) {
+          if (eid !== this.intentDetail.groupBy) {
+            e[eid] = this.entities[eid]
+          }
+        }
+        return e
+      },
+      groupById() {
+        return this.intentDetail.groupBy
       }
     },
     created() {
@@ -81,25 +105,10 @@
     },
     methods: {
       getIntents(showAfterLoading) {
-        var t = this
-        this.$root.getAndSet(
-          'intents',
-          t.intents,
-          null,
-          function (d) {
-            t.loading = false
-            if (showAfterLoading) {
-              t.manualIntentChoose = showAfterLoading
-            }
-          }
-        )
+        return true
       },
       getIntentOptions() {
-        var t = this
-        t.$root.getAndSet('aggregations', t.aggregations)
-        t.$root.getAndSet('entities', t.entities)
-        t.$root.getAndSet('datasources', t.datasources, null, null, {filter: {include: {tables: "attributes"}}})
-        t.$root.getAndSet('charttypes', t.charttypes)
+        this.$store.dispatch('load', ['aggregations', 'entities', 'datasources', 'charttypes'])
       },
       addIntent() {
         let newIntent = {
@@ -117,6 +126,11 @@
         this.onEdit = true
       },
       chooseIntent(i) {
+      }
+    },
+    watch: {
+      groupById(id) {
+        this.$tools.deleteFromArray(this.intentDetail.filterByIds, id)
       }
     }
   }

@@ -1,6 +1,6 @@
 <template>
   <FormRowBlank :label="label">
-    <input  readonly v-if="!onEdit" class="form-control-plaintext" v-model="plainTextArray"/>
+    <input readonly v-if="!onEdit" class="form-control-plaintext" v-model="plainTextArray"/>
     <div v-if="onEdit">
       <div class="arrayInputDisplay">
         <h5>
@@ -93,8 +93,24 @@
       }
     },
     watch: {
+      value(v) {
+        let toSet = this.arrayToObject(this.$props.value)
+        for (let oldKey in this.inputList) {
+          if (!(oldKey in toSet)) {
+            this.$delete(this.inputList, oldKey)
+          }
+        }
+        for (let newKey in toSet) {
+          this.$set(this.inputList, newKey, toSet[newKey])
+        }
+      },
       addNext(v) {
         this.$set(this.inputList, v, v)
+        let toEmit = []
+        for (let id in this.inputList) {
+          toEmit.push(id)
+        }
+        this.$emit("input", toEmit)
       }
     }
   }
