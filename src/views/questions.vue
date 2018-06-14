@@ -1,6 +1,5 @@
 <template>
-  <MasterDetail :addnew="addIntent" tableheading="Questions" :selected="chooseIntent" :tablecontent="intents"
-                :loading="loading" :manualchoose="manualIntentChoose" :update="getIntents">
+  <MasterDetail route="intents" tableheading="Available Questions">
     <div>
       <b-tabs>
         <b-tab class="tabTitle" title="General" active>
@@ -38,25 +37,7 @@
     },
     name: "intents",
     data() {
-      return {
-        intentDetail: {
-          name: "",
-          charttype: "",
-          calculationNeeded: true,
-          id: "string",
-          targetValueIds: [
-            ''
-          ],
-          groupBy: '',
-          filterByIds: [
-            ''
-          ],
-          projectId: "string",
-          aggregationId: "string"
-        },
-        manualIntentChoose: '',
-        onEdit: false
-      }
+      return {}
     },
     computed: {
       intents() {
@@ -74,17 +55,14 @@
       charttypes() {
         return this.$store.state.charttypes
       },
-      currentChartType() {
-        let ctname
-        try {
-          ctname = this.charttypes[this.intentDetail.charttype].name
-        } catch (e) {
-          ctname = ''
-        }
-        return ctname
+      onEdit() {
+        return this.$store.state.onEdit.intents
       },
       loading() {
         return this.$store.state.loaders.intents
+      },
+      intentDetail() {
+        return this.$store.state.detailItem.intents
       },
       entitiesWithoutGroupedBy() {
         let e = {}
@@ -109,23 +87,6 @@
       },
       getIntentOptions() {
         this.$store.dispatch('load', ['aggregations', 'entities', 'datasources', 'charttypes'])
-      },
-      addIntent() {
-        let newIntent = {
-          name: "",
-          charttype: "",
-          calculationNeeded: true,
-          id: "string",
-          targetValueIds: [],
-          groupByIds: [],
-          filterByIds: [],
-          projectId: "string",
-          aggregationId: "string"
-        }
-        this.$root.clone(this.intentDetail, newIntent)
-        this.onEdit = true
-      },
-      chooseIntent(i) {
       }
     },
     watch: {

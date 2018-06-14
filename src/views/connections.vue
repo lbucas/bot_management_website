@@ -64,7 +64,7 @@
                   </select>
                 </b-col>
                 <b-col cols="1">
-                  <img class="controlicon" src="../assets/icons/arrowtwoway.svg"/>
+                  <icon icon="arrowtwoway"/>
                   <button v-if="!editing && editjoin.id !== ''" @click="editing = true" type="button"
                           id="editConnection" class="close">×
                   </button>
@@ -157,9 +157,10 @@
   import Loader from "../components/Loader"
   import DeleteButton from "../components/buttons/DeleteButton"
   import ExpandIcon from "../components/ExpandIcon"
+  import Icon from "../components/icon"
   export default {
     name: "connections",
-    components: {ExpandIcon, DeleteButton, Loader},
+    components: {Icon, ExpandIcon, DeleteButton, Loader},
     data() {
       return {
         tableWidth: 120, // this.$refs.dragDrop.clientWidth,
@@ -258,7 +259,6 @@
       },
       deleteConnection() {
         var t = this
-        debugger
         this.$store.dispatch('delete', {route: 'joins', toDelete: this.editjoin.id})
           .then(() => {
             t.choose(2, t.table2)

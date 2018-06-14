@@ -13,6 +13,7 @@ export default new Vuex.Store({
   state: {
     apiUrl: api.url(),
     projects: {},
+    projectId: '',
     datasources: {},
     entities: {},
     intents: {},
@@ -47,6 +48,16 @@ export default new Vuex.Store({
         description: '',
         attributeId: '',
         onEdit: false
+      },
+      intents: {
+        name: "",
+        charttype: "",
+        calculationNeeded: true,
+        id: "",
+        targetValueIds: [],
+        groupByIds: [],
+        filterByIds: [],
+        aggregationId: ""
       }
     },
     newItem: {
@@ -68,11 +79,22 @@ export default new Vuex.Store({
         description: '',
         attributeId: '',
         onEdit: false
+      },
+      intents: {
+        name: "",
+        charttype: "",
+        calculationNeeded: true,
+        id: "",
+        targetValueIds: [],
+        groupByIds: [],
+        filterByIds: [],
+        aggregationId: ""
       }
     },
     onEdit: {
       datasources: false,
-      entities: false
+      entities: false,
+      intents: false
     },
     loaded: {
       projects: false,
@@ -91,6 +113,12 @@ export default new Vuex.Store({
       intents: false,
       joins: false,
       keywords: false
+    },
+    detailsVisible: {
+      datasources: false,
+      entities: false,
+      intents: false,
+      joins: false
     }
 
   },
@@ -205,9 +233,9 @@ export default new Vuex.Store({
         }
       }
     },
-    set(state, {route, items}) {
-      for (let key in items) {
-        Vue.set(state[route], key, items.id)
+    set(state, {route, item}) {
+      for (let key in item) {
+        Vue.set(state[route], key, item[key])
       }
     },
     patch(state, {route, item}) {
@@ -221,6 +249,15 @@ export default new Vuex.Store({
     },
     endEditing(state, route) {
       this.state.onEdit[route] = false
+    },
+    setProjectId(state, projectId) {
+      state.projectId = projectId
+      for (let r in state.detailsVisible) {
+        state.detailsVisible[r] = false
+      }
+    },
+    setDetailsVisible(state, route) {
+      state.detailsVisible[route] = true
     }
   },
   actions: {
@@ -288,6 +325,7 @@ export default new Vuex.Store({
       }
     },
     create(context, {route, toCreate}) {
+      delete toCreate.id
       context.commit('loading', route)
       return new Promise(function (resolve, reject) {
         api.call('POST', route, toCreate)
@@ -303,7 +341,9 @@ export default new Vuex.Store({
             }
             context.commit('set', {route, item: data})
             context.commit('endEditing', route)
-            context.commit('setDetailItem', {route, item: data[Object.keys(data)[0]]})
+            if (route in context.state.detailItem) {
+              context.commit('setDetailItem', {route, item: data[Object.keys(data)[0]]})
+            }
             context.commit('finishedLoading', route)
             resolve(data)
           }, (err) => {
@@ -328,7 +368,9 @@ export default new Vuex.Store({
             }
             context.commit('set', {route, item: data})
             context.commit('endEditing', route)
-            context.commit('setDetailItem', {route, item: data[Object.keys(data)[0]]})
+            if (route in context.state.detailItem) {
+              context.commit('setDetailItem', {route, item: data[Object.keys(data)[0]]})
+            }
             context.commit('finishedLoading', route)
             resolve(data)
           }, (err) => {
@@ -360,17 +402,17 @@ export default new Vuex.Store({
           })
       })
     },
-    getKeywords(context, {attributeId, forceReload}) {
+    getKeywords(context, attributeId) {
       return new Promise(function (resolve, reject) {
-        this.commit('loading', 'keywords')
+        context.commit('loading', 'keywords')
         let keywords = context.state.keywords[attributeId]
-        if (!keywords || forceReload) {
-          let route = 'attributes/' + attributeId + '/attributeValues'
-          api.call('GET', route)
+        if (!keywords) {
+          let route = 'attributes/' + attributeId + '/keywords'
+          api.call('GET', route, {filter: '{"include": "attributeValues"}'})
             .then((data) => {
               data = api.arrayToObject(data)
               context.commit('setKeywords', {keywords, attributeId})
-              this.commit('finishedLoading', 'keywords')
+              context.commit('finishedLoading', 'keywords')
               resolve(data)
             }, (err) => {
               reject(err)
@@ -381,10 +423,23 @@ export default new Vuex.Store({
         }
       })
     },
+    getKeywordsFromDs(context, {attributeId, entityId}) {
+      return new Promise(function (resolve, reject) {
+        context.commit('loading', 'keywords')
+        api.call("POST", 'attributeValues/updateValues', {attributeId, entityId})
+          .then(() => {
+            context.commit('finishedLoading', 'keywords')
+            resolve()
+          }, (err) => {
+            reject(err)
+          })
+      })
+    },
     setAccessToken(context, token) {
       api.setToken(token)
     },
     setProjectId(context, projectId) {
+      context.commit('setProjectId', projectId)
       api.setProjectId(projectId)
     },
     newDetailItem(context, route) {
@@ -392,7 +447,6 @@ export default new Vuex.Store({
     },
     setBackEditing(context, route) {
       let id = context.state.detailItem[route].id
-      debugger
       if (id) {
         context.commit('setDetailItem', {route, item: context.state[route][id]})
         context.commit('endEditing', route)

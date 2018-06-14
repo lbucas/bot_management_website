@@ -10,12 +10,13 @@
           </b-col>
         </b-row>
         <h5>Bot Management</h5>
-        <h6 id="projectTitle" @click=" $root.modalOpen('projectModal')"><img src="./assets/icons/projects.svg" id="projectIcon"/>
+        <h6 id="projectTitle" @click=" $root.modalOpen('projectModal')">
+          <icon id="projectIcon" icon="Projects"/>
           {{project.name}}</h6>
         <div id="links">
           <ul v-for="nl in navLinks">
             <li class="navLink font-weight-light" @click="route(nl)" :active="current === nl">
-              <img v-bind:src="(require('./assets/icons/'+nl+'.svg'))" class="navIcon"/>
+              <icon :icon="nl" class="navIcon"/>
               {{nl}}
             </li>
           </ul>
@@ -87,10 +88,11 @@
 
 <script>
   import Loader from "./components/Loader"
+  import Icon from "./components/icon"
 
   export default {
     name: 'app',
-    components: {Loader},
+    components: {Icon, Loader},
     data() {
       return {
         current: 'Home',
@@ -162,7 +164,7 @@
           name: t.newProjectName,
           merckUserId: t.user.id
         }
-        this.store.dispatch('create', {route: 'projects', toCreate: project})
+        this.$store.dispatch('create', {route: 'projects', toCreate: project})
           .then(() => {
             t.createProject = false
           })
@@ -237,7 +239,7 @@
   }
 
   .navIcon {
-    width: 1.3em;
+    width: 1.3em !important;
   }
 
   #links {
@@ -323,11 +325,6 @@
   //tabs
   .nav-item a {
     color: black !important;
-  }
-
-  //icons
-  .controlicon {
-    width: 1em;
   }
 
   //transitions

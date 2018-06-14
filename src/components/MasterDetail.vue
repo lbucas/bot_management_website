@@ -3,7 +3,7 @@
     <b-row>
       <b-col lg="4" class="mdtable">
         <h5>
-          <span class="tabHeading">{{tableheading}}</span>
+          <span class="tabHeading">{{theading}}</span>
           <b-button size="sm" variant="primary" @click="addNew">+</b-button>
           <UpdateButton :loading="loading" :update="update" size="sm" variant="secondary"></UpdateButton>
         </h5>
@@ -38,7 +38,7 @@
       route: String,
       tableheading: {
         type: String,
-        default: this.route
+        default: ''
       },
       secondary: {
         type: String,
@@ -49,30 +49,27 @@
     methods: {
       chooseEntry(entry) {
         if (entry) {
-          this.activeId = entry.id
-          this.detailsVisible = true
+          this.setDetailsVisible()
           this.$store.commit('endEditing', this.route)
           this.$store.commit('setDetailItem', {route: this.route, item: entry})
         } else {
-          this.activeId = ''
           this.detailsVisible = false
         }
       },
       addNew() {
-        this.detailsVisible = true
-        this.activeId = ''
+        this.setDetailsVisible = true
         this.$store.commit('editing', this.route)
         this.$store.dispatch('newDetailItem', this.route)
       },
       update() {
         this.$store.dispatch('update', this.route)
+      },
+      setDetailsVisible() {
+        this.$store.commit('setDetailsVisible', this.route)
       }
     },
     data() {
-      return {
-        activeId: '',
-        detailsVisible: false
-      }
+      return {}
     },
     computed: {
       tablecontent() {
@@ -83,22 +80,19 @@
       },
       loading() {
         return this.$store.state.loaders[this.route]
-      }
-    },
-    watch: {
-      manualchoose(id) {
-        debugger
-        if (id !== '') {
-          this.chooseEntry(id)
-        } else {
-          this.detailsVisible = false
-        }
-        this.manualchoose = ''
       },
-      forceUpdateTrigger() {
-        if (this.activeId !== '') {
-          this.chooseEntry()
+      theading() {
+        let th = this.$props.tableheading
+        if (!th) {
+          th = this.$props.route
         }
+        return th
+      },
+      detailsVisible() {
+        return this.$store.state.detailsVisible[this.route]
+      },
+      activeId() {
+        return this.$store.state.detailItem[this.route].id
       }
     }
   }

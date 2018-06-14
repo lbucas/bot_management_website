@@ -1,13 +1,15 @@
 <template>
     <div class="expandWrapper">
-      <img v-if="!expanded" class="controlicon" src="../assets/icons/expand-button.svg"/>
-      <img v-if="expanded" class="controlicon" src="../assets/icons/expand-arrow.svg"/>
+      <icon class="testttt" v-if="!expanded" icon="expand-button"/>
+      <icon v-if="expanded" icon="expand-arrow"/>
     </div>
 </template>
 
 <script>
+  import Icon from "./icon"
   export default {
     name: "ExpandIcon",
+    components: {Icon},
     props: {
       expanded: Boolean
     }

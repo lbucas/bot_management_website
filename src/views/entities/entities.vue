@@ -35,7 +35,9 @@
           </b-button>
           <b-button variant="sencondary" @click="$store.dispatch('setBackEditing', 'entities')" v-if="onEdit">Cancel</b-button>
         </b-tab>
-        <b-tab class="tabTitle" title="Keywords"></b-tab>
+        <b-tab class="tabTitle" title="Keywords" v-if="!onEdit">
+            <keywords/>
+        </b-tab>
       </b-tabs>
     </MasterDetail>
   </div>
@@ -49,9 +51,11 @@
   import FormRowBlank from "../../components/form/FormRowBlank"
   import DeleteButton from "../../components/buttons/DeleteButton"
   import CustomForm from "../../components/form/CustomForm"
+  import Keywords from "./keywords"
 
   export default {
     components: {
+      Keywords,
       CustomForm,
       DeleteButton,
       FormRowBlank,

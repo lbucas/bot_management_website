@@ -1,7 +1,6 @@
 import jqajax from 'jquery-ajax'
 import Promise from 'bluebird'
 
-// const mainUrl = 'http://localhost:3000/'
 const mainUrl = 'https://api.emd-databots.com/'
 const devUrl = 'https://dev.emd-databots.com/'
 

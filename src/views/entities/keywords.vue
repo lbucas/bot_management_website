@@ -1,39 +1,46 @@
 <template>
   <b-row>
-    <b-col lg="4" class="mdtable">
+    <b-col lg="6" class="mdtable">
+      <div class="updateKeywordsWrapper">
+        <update-button class="updateKeywords" :update="updateKeywords" :loading="keywordsLoading"
+                       text="Load Keywords from Datasource" size="sm"/>
+      </div>
+      <div v-if="!isLoading && keywordsIndex.length > 0" class="pageNavigator">
+        <b-button variant="outline-secondary" class="back" size="sm" v-if="page> 1" @click="page--" outline>←</b-button>
+        Page {{page}} of {{pagesTotal}}
+        <b-button variant="outline-secondary" size="sm" v-if="page < pagesTotal" @click="page++">→</b-button>
+      </div>
       <div class="table-responsive">
         <table class="table table-hover">
-          <span v-if="!isLoading && keywordsIndex.length == 0">No keywords added yet.</span>
-          <tr v-for="(k, id) in keywordsOnPage" >
+          <tbody>
+          <tr v-if="!isLoading && keywordsIndex.length == 0">
+            <td>No keywords added yet.</td>
+          </tr>
+          </tbody>
+          <tr v-for="(k, id) in keywordsOnPage">
             <td>
-              {{k.name}}
+              {{k.value}}
             </td>
           </tr>
         </table>
       </div>
     </b-col>
-    <b-col lg="8">
-      <div class="mddetail" v-if="detailsVisible">
-        <Loader :loading="loading"/>
-        <slot></slot>
-      </div>
+    <b-col lg="6">
+      <h6 class="selectKwHint">Select entries from the table to summarize them to one shared keyword</h6>
     </b-col>
   </b-row>
 </template>
 
 <script>
-  const entriesPerPage = 10
+  import Loader from "../../components/Loader"
+  import UpdateButton from "../../components/buttons/UpdateButton"
+
   export default {
     name: "keywords",
-    props: {
-      loading: {
-        type: Boolean,
-        default: false
-      },
-      attributeId: String
-    },
+    components: {UpdateButton, Loader},
     data() {
       return {
+        entriesPerPage: 10,
         page: 1,
         keywords: {}
       }
@@ -44,37 +51,90 @@
       },
       keywordsIndex() {
         let index = []
-        for (let key in this.keywords) { index.push(key) }
+        for (let key in this.keywords) {
+          index.push(key)
+        }
+        return index
       },
       keywordsOnPage() {
         let kop = {}
         let k
-        for (let i = ((this.page - 1) * entriesPerPage); i < this.page * entriesPerPage; i++) {
+        for (let i = ((this.page - 1) * this.entriesPerPage); i < Math.min(this.page * this.entriesPerPage, Object.keys(this.keywords).length); i++) {
           k = this.keywordsIndex[i]
-          kop[i] = this.keywords[i]
+          kop[i] = this.keywords[k]
         }
         return kop
       },
+      loading() {
+        this.$store.state.loaders.entities
+      },
       isLoading() {
         return this.loading || this.keywordsLoading
+      },
+      attributeId() {
+        return this.$store.state.detailItem.entities.attributeId
+      },
+      entityId() {
+        return this.$store.state.detailItem.entities.id
+      },
+      pagesTotal() {
+        return Math.ceil(this.keywordsIndex.length / this.entriesPerPage)
       }
     },
     created() {
+      if (this.attributeId) {
+        this.loadKeywords()
+      }
     },
-    methods: {},
-    watch: {
-      attributeId(attributeId) {
+    methods: {
+      loadKeywords() {
         var t = this
-        this.keywords = []
-        this.$store.dispatch('getKeywords', {attributeId, forceUpdate: false})
+        this.$store.dispatch('getKeywords', this.attributeId)
           .then((data) => {
             t.$root.clone(t.keywords, data)
           })
+      },
+      updateKeywords() {
+        var t = this
+        this.$store.dispatch('getKeywordsFromDs', {entityId: this.entityId, attributeId: this.attributeId})
+          .then(() => {
+            t.loadKeywords()
+          })
+      }
+    },
+    watch: {
+      attributeId(attributeId) {
+        this.keywords = {}
+        if (attributeId) {
+          this.loadKeywords()
+        }
       }
     }
   }
 </script>
 
-<style scoped>
+<style lang="less" scoped>
+  .updateKeywordsWrapper {
+    width: 100%;
+    .updateKeywords {
+      float: none !important;
+      margin: 1rem 0 1rem 0;
+    }
+  }
+
+  .pageNavigator {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+    .back {
+      float: left !important;
+    }
+  }
+
+  .selectKwHint {
+    margin-top: 3rem;
+    text-align: center;
+  }
+
 
 </style>

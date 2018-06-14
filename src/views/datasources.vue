@@ -6,7 +6,7 @@
           <CustomForm id="dsform">
             <FormRowInput label="Title" v-model="dsDetails.name" :on-edit="onEdit"/>
             <FormRowSelect v-model="dsDetails.datasourceTypeId" :on-edit="onEdit" :list="datasourcetypes" label="Type"
-                           :display-value="currentDsType" list-display-value="name" :change="connectionNotTested"/>
+                           :change="connectionNotTested"/>
             <FormRowInput label="Host" v-model="dsDetails.connectionObj.host" :on-edit="onEdit" big
                           :change="connectionNotTested"/>
             <FormRowInput label="Port" v-model="dsDetails.connectionObj.port" :on-edit="onEdit"
@@ -33,7 +33,7 @@
                     @click="$store.dispatch('setBackEditing', 'datasources')">Cancel
           </b-button>
         </b-tab>
-        <b-tab class="tabTitle" title="Tables" v-if="showTables">
+        <b-tab class="tabTitle" title="Tables" v-if="!onEdit">
           <table class="table" id="dsTables">
             <tbody>
             <tr v-if="Object.keys(dsDetails.tables).length == 0" class="noEntries">
@@ -42,8 +42,7 @@
             <tr v-for="(t, id) in dsDetails.tables">
               <td>
                 <span v-b-toggle="'tables' + id" @click="expandtable(id)">
-                  <img v-if="!(id in expanded)" class="controlicon" src="../assets/icons/expand-button.svg"/>
-                  <img v-if="(id in expanded)" class="controlicon" src="../assets/icons/expand-arrow.svg"/>
+                  <expand-icon :expanded="(id in expanded)"/>
                   {{t.name}}
                 </span>
                 <b-collapse v-bind:id="'tables' + id" class="mt-2">
@@ -84,10 +83,12 @@
   import DeleteButton from "../components/buttons/DeleteButton"
   import FormRowSelect from "../components/form/FormRowSelect"
   import CustomForm from "../components/form/CustomForm"
+  import ExpandIcon from "../components/ExpandIcon"
 
   export default {
     name: 'datasources',
     components: {
+      ExpandIcon,
       CustomForm,
       FormRowSelect,
       DeleteButton,

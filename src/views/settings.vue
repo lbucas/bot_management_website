@@ -10,13 +10,13 @@
 
           </form-row-blank>
           <b-button @click="saveProject" variant="primary">Save</b-button>
-          <b-button @click="updateProject" variant="secondary">Reset</b-button>
+          <b-button @click="" variant="secondary">Reset</b-button>
         </form>
       </b-col>
       <b-col></b-col>
       <b-col lg="5">
         <h5>Danger Zone</h5>
-        <b-button variant="danger" @click="deleteProject">Delete Project</b-button>
+        <delete-button :on-delete="deleteProject"/>
       </b-col>
     </b-row>
 
@@ -30,32 +30,28 @@
   import FormRowInput from "../components/form/FormRowInput"
   import FormRowBlank from "../components/form/FormRowBlank"
   import Loader from "../components/Loader"
+  import DeleteButton from "../components/buttons/DeleteButton"
   export default {
     name: 'settings',
-    components: {Loader, FormRowBlank, FormRowInput},
+    components: {DeleteButton, Loader, FormRowBlank, FormRowInput},
     data() {
       return {
-        project: {
-          name: ''
-        },
         loading: false
       }
     },
     computed: {
-      activePID() {
-        return this.$root.project.id
+      projectId() {
+        return this.$store.state.projectId
+      },
+      project() {
+        return this.$store.state.projects[this.projectId]
       },
       collaborators() {
         return {}
       }
     },
-    created() {
-      this.updateProject()
-    },
+    created() {},
     methods: {
-      updateProject() {
-        this.$root.clone(this.project, this.$root.project)
-      },
       saveProject() {
         var t = this
         var toSend = {
@@ -73,15 +69,10 @@
       },
       deleteProject() {
         var t = this
-        var id = this.$root.project.id
-        this.$root.delete(
-          'projects',
-          id,
-          function () {
-            t.$delete(t.$parent.projects, id)
-            t.$root.projectDialog()
-          }
-        )
+        t.$store.dispatch('delete', {route: 'projects', toDelete: t.projectId})
+          .then(() => {
+            t.$root.modalOpen('projectModal')
+          })
       }
     }
   }

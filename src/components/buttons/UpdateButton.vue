@@ -1,5 +1,5 @@
 <template>
-  <b-button variant="primary" :size="size" :variant="variant" @click="startUpdate">
+  <b-button variant="primary" :size="size" :variant="variant" @click="startUpdate" :disabled="spinning">
     <img class="updateImg" src="../../assets/icons/update.svg" v-if="!spinning && !done"/>
     <img class="updateImg" src="../../assets/icons/updating.svg" v-if="spinning" :size="size" :variant="variant"/>
     <img class="updateImg" src="../../assets/icons/done.svg" v-if="done && !spinning" :size="size" :variant="variant"/>
