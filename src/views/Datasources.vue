@@ -3,23 +3,23 @@
     <MasterDetail tableheading="Available Datasources" route="datasources">
       <b-tabs id="dsDetails">
         <b-tab class="tabTitle" title="General" active>
-          <CustomForm id="dsform">
-            <FormRowInput label="Title" v-model="dsDetails.name" :on-edit="onEdit"/>
+          <CustomForm id="dsform" :on-edit="onEdit">
+            <FormRowInput label="Title" v-model="dsDetails.name"/>
             <FormRowSelect v-model="dsDetails.datasourceTypeId" :on-edit="onEdit" :list="datasourcetypes" label="Type"
                            :change="connectionNotTested"/>
             <FormRowInput label="Host" v-model="dsDetails.connectionObj.host" :on-edit="onEdit" big
                           :change="connectionNotTested"/>
-            <FormRowInput label="Port" v-model="dsDetails.connectionObj.port" :on-edit="onEdit"
+            <FormRowInput label="Port" v-model="dsDetails.connectionObj.port"
                           :change="connectionNotTested"/>
-            <FormRowInput label="DB-Name" v-model="dsDetails.connectionObj.db" :on-edit="onEdit"
+            <FormRowInput label="DB-Name" v-model="dsDetails.connectionObj.db"
                           :change="connectionNotTested"/>
-            <FormRowInput label="User" v-model="dsDetails.connectionObj.user" :on-edit="onEdit"
+            <FormRowInput label="User" v-model="dsDetails.connectionObj.user"
                           :change="connectionNotTested"/>
-            <FormRowInput label="Password" v-model="dsDetails.connectionObj.password" :on-edit="onEdit"
+            <FormRowInput label="Password" v-model="dsDetails.connectionObj.password"
                           inputtype="password"
                           :change="connectionNotTested"/>
           </CustomForm>
-          <b-button variant="primary" @click="$store.commit('editing', 'datasources')" v-if="!onEdit">Edit</b-button>
+          <edit-button route="datasources"/>
           <b-button variant="primary" id="saveDS" @click="createOrEditDs" :disabled="!connectionTested"
                     v-if="onEdit" data-toggle="tooltip" data-placement="bottom"
                     title="Please test the connection first!">
@@ -28,10 +28,8 @@
           <b-button variant="info" @click="testConnection" v-if="!connectionTested">{{connectionTestLabel}}</b-button>
           <b-button variant="success" v-if="connectionTested" @click="connectionTested=false">Success!</b-button>
 
-          <DeleteButton :on-delete="deleteDS" v-if="!onEdit"/>
-          <b-button variant="secondary" v-if="(onEdit&&!dsDetails.id=='')"
-                    @click="$store.dispatch('setBackEditing', 'datasources')">Cancel
-          </b-button>
+          <delete-button :on-delete="deleteDS" v-if="!onEdit"/>
+          <cancel-button route="datasources" v-if="(onEdit&&!dsDetails.id=='')"/>
         </b-tab>
         <b-tab class="tabTitle" title="Tables" v-if="!onEdit">
           <table class="table" id="dsTables">
@@ -47,7 +45,9 @@
                 </span>
                 <b-collapse v-bind:id="'tables' + id" class="mt-2">
                   <ul>
-                    <li v-if="Object.keys(t.attributes).length == 0" class="noEntries">No attributes found for this table</li>
+                    <li v-if="Object.keys(t.attributes).length == 0" class="noEntries">No attributes found for this
+                      table
+                    </li>
                     <li v-for="a in t.attributes">
                       {{a.name}} ({{a.datatype}})
                     </li>
@@ -84,10 +84,15 @@
   import FormRowSelect from "../components/form/FormRowSelect"
   import CustomForm from "../components/form/CustomForm"
   import ExpandIcon from "../components/ExpandIcon"
+  import CancelButton from "../components/buttons/CancelButton"
+  import StoreItems from '../components/mixins/StoreItems'
+  import EditButton from "../components/buttons/EditButton"
 
   export default {
-    name: 'datasources',
+    name: 'Datasources',
     components: {
+      EditButton,
+      CancelButton,
       ExpandIcon,
       CustomForm,
       FormRowSelect,
@@ -98,6 +103,7 @@
       MasterDetail,
       Loader
     },
+    mixins: [StoreItems],
     data() {
       return {
         dsSelected: false,
@@ -116,12 +122,6 @@
     computed: {
       loading() {
         return this.$store.state.loaders.datasources
-      },
-      datasources() {
-        return this.$store.state.datasources
-      },
-      datasourcetypes() {
-        return this.$store.state.datasourcetypes
       },
       dsDetails() {
         return this.$store.state.detailItem.datasources

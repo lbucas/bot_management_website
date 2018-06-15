@@ -18,7 +18,8 @@
       this.$tools.cookies.set('access_token', token)
       this.$tools.cookies.set('access_token_validUntil', today.setDate(today.getDate() + 14))
       this.$parent.projectCheck()
-      this.$router.push('/')
+      this.$store.commit('signedIn')
+      this.$parent.route()
     }
   }
 </script>

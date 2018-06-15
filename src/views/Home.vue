@@ -1,9 +1,5 @@
 <template>
   <div>
-    <custom-form>
-      <form-row-select v-model="test" :list="list" suggestions />
-      <form-row-select v-model="test" :list="list"/>
-    </custom-form>
   </div>
 
 </template>

@@ -20,14 +20,11 @@ export default {
       document.cookie = sCookie
     },
     clear: function(sName) {
-      this.setCookie(sName, '')
+      this.set(sName, '')
     }
   },
-  deleteFromArray(arr, element) {
-    let ind = arr.indexOf(element)
-    if (element !== -1) {
-      arr.splice(ind, 1)
-    }
+  removeFromArray(list, toDelete) {
+    return list.filter(item => item != toDelete) // eslint-disable-line eqeqeq
   },
   arrayToObject(toTransform, akey) {
     if (Array.isArray(toTransform)) {
@@ -39,5 +36,12 @@ export default {
     } else {
       return toTransform
     }
+  },
+  objectToArray(obj) {
+    let a = []
+    for (let key in obj) {
+      a.push(obj[key])
+    }
+    return a
   }
 }

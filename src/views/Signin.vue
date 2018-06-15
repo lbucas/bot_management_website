@@ -13,7 +13,7 @@
   export default {
     name: "signin",
     created() {
-      this.$cookies.set('signingIn', true)
+      this.$tools.cookies.set('signingIn', true)
       let apiUrl = this.$store.state.apiUrl
       window.location.href = apiUrl + 'auth/azure'
     }

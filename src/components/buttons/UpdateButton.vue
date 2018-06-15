@@ -28,7 +28,8 @@
     },
     data() {
       return {
-        done: false
+        done: false,
+        clickedByUser: false
       }
     },
     computed: {
@@ -38,16 +39,19 @@
     },
     methods: {
       startUpdate() {
+        this.clickedByUser = true
         this.update()
       }
     },
     watch: {
       loading(l) {
         var t = this
-        t.done = true
-        setTimeout(() => {
-          t.done = false
-        }, 1000)
+        if (t.clickedByUser) {
+          t.done = true
+          setTimeout(() => {
+            t.done = false
+          }, 2000)
+        }
       }
     }
   }

@@ -18,18 +18,15 @@
 <script>
   import FormRowBlank from "./FormRowBlank"
   import SuggestionSelect from "./SuggestionSelect"
+  import FormComponent from "../mixins/FormComponent"
 
   export default {
     name: "FormRowArrayInput",
+    mixins: [FormComponent],
     components: {SuggestionSelect, FormRowBlank},
     props: {
       value: Array,
-      label: String,
       lookupList: Object,
-      onEdit: {
-        type: Boolean,
-        default: true
-      },
       displayValue: {
         type: String,
         default: 'name'
@@ -103,6 +100,10 @@
         for (let newKey in toSet) {
           this.$set(this.inputList, newKey, toSet[newKey])
         }
+      },
+      inputList(v) {
+        let il = this.$tools.objectToArray(v)
+        this.$emit("input", il)
       },
       addNext(v) {
         this.$set(this.inputList, v, v)

@@ -5,8 +5,8 @@ const mainUrl = 'https://api.emd-databots.com/'
 const devUrl = 'https://dev.emd-databots.com/'
 
 const api = {
-  token: '',
-  projectId: '',
+  token: null,
+  projectId: null,
   url() {
     return (window.location.hostname === 'webdev.emd-databots.com' ? devUrl : mainUrl)
   },
@@ -25,6 +25,21 @@ const api = {
         }
       }
       return data
+    },
+    intents(data) {
+      let intent
+      for (var k in data) {
+        intent = data[k]
+        intent.groupById = intent.groupById[0]
+        intent.targetValueId = intent.targetValueId[0]
+      }
+      return data
+    }
+  },
+  getSubroute(route, id) {
+    switch (route) {
+      case 'keywords':
+        return 'attributes/' + id + '/keywords'
     }
   },
   get(route, data) {
@@ -59,7 +74,7 @@ const api = {
   dependentFromProject: {
     datasources: true,
     entities: true,
-    questions: true
+    intents: true
   },
   fireCall({type, route, data}) {
     return new Promise(function (resolve, reject) {
@@ -115,7 +130,7 @@ const api = {
     return (route in api.dependentFromProject ? 'projects/' + api.projectId + '/' + route : route)
   },
   checkDependencies(route) {
-    if (api.token.length > 0 && (!api.dependentFromProject[route] || api.projectId.length > 0)) {
+    if (api.token && (!api.dependentFromProject[route] || api.projectId)) {
       return true
     } else {
       return false

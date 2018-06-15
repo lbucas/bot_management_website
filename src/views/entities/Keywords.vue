@@ -1,19 +1,16 @@
 <template>
   <b-row>
+    <Loader :loading="loading"/>
     <b-col lg="6" class="mdtable">
       <div class="updateKeywordsWrapper">
         <update-button class="updateKeywords" :update="updateKeywords" :loading="keywordsLoading"
                        text="Load Keywords from Datasource" size="sm"/>
       </div>
-      <div v-if="!isLoading && keywordsIndex.length > 0" class="pageNavigator">
-        <b-button variant="outline-secondary" class="back" size="sm" v-if="page> 1" @click="page--" outline>←</b-button>
-        Page {{page}} of {{pagesTotal}}
-        <b-button variant="outline-secondary" size="sm" v-if="page < pagesTotal" @click="page++">→</b-button>
-      </div>
+      <Pagination subroute="keywords" :id="attributeId" />
       <div class="table-responsive">
         <table class="table table-hover">
           <tbody>
-          <tr v-if="!isLoading && keywordsIndex.length == 0">
+          <tr v-if="keywordsCount == 0">
             <td>No keywords added yet.</td>
           </tr>
           </tbody>
@@ -34,42 +31,30 @@
 <script>
   import Loader from "../../components/Loader"
   import UpdateButton from "../../components/buttons/UpdateButton"
+  import Pagination from "../../components/Pagination"
 
   export default {
     name: "keywords",
-    components: {UpdateButton, Loader},
+    components: {Pagination, UpdateButton, Loader},
     data() {
-      return {
-        entriesPerPage: 10,
-        page: 1,
-        keywords: {}
-      }
+      return {}
     },
     computed: {
       keywordsLoading() {
-        return this.$store.state.loaders.keywords
-      },
-      keywordsIndex() {
-        let index = []
-        for (let key in this.keywords) {
-          index.push(key)
+        let l = this.$store.state.loaders.keywords[this.attributeId]
+        if (l === undefined) {
+          return true
         }
-        return index
+        return l
       },
       keywordsOnPage() {
-        let kop = {}
-        let k
-        for (let i = ((this.page - 1) * this.entriesPerPage); i < Math.min(this.page * this.entriesPerPage, Object.keys(this.keywords).length); i++) {
-          k = this.keywordsIndex[i]
-          kop[i] = this.keywords[k]
-        }
-        return kop
+        return this.$store.state.onPage.keywords[this.attributeId] || {}
+      },
+      keywordsCount() {
+        return this.$store.state.loadLimitedCount.keywords[this.attributeId] || 0
       },
       loading() {
-        this.$store.state.loaders.entities
-      },
-      isLoading() {
-        return this.loading || this.keywordsLoading
+        return this.$store.state.loaders.entities
       },
       attributeId() {
         return this.$store.state.detailItem.entities.attributeId
@@ -77,22 +62,16 @@
       entityId() {
         return this.$store.state.detailItem.entities.id
       },
-      pagesTotal() {
-        return Math.ceil(this.keywordsIndex.length / this.entriesPerPage)
+      page() {
+        return this.$store.state.page.keywords[this.attributeId]
       }
     },
     created() {
-      if (this.attributeId) {
-        this.loadKeywords()
-      }
+      this.loadKeywords()
     },
     methods: {
       loadKeywords() {
-        var t = this
-        this.$store.dispatch('getKeywords', this.attributeId)
-          .then((data) => {
-            t.$root.clone(t.keywords, data)
-          })
+        this.$store.dispatch('getRouteSpecific', {subroute: 'keywords', id: this.attributeId})
       },
       updateKeywords() {
         var t = this

@@ -8,7 +8,13 @@
 
 <script>
   export default {
-    name: "CustomForm"
+    name: "CustomForm",
+    props: {
+      onEdit: {
+        type: Boolean,
+        default: true
+      }
+    }
   }
 </script>
 

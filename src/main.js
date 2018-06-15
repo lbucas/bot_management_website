@@ -3,12 +3,11 @@
 import Vue from 'vue'
 import BootstrapVue from 'bootstrap-vue'
 import App from './App'
-import router from './router'
-import store from './store'
+import router from './js/router'
+import store from './js/store'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
-import jqajax from 'jquery-ajax'
-import tools from './tools'
+import tools from './js/tools'
 
 Vue.use(BootstrapVue)
 Vue.config.productionTip = false

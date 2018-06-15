@@ -157,7 +157,7 @@
   import Loader from "../components/Loader"
   import DeleteButton from "../components/buttons/DeleteButton"
   import ExpandIcon from "../components/ExpandIcon"
-  import Icon from "../components/icon"
+  import Icon from "../components/Icon"
   export default {
     name: "connections",
     components: {Icon, ExpandIcon, DeleteButton, Loader},

@@ -5,27 +5,23 @@
            v-model="inputValue"/>
     <textarea v-if="big" :type="inputtype" v-bind:readonly="!onEdit"
               :class="{ 'form-control-plaintext': !onEdit || !editable, 'form-control': onEdit && editable }"
-              v-model="inputValue"/>
+              v-model="inputValue" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
   </FormRowBlank>
 </template>
 
 <script>
   import FormRowBlank from "./FormRowBlank"
+  import FormComponent from "../mixins/FormComponent"
 
   export default {
     name: "FormRowInput",
+    mixins: [FormComponent],
     components: {FormRowBlank},
     props: {
-      label: String,
       value: String,
-      onEdit: {
-        type: Boolean,
-        default: true
-      },
       change: {
         type: Function,
-        default: function () {
-        }
+        default: function () {}
       },
       editable: {
         type: Boolean,

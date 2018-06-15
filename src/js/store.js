@@ -1,12 +1,25 @@
 import Vuex from 'vuex'
 import Vue from 'vue'
-import api from '../api'
+import api from './api'
 import Promise from 'bluebird'
 
 Vue.use(Vuex)
 
 const filters = {
-  datasources: '{"include":{"relation":"tables","scope":{"include":[{"relation":"joins","scope":{"include":{"relation":"attributes","scope":{"fields":["id","tableId"]}}}},{"relation":"attributes"}]}}}'
+  datasources: {
+    "include": {
+      "relation": "tables",
+      "scope": {
+        "include": [{
+          "relation": "joins",
+          "scope": {"include": {"relation": "attributes", "scope": {"fields": ["id", "tableId"]}}}
+        }, {"relation": "attributes"}]
+      }
+    }
+  },
+  keywords: {
+    "include": "attributeValues"
+  }
 }
 
 export default new Vuex.Store({
@@ -43,28 +56,28 @@ export default new Vuex.Store({
         tables: []
       },
       entities: {
-        id: '',
+        id: NaN,
         name: '',
         description: '',
-        attributeId: '',
+        attributeId: NaN,
         onEdit: false
       },
       intents: {
         name: "",
-        charttype: "",
-        calculationNeeded: true,
-        id: "",
-        targetValueIds: [],
-        groupByIds: [],
+        charttypeId: "",
+        calculationNeeded: false,
+        id: NaN,
+        targetValueId: NaN,
+        groupById: NaN,
         filterByIds: [],
-        aggregationId: ""
+        aggregationId: NaN
       }
     },
     newItem: {
       datasources: {
-        id: '',
+        id: NaN,
         name: '',
-        datasourceTypeId: '5b0435bc41b70a008681ddc7',
+        datasourceTypeId: 1,
         connectionObj: {
           host: '',
           user: '',
@@ -74,21 +87,22 @@ export default new Vuex.Store({
         }
       },
       entities: {
-        id: '',
+        id: NaN,
         name: '',
         description: '',
-        attributeId: '',
+        attributeId: NaN,
         onEdit: false
       },
       intents: {
         name: "",
-        charttype: "",
-        calculationNeeded: true,
-        id: "",
-        targetValueIds: [],
-        groupByIds: [],
+        charttypeId: NaN,
+        calculationNeeded: false,
+        id: NaN,
+        targetValueId: NaN,
+        groupById: NaN,
         filterByIds: [],
-        aggregationId: ""
+        aggregationId: NaN,
+        projectId: NaN
       }
     },
     onEdit: {
@@ -112,14 +126,26 @@ export default new Vuex.Store({
       entities: false,
       intents: false,
       joins: false,
-      keywords: false
+      keywords: {}
     },
     detailsVisible: {
       datasources: false,
       entities: false,
       intents: false,
       joins: false
-    }
+    },
+    signingIn: false,
+    onPage: {
+      keywords: {}
+    },
+    loadLimitedCount: {
+      keywords: {}
+    },
+    page: {
+      keywords: {}
+    },
+    loadlimit: 100,
+    entriesPerPage: 10
 
   },
   getters: {
@@ -147,8 +173,6 @@ export default new Vuex.Store({
             attr[attrId].datasourceId = dsid
             attr[attrId].tableId = tid
           }
-          attr[tid] = ds.tables[tid]
-          attr[tid].datasourceId = dsid
         }
       }
       return attr
@@ -198,7 +222,7 @@ export default new Vuex.Store({
           a2: join.a1,
           id: join.id
         }
-        jpt[join.t1][join.td] = join
+        jpt[join.t1][join.t2] = join
         jpt[join.t2][join.t1] = jSwapped
       }
       return jpt
@@ -217,13 +241,27 @@ export default new Vuex.Store({
       state.loaded[toUpdate] = true
     },
     loading(state, route) {
-      state.loaders[route] = true
+      if (typeof route === 'string') {
+        Vue.set(state.loaders, route, true)
+      } else {
+        let valId = route.valId
+        route = route.route
+        Vue.set(state.loaders[route], valId, true)
+      }
     },
     finishedLoading(state, route) {
-      state.loaders[route] = false
+      if (typeof route === 'string') {
+        Vue.set(state.loaders, route, false)
+      } else {
+        let valId = route.valId
+        route = route.route
+        Vue.set(state.loaders[route], valId, false)
+      }
     },
-    setKeywords(state, {keywords, attributeId}) {
-      state.keywords[attributeId] = keywords
+    set(state, {route, item}) {
+      for (let key in item) {
+        Vue.set(state[route], key, item[key])
+      }
     },
     setDetailItem(state, {route, item}) {
       let toUpdate = state.detailItem[route]
@@ -233,22 +271,27 @@ export default new Vuex.Store({
         }
       }
     },
-    set(state, {route, item}) {
-      for (let key in item) {
-        Vue.set(state[route], key, item[key])
+    setRouteSpecific(state, {subroute, id, data}) {
+      let list = state[subroute][id]
+      if (!list) {
+        Vue.set(state[subroute], id, [])
+        list = state[subroute][id]
+      }
+      for (let i = 0; i < data.length; i++) {
+        list.push(data[i])
       }
     },
     patch(state, {route, item}) {
       Vue.set(state[route], item.id, item)
     },
-    delete(state, {route, id}) {
-      Vue.delete(state[route], id)
+    delete(state, {route, item}) {
+      Vue.delete(state[route], item)
     },
     editing(state, route) {
-      this.state.onEdit[route] = true
+      Vue.set(state.onEdit, route, true)
     },
     endEditing(state, route) {
-      this.state.onEdit[route] = false
+      Vue.set(state.onEdit, route, false)
     },
     setProjectId(state, projectId) {
       state.projectId = projectId
@@ -257,7 +300,32 @@ export default new Vuex.Store({
       }
     },
     setDetailsVisible(state, route) {
-      state.detailsVisible[route] = true
+      Vue.set(state.detailsVisible, route, true)
+    },
+    setDetailsNotVisible(state, route) {
+      Vue.set(state.detailsVisible, route, false)
+    },
+    signingIn(state) {
+      Vue.set(state, 'signingIn', true)
+    },
+    signedIn(state) {
+      Vue.set(state, 'signingIn', false)
+    },
+    setLoadLimitedCount(state, {subroute, id, count}) {
+      Vue.set(state.loadLimitedCount[subroute], id, count)
+    },
+    setOnPage (state, {subroute, id, onPage}) {
+      state.onPage[subroute][id] = {}
+      for (let newKey in onPage) {
+        Vue.set(state.onPage[subroute][id], newKey, onPage[newKey])
+      }
+    },
+    createPagination(state, {subroute, id}) {
+      Vue.set(state.page[subroute], id, 1)
+      Vue.set(state.onPage[subroute], id, {})
+    },
+    page (state, {subroute, id, page}) {
+      state.page[subroute][id] = page
     }
   },
   actions: {
@@ -298,7 +366,8 @@ export default new Vuex.Store({
       var activeId
       try {
         activeId = context.state.detailItem[toLoad.target].id
-      } catch (e) {}
+      } catch (e) {
+      }
       context.commit('loading', toLoad.route)
       return new Promise(function (resolve, reject) {
         let filter = (filters[toLoad.route] ? {'filter': filters[toLoad.route]} : {})
@@ -385,6 +454,7 @@ export default new Vuex.Store({
         api.call('DELETE', deleteRoute)
           .then(() => {
             context.commit('delete', {route, item: toDelete})
+            context.commit('setDetailsNotVisible', route)
             context.commit('finishedLoading', route)
             resolve()
           }, (err) => {
@@ -402,33 +472,60 @@ export default new Vuex.Store({
           })
       })
     },
-    getKeywords(context, attributeId) {
+    getRouteSpecific(context, {subroute, id}) {
       return new Promise(function (resolve, reject) {
-        context.commit('loading', 'keywords')
-        let keywords = context.state.keywords[attributeId]
-        if (!keywords) {
-          let route = 'attributes/' + attributeId + '/keywords'
-          api.call('GET', route, {filter: '{"include": "attributeValues"}'})
-            .then((data) => {
-              data = api.arrayToObject(data)
-              context.commit('setKeywords', {keywords, attributeId})
-              context.commit('finishedLoading', 'keywords')
-              resolve(data)
-            }, (err) => {
-              reject(err)
+        context.commit('loading', {route: subroute, valId: id})
+        let list = context.state[subroute][id]
+        if (!(list) || list.length === 0) {
+          let route = api.getSubroute(subroute, id) + '/count'
+          api.call('GET', route)
+            .then((d) => {
+              context.commit('setLoadLimitedCount', {subroute, id, count: d.count})
+              context.dispatch('getNextLoadLimited', {subroute, id})
+                .then(() => {
+                  context.dispatch('createPagination', {subroute, id})
+                    .then(() => {
+                      context.commit('finishedLoading', {route: subroute, valId: id})
+                      resolve()
+                    })
+                })
+            }, () => {
             })
         } else {
-          this.commit('finishedLoading', 'keywords')
-          resolve(keywords)
+          context.commit('finishedLoading', {route: subroute, valId: id})
+          resolve()
         }
+      })
+    },
+    getNextLoadLimited(context, {subroute, id}) {
+      return new Promise(function (resolve, reject) {
+        let alreadyLoaded
+        try {
+          alreadyLoaded = context.state[subroute][id].length
+        } catch (e) {
+          alreadyLoaded = 0
+        }
+        let nextLimit = alreadyLoaded + context.state.loadlimit
+        let filter = filters[subroute] || {}
+        filter.limit = nextLimit
+        filter.skip = alreadyLoaded
+        let route = api.getSubroute(subroute, id)
+        api.call('GET', route, {filter: filter})
+          .then((data) => {
+            context.commit('setRouteSpecific', {subroute, id, data})
+            context.commit('finishedLoading', {route: subroute, valId: id})
+            resolve(data)
+          }, (err) => {
+            reject(err)
+          })
       })
     },
     getKeywordsFromDs(context, {attributeId, entityId}) {
       return new Promise(function (resolve, reject) {
-        context.commit('loading', 'keywords')
+        context.commit('loading', {route: 'keywords', valId: attributeId})
         api.call("POST", 'attributeValues/updateValues', {attributeId, entityId})
           .then(() => {
-            context.commit('finishedLoading', 'keywords')
+            context.commit('finishedLoading', {route: 'keywords', valId: attributeId})
             resolve()
           }, (err) => {
             reject(err)
@@ -453,6 +550,44 @@ export default new Vuex.Store({
       } else {
         context.commit('setDetailItem', {route, item: context.state.newItem[route]})
       }
+    },
+    createPagination(context, {subroute, id}) {
+      return new Promise(function (resolve, reject) {
+        context.commit('createPagination', {subroute, id})
+        context.dispatch('calculateOnPage', {subroute, id})
+          .then(() => {
+            resolve()
+          })
+      })
+    },
+    calculateOnPage(context, {subroute, id}) {
+      return new Promise(function (resolve, reject) {
+        let page = context.state.page[subroute][id]
+        let epp = context.state.entriesPerPage
+        let max = Math.min(page * epp, context.state.loadLimitedCount[subroute][id])
+        let op = {}
+        let list = context.state[subroute][id]
+        let next
+        for (let i = (page - 1) * epp; i < max; i++) {
+          next = list[i]
+          op[next.id] = next
+        }
+        context.commit('setOnPage', {subroute, id, onPage: op})
+      })
+    },
+    page(context, {subroute, id, forward}) {
+      let toAdd = (forward ? 1 : -1)
+      let newPage = context.state.page[subroute][id] + toAdd
+      let epp = context.state.entriesPerPage
+      let alreadyLoaded = context.state[subroute][id].length
+      if ((alreadyLoaded - newPage * epp) / context.state.loadlimit < 0.5) {
+        context.dispatch('getNextLoadLimited', {subroute, id})
+      }
+      context.commit('page', {subroute, id, page: newPage})
+      context.dispatch('calculateOnPage', {subroute, id})
+    },
+    notificationStream(context) {
+
     }
   }
 })

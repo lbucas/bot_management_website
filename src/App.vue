@@ -1,7 +1,7 @@
 <template>
   <b-container fluid id="app">
     <b-row>
-      <b-col md="3" lg="2" id="sidenavigation" v-if="!$root.signingIn">
+      <b-col md="3" lg="2" id="sidenavigation" v-if="!signingIn">
         <b-row>
           <b-col>
             <div id="logoDiv">
@@ -12,7 +12,8 @@
         <h5>Bot Management</h5>
         <h6 id="projectTitle" @click=" $root.modalOpen('projectModal')">
           <icon id="projectIcon" icon="Projects"/>
-          {{project.name}}</h6>
+          {{project.name}}
+        </h6>
         <div id="links">
           <ul v-for="nl in navLinks">
             <li class="navLink font-weight-light" @click="route(nl)" :active="current === nl">
@@ -24,11 +25,15 @@
 
       </b-col>
       <b-col id="mainCol">
-        <b-row id="nav-info" class="shadow">
+        <b-row id="nav-info" class="shadow" v-if="!signingIn">
           <b-col id="currentPage" class="text-left">
-            <h4>{{current}}</h4>
+            <h4>
+              <icon :icon="current"/>
+              {{current}}
+            </h4>
           </b-col>
           <b-col id="userInfo" class="text-right">
+            <icon icon="Notification"/>
             {{userDisplayName}}
           </b-col>
         </b-row>
@@ -88,7 +93,7 @@
 
 <script>
   import Loader from "./components/Loader"
-  import Icon from "./components/icon"
+  import Icon from "./components/Icon"
 
   export default {
     name: 'app',
@@ -124,15 +129,13 @@
       },
       projectsLoading() {
         return this.$store.state.loaders.projects
+      },
+      signingIn() {
+        return this.$store.state.signingIn
       }
     },
     methods: {
       route(togo) {
-        var cur = togo
-        if (cur === '/') {
-          cur = "Home"
-        }
-        this.current = cur
         togo = togo.toLowerCase()
         this.$router.push('/' + togo)
       },
@@ -175,22 +178,28 @@
     },
     created() {
       this.current = this.$router.history.current.name
-      if (!(this.current === 'SignIn' || this.current === 'SigningIn')) {
-        let at = this.$tools.cookies.get('access_token')
-        let expires = this.$tools.cookies.get('access_token_validUntil')
-        let today = new Date()
-        if (at && parseInt(expires) > new Date().getTime()) {
-          this.$store.dispatch('setAccessToken', at)
-          this.projectCheck()
-          this.getUser()
-        } else {
-          this.$router.push('/signin')
+      let at = this.$tools.cookies.get('access_token')
+      let expires = this.$tools.cookies.get('access_token_validUntil')
+      let today = new Date()
+      if (at && parseInt(expires) > new Date().getTime()) {
+        this.$store.dispatch('setAccessToken', at)
+        this.projectCheck()
+        this.getUser()
+      } else {
+        this.$store.commit('signingIn')
+        if (!(this.current === 'Signin' || this.current === 'Signedin')) {
+          this.route('Signin')
         }
       }
     },
     mounted() {
-      if (!this.project.id && !(this.current === 'SignIn' || this.current === 'SigningIn')) {
+      if (!this.project.id && !this.signingIn) {
         this.$root.modalOpen('projectModal')
+      }
+    },
+    watch: {
+      $route (to) {
+        this.current = to.name
       }
     }
   }

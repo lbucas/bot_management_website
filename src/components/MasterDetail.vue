@@ -2,8 +2,8 @@
   <div>
     <b-row>
       <b-col lg="4" class="mdtable">
-        <h5>
-          <span class="tabHeading">{{theading}}</span>
+        <h5 class="mdtableHeader">
+          <span class="tabHeading">{{theading}} ({{tlength}})</span>
           <b-button size="sm" variant="primary" @click="addNew">+</b-button>
           <UpdateButton :loading="loading" :update="update" size="sm" variant="secondary"></UpdateButton>
         </h5>
@@ -57,7 +57,7 @@
         }
       },
       addNew() {
-        this.setDetailsVisible = true
+        this.setDetailsVisible()
         this.$store.commit('editing', this.route)
         this.$store.dispatch('newDetailItem', this.route)
       },
@@ -89,27 +89,33 @@
         return th
       },
       detailsVisible() {
-        return this.$store.state.detailsVisible[this.route]
+        let route = this.route
+        return this.$store.state.detailsVisible[route]
       },
       activeId() {
         return this.$store.state.detailItem[this.route].id
+      },
+      tlength() {
+        return Object.keys(this.tablecontent).length
       }
     }
   }
 </script>
 
-<style lang="less">
-  @richPurple: #503291;
+<style lang="less" scoped>
+  @import "../assets/less/colors";
+  @import "../assets/less/mixins";
 
   .mdtable {
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
+    #noUserSelect;
     h5 {
       margin-top: 1em;
+      font-size: 1.2rem;
+    }
+    .mdtableHeader {
+      button {
+        width: 2.2rem;
+      }
     }
     .tablePrimary {
       font-weight: 400;
