@@ -40,6 +40,8 @@ const api = {
     switch (route) {
       case 'keywords':
         return 'attributes/' + id + '/keywords'
+      case 'trainings':
+        return 'intents/' + id + '/trainings'
     }
   },
   get(route, data) {

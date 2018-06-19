@@ -21,6 +21,9 @@ const filters = {
     "include": "attributeValues"
   }
 }
+const clone = () => {
+
+}
 
 export default new Vuex.Store({
   state: {
@@ -41,6 +44,7 @@ export default new Vuex.Store({
     charttypes: {},
     aggregations: {},
     keywords: {},
+    trainings: {},
     api: api,
     detailItem: {
       datasources: {
@@ -71,7 +75,9 @@ export default new Vuex.Store({
         groupById: NaN,
         filterByIds: [],
         aggregationId: NaN
-      }
+      },
+      keywords: {},
+      trainings: {}
     },
     newItem: {
       datasources: {
@@ -126,7 +132,8 @@ export default new Vuex.Store({
       entities: false,
       intents: false,
       joins: false,
-      keywords: {}
+      keywords: {},
+      trainings: {}
     },
     detailsVisible: {
       datasources: false,
@@ -135,17 +142,26 @@ export default new Vuex.Store({
       joins: false
     },
     signingIn: false,
+    // subroute specific
     onPage: {
-      keywords: {}
+      keywords: {},
+      trainings: {}
     },
     loadLimitedCount: {
-      keywords: {}
+      keywords: {},
+      trainings: {}
+    },
+    loadLimitedIndex: {
+      keywords: {},
+      trainings: {}
     },
     page: {
-      keywords: {}
+      keywords: {},
+      trainings: {}
     },
     loadlimit: 100,
-    entriesPerPage: 10
+    entriesPerPage: 12,
+    keywordName: {}
 
   },
   getters: {
@@ -274,12 +290,16 @@ export default new Vuex.Store({
     setRouteSpecific(state, {subroute, id, data}) {
       let list = state[subroute][id]
       if (!list) {
-        Vue.set(state[subroute], id, [])
+        Vue.set(state[subroute], id, {})
         list = state[subroute][id]
       }
-      for (let i = 0; i < data.length; i++) {
-        list.push(data[i])
+      for (let key in data) {
+        Vue.set(state[subroute][id], key, data[key])
       }
+      Vue.set(state.loadLimitedIndex[subroute], id, Object.keys(state[subroute][id]))
+    },
+    clearRouteSpecific(state, {subroute, id}) {
+      Vue.delete(state[subroute], id)
     },
     patch(state, {route, item}) {
       Vue.set(state[route], item.id, item)
@@ -326,6 +346,45 @@ export default new Vuex.Store({
     },
     page (state, {subroute, id, page}) {
       state.page[subroute][id] = page
+    },
+    keywordSelected(state, {attrId, keyword}) {
+      let id = keyword.id
+      let sel = this.state.detailItem.keywords[attrId]
+      if (!sel) {
+        Vue.set(this.state.detailItem.keywords, attrId, {})
+        Vue.set(this.state.keywordName, attrId, '')
+        sel = this.state.detailItem.keywords[attrId]
+      }
+      if (id in sel) {
+        Vue.delete(sel, id)
+      } else {
+        Vue.set(sel, id, keyword)
+      }
+    },
+    clearKeywordSelected(state, {attrId}) {
+      Vue.set(this.state.detailItem.keywords, attrId, {})
+    },
+    keywordName(state, {newValue, attrId}) {
+      Vue.set(this.state.keywordName, attrId, newValue)
+    },
+    trainingSelected(state, {intentId, training}) {
+      let t = state.detailItem.trainings[intentId]
+      if (!t) {
+        Vue.set(state.detailItem.trainings, intentId, {})
+        t = state.detailItem.trainings[intentId]
+      }
+      for (let newKey in training) {
+        if (training[newKey] !== undefined) {
+          Vue.set(t, newKey, training[newKey])
+        }
+      }
+    },
+    newTraining(state, intentId) {
+      state.detailItem.trainings[intentId] = {
+        intentId: intentId,
+        sentence: '',
+        projectId: state.projectId
+      }
     }
   },
   actions: {
@@ -472,9 +531,13 @@ export default new Vuex.Store({
           })
       })
     },
-    getRouteSpecific(context, {subroute, id}) {
+    getRouteSpecific(context, {subroute, id, forceReload}) {
       return new Promise(function (resolve, reject) {
+        debugger
         context.commit('loading', {route: subroute, valId: id})
+        if (forceReload) {
+          context.commit('clearRouteSpecific', {subroute, id})
+        }
         let list = context.state[subroute][id]
         if (!(list) || list.length === 0) {
           let route = api.getSubroute(subroute, id) + '/count'
@@ -501,7 +564,7 @@ export default new Vuex.Store({
       return new Promise(function (resolve, reject) {
         let alreadyLoaded
         try {
-          alreadyLoaded = context.state[subroute][id].length
+          alreadyLoaded = context.state.loadLimitedIndex[subroute][id].length
         } catch (e) {
           alreadyLoaded = 0
         }
@@ -512,6 +575,7 @@ export default new Vuex.Store({
         let route = api.getSubroute(subroute, id)
         api.call('GET', route, {filter: filter})
           .then((data) => {
+            data = api.arrayToObject(data)
             context.commit('setRouteSpecific', {subroute, id, data})
             context.commit('finishedLoading', {route: subroute, valId: id})
             resolve(data)
@@ -567,9 +631,10 @@ export default new Vuex.Store({
         let max = Math.min(page * epp, context.state.loadLimitedCount[subroute][id])
         let op = {}
         let list = context.state[subroute][id]
+        let index = context.state.loadLimitedIndex[subroute][id]
         let next
         for (let i = (page - 1) * epp; i < max; i++) {
-          next = list[i]
+          next = list[index[i]]
           op[next.id] = next
         }
         context.commit('setOnPage', {subroute, id, onPage: op})
@@ -588,6 +653,26 @@ export default new Vuex.Store({
     },
     notificationStream(context) {
 
+    },
+    updateKeyword(context, attributeId) {
+      // TODO
+    },
+    summarizeKeyword(context, attributeId) {
+      // TODO
+    },
+    saveTraining(context, intentId) {
+      return new Promise(function (resolve, reject) {
+        context.commit('loading', {route: 'trainings', valId: intentId})
+        let d = context.state.detailItem.trainings[intentId]
+        api.call('POST', 'trainings', d)
+          .then(() => {
+            context.dispatch('getRouteSpecific', {subroute: 'trainings', id: intentId}).intentId
+              .then(() => {
+                context.commit('loading', {route: 'finishedLoading', valId: intentId})
+                resolve()
+              })
+          })
+      })
     }
   }
 })

@@ -20,7 +20,7 @@
           <delete-button v-if="!onEdit" :on-delete="deleteIntent"/>
         </b-tab>
         <b-tab class="tabTitle" title="Training sentences">
-          <training/>
+          <training :intentId="intentDetail.id"/>
         </b-tab>
       </b-tabs>
 

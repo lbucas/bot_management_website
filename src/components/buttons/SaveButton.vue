@@ -1,5 +1,6 @@
 <template>
-  <b-button variant="primary" @click="onSave" :disabled="disabled">Save
+  <b-button variant="primary" @click="onSave" :disabled="disabled">
+    {{text}}
   </b-button>
 </template>
 
@@ -11,6 +12,10 @@
       disabled: {
         type: Boolean,
         default: false
+      },
+      text: {
+        type: String,
+        default: 'Save'
       }
     }
   }

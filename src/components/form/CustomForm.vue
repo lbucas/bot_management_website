@@ -13,6 +13,10 @@
       onEdit: {
         type: Boolean,
         default: true
+      },
+      inline: {
+        type: Boolean,
+        default: true
       }
     }
   }

@@ -20,15 +20,6 @@ new Vue({
   store,
   template: '<App/>',
   components: {App},
-  data() {
-    return {
-      project: '',
-      apiRoute: 'https://api.emd-databots.com/',
-      devApiRoute: 'https://api.emd-databots.com/',
-      token: '',
-      signingIn: false
-    }
-  },
   methods: {
     modalOpen(id) {
       this.$emit('bv::show::modal', id)

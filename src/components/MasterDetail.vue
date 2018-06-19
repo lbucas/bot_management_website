@@ -22,7 +22,7 @@
       <b-col lg="8">
         <div class="mddetail" v-if="detailsVisible">
           <Loader :loading="loading"/>
-          <slot></slot>
+          <slot class="mdSlot"></slot>
         </div>
       </b-col>
     </b-row>
@@ -149,8 +149,13 @@
     }
   }
 
+  label {
+    font-size: 1rem !important;
+  }
+
   .mddetail {
     padding-top: 1em;
+    font-size: .9rem
   }
 
 
