@@ -533,7 +533,6 @@ export default new Vuex.Store({
     },
     getRouteSpecific(context, {subroute, id, forceReload}) {
       return new Promise(function (resolve, reject) {
-        debugger
         context.commit('loading', {route: subroute, valId: id})
         if (forceReload) {
           context.commit('clearRouteSpecific', {subroute, id})

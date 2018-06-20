@@ -5,7 +5,7 @@
         <b-row>
           <b-col>
             <div id="logoDiv">
-              <img id="emdlogo" src="./assets/logo/emdgreen.png">
+              <img id="emdlogo" src="./assets/logo/merckgreen.png">
             </div>
           </b-col>
         </b-row>
@@ -154,7 +154,6 @@
         if (onModal) {
           this.$root.modalClose('projectModal')
         }
-        this.$store.dispatch('post', {route: 'projects/changeProject', toPost: {projectId: p.id}})
         this.$store.dispatch('updateProjectDependent')
       },
       loadProjects() {
