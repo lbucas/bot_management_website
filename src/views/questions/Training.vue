@@ -20,9 +20,11 @@
         <b-button variant="primary" id="addNewSentence" @click="addTraining">Add new sentence</b-button>
       </center-button>
       <div v-else>
-        <label for="trainingSentence">Training sentence:</label>
+        <label for="testing">Training sentence:</label>
+        <!--<label for="trainingSentence">Training sentence:</label>
         <textarea v-model="trainingDetail.sentence" id="trainingSentence" class="form-control"
-                  @select="sentenceSelected"/>
+                  @select="sentenceSelected"/>-->
+        <div id="testing" contenteditable="true" @mouseup="sentenceSelected">This is an editable paragraph.</div>
         <save-button id="saveTraining" :on-save="saveTraining"/>
         <!-- <Table :head="['Text', 'Linked entity']">
           <tr v-for="part in selectedParts">
@@ -72,6 +74,7 @@
     },
     methods: {
       sentenceSelected(e) {
+        debugger
         /*
         let start = e.currentTarget.selectionStart
         let end = e.currentTarget.selectionEnd
