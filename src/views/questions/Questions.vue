@@ -4,7 +4,7 @@
       <b-tabs>
         <b-tab class="tabTitle" title="General" active>
           <custom-form id="intentDetails" :on-edit="onEdit">
-            <form-row-input v-model="intentDetail.name" label="Title"/>
+            <form-row-input v-model="intentDetail.name" :editable="!intentDetail.id" label="Title"/>
             <form-row-attribute-select v-model="intentDetail.targetValueId" label="Target Value"/>
             <form-row-select v-model="intentDetail.aggregationId" label="Aggregation" list-display-value="operation"
                              :list="aggregations"/>
@@ -14,12 +14,12 @@
                                   label="Filterable by"
                                   :placeholder="'Add Entities to filter by'"/>
           </custom-form>
-          <save-button :on-save="saveIntent" v-if="onEdit"/>
+          <save-button :on-save="saveIntent" v-if="onEdit" :disabled="notSaveable"/>
           <cancel-button route="intents"/>
           <edit-button route="intents"/>
           <delete-button v-if="!onEdit" :on-delete="deleteIntent"/>
         </b-tab>
-        <b-tab class="tabTitle" title="Training sentences">
+        <b-tab v-if="!onEdit" class="tabTitle" title="Training sentences">
           <training :intentId="intentDetail.id"/>
         </b-tab>
       </b-tabs>
@@ -30,7 +30,7 @@
 </template>
 
 <script>
-  import MasterDetail from '../../components/MasterDetail.vue'
+  import MasterDetail from '../../components/MasterDetail'
   import FormRowInput from "../../components/form/FormRowInput"
   import FormRowSelect from "../../components/form/FormRowSelect"
   import SuggestionSelect from "../../components/form/SuggestionSelect"
@@ -61,9 +61,6 @@
     },
     mixins: [StoreItems],
     name: "intents",
-    data() {
-      return {}
-    },
     computed: {
       onEdit() {
         return this.$store.state.onEdit.intents
@@ -85,6 +82,10 @@
       },
       groupById() {
         return this.intentDetail.groupById
+      },
+      notSaveable() {
+        let ind = this.intentDetail
+        return (ind.name === '' || !ind.charttypeId || !ind.targetValueId || !ind.aggregationId || !ind.groupById)
       }
     },
     created() {

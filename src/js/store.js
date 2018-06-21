@@ -60,28 +60,28 @@ export default new Vuex.Store({
         tables: []
       },
       entities: {
-        id: NaN,
+        id: null,
         name: '',
         description: '',
-        attributeId: NaN,
+        attributeId: null,
         onEdit: false
       },
       intents: {
         name: "",
         charttypeId: "",
         calculationNeeded: false,
-        id: NaN,
-        targetValueId: NaN,
-        groupById: NaN,
+        id: null,
+        targetValueId: null,
+        groupById: null,
         filterByIds: [],
-        aggregationId: NaN
+        aggregationId: null
       },
       keywords: {},
       trainings: {}
     },
     newItem: {
       datasources: {
-        id: NaN,
+        id: null,
         name: '',
         datasourceTypeId: 1,
         connectionObj: {
@@ -93,22 +93,27 @@ export default new Vuex.Store({
         }
       },
       entities: {
-        id: NaN,
+        id: null,
         name: '',
         description: '',
-        attributeId: NaN,
+        attributeId: null,
         onEdit: false
       },
       intents: {
         name: "",
-        charttypeId: NaN,
+        charttypeId: null,
         calculationNeeded: false,
-        id: NaN,
-        targetValueId: NaN,
-        groupById: NaN,
+        id: null,
+        targetValueId: null,
+        groupById: null,
         filterByIds: [],
-        aggregationId: NaN,
-        projectId: NaN
+        aggregationId: null,
+        projectId: null
+      },
+      training: {
+        sentence: '',
+        id: this.intentId,
+        _annotations: []
       }
     },
     onEdit: {
@@ -300,6 +305,7 @@ export default new Vuex.Store({
     },
     clearRouteSpecific(state, {subroute, id}) {
       Vue.delete(state[subroute], id)
+      Vue.delete(state.loadLimitedIndex[subroute], id)
     },
     patch(state, {route, item}) {
       Vue.set(state[route], item.id, item)
@@ -334,7 +340,7 @@ export default new Vuex.Store({
     setLoadLimitedCount(state, {subroute, id, count}) {
       Vue.set(state.loadLimitedCount[subroute], id, count)
     },
-    setOnPage (state, {subroute, id, onPage}) {
+    setOnPage(state, {subroute, id, onPage}) {
       state.onPage[subroute][id] = {}
       for (let newKey in onPage) {
         Vue.set(state.onPage[subroute][id], newKey, onPage[newKey])
@@ -344,7 +350,7 @@ export default new Vuex.Store({
       Vue.set(state.page[subroute], id, 1)
       Vue.set(state.onPage[subroute], id, {})
     },
-    page (state, {subroute, id, page}) {
+    page(state, {subroute, id, page}) {
       state.page[subroute][id] = page
     },
     keywordSelected(state, {attrId, keyword}) {
@@ -380,11 +386,13 @@ export default new Vuex.Store({
       }
     },
     newTraining(state, intentId) {
-      state.detailItem.trainings[intentId] = {
+      let newTr = {
         intentId: intentId,
         sentence: '',
-        projectId: state.projectId
+        projectId: state.projectId,
+        _annotations: []
       }
+      Vue.set(state.detailItem.trainings, intentId, newTr)
     }
   },
   actions: {
@@ -531,6 +539,16 @@ export default new Vuex.Store({
           })
       })
     },
+    get(context, {route, filter}) {
+      return new Promise(function (resolve, reject) {
+        api.call('GET', route, filter)
+          .then((data) => {
+            resolve(data)
+          }, (err) => {
+            reject(err)
+          })
+      })
+    },
     getRouteSpecific(context, {subroute, id, forceReload}) {
       return new Promise(function (resolve, reject) {
         context.commit('loading', {route: subroute, valId: id})
@@ -659,13 +677,28 @@ export default new Vuex.Store({
     summarizeKeyword(context, attributeId) {
       // TODO
     },
-    saveTraining(context, intentId) {
+    saveTraining(context, {intentId, patch}) {
       return new Promise(function (resolve, reject) {
         context.commit('loading', {route: 'trainings', valId: intentId})
+        let mode = (patch ? 'PATCH' : 'POST')
         let d = context.state.detailItem.trainings[intentId]
-        api.call('POST', 'trainings', d)
+        api.call(mode, 'trainings', d)
           .then(() => {
-            context.dispatch('getRouteSpecific', {subroute: 'trainings', id: intentId}).intentId
+            context.dispatch('getRouteSpecific', {subroute: 'trainings', id: intentId, forceReload: true})
+              .then(() => {
+                context.commit('loading', {route: 'finishedLoading', valId: intentId})
+                resolve()
+              })
+          })
+      })
+    },
+    deleteTraining(context, intentId) {
+      return new Promise(function (resolve, reject) {
+        context.commit('loading', {route: 'trainings', valId: intentId})
+        let id = context.state.detailItem.trainings[intentId].id
+        api.call('DELETE', 'trainings/' + id)
+          .then(() => {
+            context.dispatch('getRouteSpecific', {subroute: 'trainings', id: intentId, forceReload: true})
               .then(() => {
                 context.commit('loading', {route: 'finishedLoading', valId: intentId})
                 resolve()

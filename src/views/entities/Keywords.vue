@@ -92,9 +92,6 @@
       entityId() {
         return this.$store.state.detailItem.entities.id
       },
-      page() {
-        return this.$store.state.page.keywords[this.attributeId]
-      },
       selected() {
         return this.$store.state.detailItem.keywords[this.attributeId] || {}
       },

@@ -10,7 +10,7 @@
           </custom-form>
           <edit-button route="entities"/>
           <delete-button :on-delete="deleteEntity" v-if="!onEdit"/>
-          <save-button :on-save="saveEntity" id="saveEntity" :disabled="noAttrSelected" v-if="onEdit"/>
+          <save-button :on-save="saveEntity" id="saveEntity" :disabled="notSaveable" v-if="onEdit"/>
           <cancel-button route="entities" v-if="onEdit"/>
         </b-tab>
         <b-tab class="tabTitle" title="Keywords" v-if="!onEdit">
@@ -52,16 +52,6 @@
       MasterDetail
     },
     name: "entities",
-    data() {
-      return {
-        datasourceId: '',
-        dsname: '',
-        tableId: '',
-        tablename: '',
-        attributeName: '',
-        noAttrSelected: false
-      }
-    },
     computed: {
       onEdit() {
         return this.$store.state.onEdit.entities
@@ -71,6 +61,10 @@
       },
       loadingEntities() {
         return this.$store.state.loaders.entities
+      },
+      notSaveable() {
+        let ed = this.entityDetail
+        return (ed.name === '' || ed.description === '' || !ed.attributeId)
       }
     },
     created() {
