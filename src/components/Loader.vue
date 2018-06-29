@@ -2,7 +2,7 @@
   <div v-if="loading">
     <div  class="loaderOverlay">
     </div>
-    <img class="loadingAnimation" src="../assets/loading.svg">
+    <img class="loadingAnimation" src="../assets/icons/loading.svg">
   </div>
 </template>
 

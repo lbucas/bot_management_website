@@ -21,8 +21,22 @@ const filters = {
     "include": "attributeValues"
   }
 }
-const clone = () => {
-
+const clone = (oldItem, newItem) => {
+  for (let oldKey in oldItem) {
+    if (!(oldKey in newItem)) {
+      Vue.delete(oldItem, oldKey)
+    }
+  }
+  for (let newKey in newItem) {
+    Vue.set(oldItem, newKey, newItem[newKey])
+  }
+}
+const update = (oldItem, newItem) => {
+  for (let newKey in newItem) {
+    if (newItem[newKey] !== undefined) {
+      Vue.set(oldItem, newKey, newItem[newKey])
+    }
+  }
 }
 
 export default new Vuex.Store({
@@ -75,6 +89,21 @@ export default new Vuex.Store({
         groupById: null,
         filterByIds: [],
         aggregationId: null
+      },
+      joins: {
+        table1: {
+          id: '',
+          name: ''
+        },
+        table2: {
+          id: '',
+          name: ''
+        },
+        editjoin: {
+          id1: "none",
+          id2: "none",
+          id: ''
+        }
       },
       keywords: {},
       trainings: {}
@@ -166,7 +195,8 @@ export default new Vuex.Store({
     },
     loadlimit: 100,
     entriesPerPage: 12,
-    keywordName: {}
+    keywordName: {},
+    error: {}
 
   },
   getters: {
@@ -251,14 +281,7 @@ export default new Vuex.Store({
   },
   mutations: {
     updateItem(state, {toUpdate, data}) {
-      for (let oldKey in state[toUpdate]) {
-        if (!(oldKey in data)) {
-          Vue.delete(state[toUpdate], oldKey)
-        }
-      }
-      for (let newKey in data) {
-        Vue.set(state[toUpdate], newKey, data[newKey])
-      }
+      clone(state[toUpdate], data)
       state.loaded[toUpdate] = true
     },
     loading(state, route) {
@@ -280,17 +303,11 @@ export default new Vuex.Store({
       }
     },
     set(state, {route, item}) {
-      for (let key in item) {
-        Vue.set(state[route], key, item[key])
-      }
+      update(state[route], item)
     },
     setDetailItem(state, {route, item}) {
       let toUpdate = state.detailItem[route]
-      for (let newKey in item) {
-        if (item[newKey] !== undefined) {
-          Vue.set(toUpdate, newKey, item[newKey])
-        }
-      }
+      update(toUpdate, item)
     },
     setRouteSpecific(state, {subroute, id, data}) {
       let list = state[subroute][id]
@@ -298,9 +315,7 @@ export default new Vuex.Store({
         Vue.set(state[subroute], id, {})
         list = state[subroute][id]
       }
-      for (let key in data) {
-        Vue.set(state[subroute][id], key, data[key])
-      }
+      update(state[subroute][id], data)
       Vue.set(state.loadLimitedIndex[subroute], id, Object.keys(state[subroute][id]))
     },
     clearRouteSpecific(state, {subroute, id}) {
@@ -342,9 +357,7 @@ export default new Vuex.Store({
     },
     setOnPage(state, {subroute, id, onPage}) {
       state.onPage[subroute][id] = {}
-      for (let newKey in onPage) {
-        Vue.set(state.onPage[subroute][id], newKey, onPage[newKey])
-      }
+      update(state.onPage[subroute][id], onPage)
     },
     createPagination(state, {subroute, id}) {
       Vue.set(state.page[subroute], id, 1)
@@ -393,6 +406,9 @@ export default new Vuex.Store({
         _annotations: []
       }
       Vue.set(state.detailItem.trainings, intentId, newTr)
+    },
+    error(state, error) {
+      Vue.set(state, 'error', error)
     }
   },
   actions: {
@@ -682,7 +698,8 @@ export default new Vuex.Store({
         context.commit('loading', {route: 'trainings', valId: intentId})
         let mode = (patch ? 'PATCH' : 'POST')
         let d = context.state.detailItem.trainings[intentId]
-        api.call(mode, 'trainings', d)
+        let route = (patch ? 'trainings/' + d.id : 'trainings')
+        api.call(mode, route, d)
           .then(() => {
             context.dispatch('getRouteSpecific', {subroute: 'trainings', id: intentId, forceReload: true})
               .then(() => {
@@ -705,6 +722,15 @@ export default new Vuex.Store({
               })
           })
       })
+    },
+    errorHandling(context, {err, route, data}) {
+      err.route = route
+      err.sentData = data
+      context.commit('error', err)
+      context.commit('finishedLoading', route.split('/')[0])
     }
+  },
+  created() {
+    alert('created')
   }
 })

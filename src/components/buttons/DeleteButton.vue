@@ -1,9 +1,9 @@
 <template>
   <b-button-group class="deleteButtonGroup">
-    <b-button variant="outline-danger" @click="deleteWrapper" v-if="confirmDialog">
+    <b-button variant="outline-danger" :size="size" @click="deleteWrapper" v-if="confirmDialog">
       Confirm
     </b-button>
-    <b-button variant="danger" @click="confirmDialog = !confirmDialog">
+    <b-button variant="danger" :size="size" @click="confirmDialog = !confirmDialog">
       {{deleteText}}
     </b-button>
   </b-button-group>
@@ -17,6 +17,10 @@
       addDeleteText: {
         type: String,
         default: ''
+      },
+      size: {
+        type: String,
+        default: 'md'
       }
     },
     data() {

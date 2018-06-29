@@ -3,33 +3,34 @@
     <MasterDetail tableheading="Available Datasources" route="datasources">
       <b-tabs id="dsDetails">
         <b-tab class="tabTitle" title="General" active>
-          <CustomForm id="dsform" :on-edit="onEdit">
-            <FormRowInput label="Title" v-model="dsDetails.name"/>
-            <FormRowSelect v-model="dsDetails.datasourceTypeId" :on-edit="onEdit" :list="datasourcetypes" label="Type"
+          <custom-form id="dsform" :on-edit="onEdit">
+            <form-row-input label="Title" v-model="dsDetails.name"/>
+            <form-row-file v-if="isExcel" label="Files" v-model="demoV"/>
+            <form-row-select v-if="!isExcel" v-model="dsDetails.datasourceTypeId" :on-edit="onEdit" :list="datasourcetypes" label="Type"
                            :change="connectionNotTested"/>
-            <FormRowInput label="Host" v-model="dsDetails.connectionObj.host" :on-edit="onEdit" big
+            <form-row-input v-if="!isExcel" label="Host" v-model="dsDetails.connectionObj.host" :on-edit="onEdit" big
                           :change="connectionNotTested"/>
-            <FormRowInput label="Port" v-model="dsDetails.connectionObj.port"
+            <form-row-input v-if="!isExcel" label="Port" v-model="dsDetails.connectionObj.port"
                           :change="connectionNotTested"/>
-            <FormRowInput label="DB-Name" v-model="dsDetails.connectionObj.db"
+            <form-row-input v-if="!isExcel" label="DB-Name" v-model="dsDetails.connectionObj.db"
                           :change="connectionNotTested"/>
-            <FormRowInput label="User" v-model="dsDetails.connectionObj.user"
+            <form-row-input v-if="!isExcel" label="User" v-model="dsDetails.connectionObj.user"
                           :change="connectionNotTested"/>
-            <FormRowInput label="Password" v-model="dsDetails.connectionObj.password"
+            <form-row-input v-if="!isExcel" label="Password" v-model="dsDetails.connectionObj.password"
                           inputtype="password"
                           :change="connectionNotTested"/>
-          </CustomForm>
+          </custom-form>
           <edit-button route="datasources"/>
           <b-button variant="primary" id="saveDS" @click="createOrEditDs" :disabled="!connectionTested"
                     v-if="onEdit" data-toggle="tooltip" data-placement="bottom"
                     title="Please test the connection first!">
             Save
           </b-button>
-          <b-button variant="info" @click="testConnection" v-if="!connectionTested">{{connectionTestLabel}}</b-button>
-          <b-button variant="success" v-if="connectionTested" @click="connectionTested=false">Success!</b-button>
+          <b-button variant="info" @click="testConnection" v-if="!connectionTested && !isExcel">{{connectionTestLabel}}</b-button>
+          <b-button variant="success" v-if="connectionTested" @click="connectionTested=false && !isExcel">Success!</b-button>
 
-          <delete-button :on-delete="deleteDS" v-if="!onEdit"/>
-          <cancel-button route="datasources" v-if="(onEdit&&!dsDetails.id=='')"/>
+          <delete-button :on-delete="deleteDS" v-if="!onEdit && !isExcel"/>
+          <cancel-button route="datasources"/>
         </b-tab>
         <b-tab class="tabTitle" title="Tables" v-if="!onEdit">
           <table class="table" id="dsTables">
@@ -87,10 +88,12 @@
   import CancelButton from "../components/buttons/CancelButton"
   import StoreItems from '../components/mixins/StoreItems'
   import EditButton from "../components/buttons/EditButton"
+  import FormRowFile from "../components/form/FormRowFile"
 
   export default {
     name: 'Datasources',
     components: {
+      FormRowFile,
       EditButton,
       CancelButton,
       ExpandIcon,
@@ -106,17 +109,14 @@
     mixins: [StoreItems],
     data() {
       return {
-        dsSelected: false,
-        showTables: true,
         connectionTested: false,
-        activeId: "",
-        manualDsChoose: '',
-        forceUpdateTrigger: false,
-        connectionTestLabel: 'Test Connection',
         connectionErr: '',
         expanded: {},
         updatingAttr: {},
-        tablesLoading: false
+        tablesLoading: false,
+        isExcel: true,
+        demoV: {fileName: 'a', fileId: 'b'},
+        connectionTestLabel: 'Test Connection'
       }
     },
     computed: {

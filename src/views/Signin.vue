@@ -15,7 +15,18 @@
     created() {
       this.$tools.cookies.set('signingIn', true)
       let apiUrl = this.$store.state.apiUrl
-      window.location.href = apiUrl + 'auth/azure'
+      let scope
+      switch (window.location.hostname) {
+        case 'webdev.emd-databots.com':
+          scope = 'webdev'
+          break
+        case 'localhost':
+          scope = 'local'
+          break
+        default:
+          scope = 'management'
+      }
+      window.location.href = apiUrl + 'auth/' + scope + '/azure'
     }
   }
 </script>

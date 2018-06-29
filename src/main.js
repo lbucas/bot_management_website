@@ -8,10 +8,12 @@ import store from './js/store'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 import tools from './js/tools'
+import VueClip from 'vue-clip'
 
 Vue.use(BootstrapVue)
 Vue.config.productionTip = false
 Vue.prototype.$tools = tools
+Vue.use(VueClip)
 
 /* eslint-disable no-new */
 new Vue({
@@ -20,6 +22,12 @@ new Vue({
   store,
   template: '<App/>',
   components: {App},
+  created() {
+    var t = this
+    t.$store.state.api.setErrorHandler((err, route, data) => {
+      t.$store.dispatch('errorHandling', {err, route, data})
+    })
+  },
   methods: {
     modalOpen(id) {
       this.$emit('bv::show::modal', id)

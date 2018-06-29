@@ -29,7 +29,7 @@
           <b-col id="currentPage" class="text-left">
             <h4>
               <icon :icon="current"/>
-              {{current}}
+              {{$route.name}}
             </h4>
           </b-col>
           <b-col id="userInfo" class="text-right">
@@ -53,6 +53,7 @@
       <div class="table-responsive">
         <Loader :loading="projectsLoading"/>
         <table class="table table-hover">
+          <thead>
           <thead>
           <th>Title</th>
           <th>Your Role</th>
@@ -82,6 +83,17 @@
       </div>
     </b-modal>
 
+    <b-modal id="errorModal" title="An Error occurred" cancel-disabled>
+      <div v-if="error.statusText">
+        <h6>It seems like an error occurred within the application:</h6>
+        <br>
+        <error-display :src="error.statusText" desc="Type"/>
+        <error-display :src="error.responseJSON.error.message" desc="Message"/>
+        <error-display :src="error.route" desc="Target"/>
+        <error-display :src="JSON.stringify(error.sentData)" desc="Sent Data"/>
+      </div>
+    </b-modal>
+
     <div id="flaticon">Icons made by <a href="https://www.flaticon.com/authors/smashicons"
                                         title="Smashicons">Smashicons</a> from <a href="https://www.flaticon.com/"
                                                                                   title="Flaticon">www.flaticon.com</a>
@@ -94,10 +106,11 @@
 <script>
   import Loader from "./components/Loader"
   import Icon from "./components/Icon"
+  import ErrorDisplay from "./components/ErrorDisplay"
 
   export default {
     name: 'app',
-    components: {Icon, Loader},
+    components: {ErrorDisplay, Icon, Loader},
     data() {
       return {
         current: 'Home',
@@ -132,6 +145,9 @@
       },
       signingIn() {
         return this.$store.state.signingIn
+      },
+      error() {
+        return this.$store.state.error
       }
     },
     methods: {
@@ -197,8 +213,11 @@
       }
     },
     watch: {
-      $route (to) {
+      $route(to) {
         this.current = to.name
+      },
+      error() {
+        this.$root.modalOpen('errorModal')
       }
     }
   }
@@ -292,6 +311,12 @@
     }
     tr {
       cursor: pointer;
+    }
+  }
+
+  #errorModal {
+    .btn-secondary {
+      display: none;
     }
   }
 

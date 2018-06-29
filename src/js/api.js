@@ -31,11 +31,11 @@ const api = {
       for (var k in data) {
         intent = data[k]
         intent.groupById = intent.groupById[0]
-        intent.targetValueId = intent.targetValueId[0]
       }
       return data
     }
   },
+  errorHandler() {},
   getSubroute(route, id) {
     switch (route) {
       case 'keywords':
@@ -81,15 +81,14 @@ const api = {
   fireCall({type, route, data}) {
     return new Promise(function (resolve, reject) {
       data = data || {}
-      var callBackWrapper = function (data, suc, info) {
+      var callBackWrapper = (data, suc, info) => {
         if (data === undefined) {
           data = JSON.parse(info.responseText)
         }
         resolve(data)
       }
-      var errorCallback = function (err) {
-        console.error(err)
-        // reject(err)
+      var errorCallback = (err) => {
+        api.errorHandler(err, route, data)
       }
       if (type in ['GET', 'POST']) {
         route = api.translateRoute(route)
@@ -170,6 +169,9 @@ const api = {
   setProjectId(projectId) {
     api.projectId = projectId
     this.flushQueue()
+  },
+  setErrorHandler(handler) {
+    api.errorHandler = handler
   }
 }
 

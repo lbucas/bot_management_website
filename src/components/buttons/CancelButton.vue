@@ -1,6 +1,6 @@
 <template>
   <b-button variant="secondary" v-if="onEdit"
-            @click="$store.dispatch('setBackEditing', route)">
+            @click="cancelWrapper ">
     {{text}}
   </b-button>
 </template>
@@ -9,15 +9,26 @@
   export default {
     name: "CancelButton",
     props: {
-      route: String,
-      text: {
-        type: String,
-        default: "Cancel"
-      }
+      route: String
     },
     computed: {
+      newItem() {
+        return !this.$store.state.detailItem[this.route].id
+      },
       onEdit() {
         return this.$store.state.onEdit[this.route]
+      },
+      text() {
+        return (this.newItem ? 'Clear' : 'Cancel')
+      }
+    },
+    methods: {
+      cancelWrapper() {
+        if (this.newItem) {
+          this.$store.dispatch('newDetailItem', this.route)
+        } else {
+          this.$store.dispatch('setBackEditing', this.route)
+        }
       }
     }
   }

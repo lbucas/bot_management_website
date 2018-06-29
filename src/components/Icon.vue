@@ -1,19 +1,26 @@
 <template>
-  <img :src="(require('../assets/icons/'+icon+'.svg'))"/>
+  <img :src="(require('../assets/icons/'+icon+'.svg'))" :class="size"/>
 </template>
 
 <script>
   export default {
     name: "icon",
     props: {
-      icon: String
+      icon: String,
+      size: {
+        type: String,
+        default: 'md'
+      }
     }
   }
 </script>
 
-<style scoped>
+<style lang="less" scoped>
   img {
-    width: 1em;
+    width: 1rem;
+    &.xl {
+      width: 3rem !important;
+    }
   }
 
 </style>
