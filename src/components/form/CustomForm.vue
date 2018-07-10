@@ -10,13 +10,26 @@
   export default {
     name: "CustomForm",
     props: {
-      onEdit: {
-        type: Boolean,
-        default: true
-      },
       inline: {
         type: Boolean,
         default: true
+      },
+      errorsVisible: {
+        type: Boolean,
+        default: false
+      },
+      route: String
+    },
+    computed: {
+      errors() {
+        if (this.errorsVisible) {
+          return this.$store.getters.validationErrors[this.route] || {}
+        } else {
+          return false
+        }
+      },
+      onEdit() {
+        return this.$store.state.onEdit[this.route]
       }
     }
   }

@@ -34,25 +34,6 @@ new Vue({
     },
     modalClose(id) {
       this.$emit('bv::hide::modal', id)
-    },
-    arrayToObject(toTransform, akey) {
-      if (Array.isArray(toTransform)) {
-        akey = akey || 'id'
-        return toTransform.reduce(function (acc, cur, i) {
-          acc[cur[akey]] = cur
-          return acc
-        }, {})
-      } else {
-        return toTransform
-      }
-    },
-    clone(toSet, toClone) {
-      for (var k in toClone) Vue.set(toSet, k, toClone[k])
-      for (var s in toSet) {
-        if (!(s in toClone)) {
-          Vue.delete(toSet, s)
-        }
-      }
     }
   }
 })

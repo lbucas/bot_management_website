@@ -94,23 +94,18 @@
       usableEntities() {
         let usable = []
         let det = this.$store.state.detailItem.intents
-        for (let i = 0; i < det.filterByIds.length; i++) {
-          usable.push(det.filterByIds[i])
-        }
+        for (let i = 0; i < det.filterByIds.length; i++) usable.push(det.filterByIds[i])
         return usable
       },
       activeId() {
-        let aid = null
-        if (this.trainingDetail) {
-          aid = this.trainingDetail.id
-        }
+        return this.trainingDetail ? this.trainingDetail.id : null
       },
       notSaveable() {
         let det = this.trainingDetail
-        if (det.sentence === '') { return true }
+        if (det.sentence === '') return true
         for (let ind in det._annotations) {
           let a = det._annotations[ind]
-          if (a.entityId === null) { return true }
+          if (a.entityId === null) return true
         }
         return false
       }
@@ -119,16 +114,12 @@
       this.loadTrainings()
     },
     methods: {
-      sentenceSelected(e) {
+      async sentenceSelected(e) {
         let s = this.trainingDetail.sentence
         let start = e.currentTarget.selectionStart
         let end = e.currentTarget.selectionEnd
-        if (s.substring(start, start + 1) === ' ') {
-          start++
-        }
-        if (s.substring(end - 1, end) === ' ') {
-          end--
-        }
+        if (s.substring(start, start + 1) === ' ') start++
+        if (s.substring(end - 1, end) === ' ') end--
         let value = s.substring(start, end)
         if (value !== this.last && value !== s) {
           this.last = value
@@ -150,40 +141,31 @@
             }
           }
           let eid = null
-          var t = this
-          this.$store.dispatch('get', {route: 'keywords', filter: whereFilter})
-            .then((d) => {
-              if (d[0]) {
-                eid = d[0].entityId
-              }
-              t.trainingDetail._annotations.push({
-                start: start,
-                end: end,
-                value: value,
-                entityId: eid
-              })
-            })
+          let d = await this.$store.dispatch('get', {route: 'keywords', filter: whereFilter})
+          if (d[0]) eid = d[0].entityId
+          this.trainingDetail._annotations.push({
+            start: start,
+            end: end,
+            value: value,
+            entityId: eid
+          })
         }
       },
       loadTrainings() {
-        if (this.intentId) {
-          this.$store.dispatch('getRouteSpecific', {subroute: 'trainings', id: this.intentId})
-        }
+        (this.intentId) && (this.$store.dispatch('getRouteSpecific', {subroute: 'trainings', id: this.intentId}))
       },
       addTraining() {
         this.$store.commit('newTraining', this.intentId)
       },
       saveTraining() {
-        if (this.trainingDetail.id) {
-          this.$store.dispatch('saveTraining', {intentId: this.intentId, patch: true})
-        } else {
-          this.$store.dispatch('saveTraining', {intentId: this.intentId, patch: false})
-        }
-      },
-      deleteTraining() {
-        this.$store.dispatch('deleteTraining', this.intentId)
-        this.addTraining()
+        this.trainingDetail.id
+          ? this.$store.dispatch('saveTraining', {intentId: this.intentId, patch: true})
+          : this.$store.dispatch('saveTraining', {intentId: this.intentId, patch: false})
       }
+    },
+    deleteTraining() {
+      this.$store.dispatch('deleteTraining', this.intentId)
+      this.addTraining()
     }
   }
 </script>

@@ -35,7 +35,7 @@
     },
     methods: {
       deleteWrapper() {
-        this.onDelete
+        this.onDelete()
         this.confirmDialog = false
       }
     }

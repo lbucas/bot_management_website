@@ -1,5 +1,5 @@
 <template>
-  <FormRowBlank :label="label">
+  <form-row-blank :label="label">
     <input readonly v-if="!onEdit" class="form-control-plaintext" v-model="plainTextArray"/>
     <div v-if="onEdit">
       <div class="arrayInputDisplay">
@@ -10,9 +10,9 @@
           </b-badge>
         </h5>
       </div>
-      <SuggestionSelect v-model="addNext" :list="remainingOptions" :placeholder="placeholder" clear-after-select/>
+      <suggestion-select v-model="addNext" :list="remainingOptions" :placeholder="placeholder" clear-after-select/>
     </div>
-  </FormRowBlank>
+  </form-row-blank>
 </template>
 
 <script>
@@ -38,7 +38,7 @@
     },
     data() {
       return {
-        inputList: this.arrayToObject(this.$props.value),
+        inputList: {},
         addNext: ''
       }
     },
@@ -68,6 +68,15 @@
       }
     },
     created() {
+      let toSet = this.arrayToObject(this.inputValue)
+      for (let oldKey in this.inputList) {
+        if (!(oldKey in toSet)) {
+          this.$delete(this.inputList, oldKey)
+        }
+      }
+      for (let newKey in toSet) {
+        this.$set(this.inputList, newKey, toSet[newKey])
+      }
     },
     methods: {
       lookup(i) {
@@ -90,20 +99,9 @@
       }
     },
     watch: {
-      value(v) {
-        let toSet = this.arrayToObject(this.$props.value)
-        for (let oldKey in this.inputList) {
-          if (!(oldKey in toSet)) {
-            this.$delete(this.inputList, oldKey)
-          }
-        }
-        for (let newKey in toSet) {
-          this.$set(this.inputList, newKey, toSet[newKey])
-        }
-      },
       inputList(v) {
         let il = this.$tools.objectToArray(v)
-        this.$emit("input", il)
+        this.inputValue = il
       },
       addNext(v) {
         this.$set(this.inputList, v, v)
@@ -112,6 +110,13 @@
           toEmit.push(id)
         }
         this.$emit("input", toEmit)
+      },
+      lookupList(list) {
+        for (let key in this.inputList) {
+          if (!(key in list)) {
+            this.$delete(this.inputList, key)
+          }
+        }
       }
     }
   }

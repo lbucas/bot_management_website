@@ -2,6 +2,7 @@ import Vuex from 'vuex'
 import Vue from 'vue'
 import api from './api'
 import Promise from 'bluebird'
+import tools from './tools'
 
 Vue.use(Vuex)
 
@@ -45,6 +46,7 @@ export default new Vuex.Store({
     projects: {},
     projectId: '',
     datasources: {},
+    excelFiles: {},
     entities: {},
     intents: {},
     joins: {},
@@ -60,6 +62,7 @@ export default new Vuex.Store({
     keywords: {},
     trainings: {},
     api: api,
+    tools: tools,
     detailItem: {
       datasources: {
         name: '',
@@ -105,6 +108,15 @@ export default new Vuex.Store({
           id: ''
         }
       },
+      excelFiles: {
+        name: "",
+        location: "",
+        eTag: "",
+        bucket: "",
+        key: "",
+        projectId: 0,
+        datasourceId: 0
+      },
       keywords: {},
       trainings: {}
     },
@@ -125,8 +137,7 @@ export default new Vuex.Store({
         id: null,
         name: '',
         description: '',
-        attributeId: null,
-        onEdit: false
+        attributeId: null
       },
       intents: {
         name: "",
@@ -143,12 +154,37 @@ export default new Vuex.Store({
         sentence: '',
         id: this.intentId,
         _annotations: []
+      },
+      excelFiles: {
+        name: "",
+        location: "",
+        eTag: "",
+        bucket: "",
+        key: "",
+        projectId: 0,
+        datasourceId: 0
+      }
+    },
+    errorChecks: {
+      datasources: {},
+      entities: {
+        name: 'Please provide a title for the entity',
+        description: 'Please provide a description for the entity',
+        attributeId: 'Please select a connected attribute'
+      },
+      intents: {
+        name: 'Please provide a title for the question',
+        targetValueId: 'Please provide a target value for the question',
+        aggregationId: 'Please select an aggregation method for the question',
+        charttypeId: "Please select a charttype for the visulization of the question's results",
+        groupById: 'Please select an entity by which the results will be grouped by'
       }
     },
     onEdit: {
       datasources: false,
       entities: false,
-      intents: false
+      intents: false,
+      excelFiles: false
     },
     loaded: {
       projects: false,
@@ -158,7 +194,8 @@ export default new Vuex.Store({
       joins: false,
       datasourcetypes: false,
       user: false,
-      charttypes: false
+      charttypes: false,
+      excelFiles: false
     },
     loaders: {
       projects: false,
@@ -166,6 +203,7 @@ export default new Vuex.Store({
       entities: false,
       intents: false,
       joins: false,
+      excelFiles: false,
       keywords: {},
       trainings: {}
     },
@@ -173,9 +211,9 @@ export default new Vuex.Store({
       datasources: false,
       entities: false,
       intents: false,
-      joins: false
+      joins: false,
+      excelFiles: false
     },
-    signingIn: false,
     // subroute specific
     onPage: {
       keywords: {},
@@ -201,10 +239,9 @@ export default new Vuex.Store({
   },
   getters: {
     tables: state => {
-      var tables = {}
-      let ds
+      let tables = {}
       for (let dsid in state.datasources) {
-        ds = state.datasources[dsid]
+        let ds = state.datasources[dsid]
         for (let tid in ds.tables) {
           tables[tid] = ds.tables[tid]
           tables[tid].datasourceId = dsid
@@ -213,12 +250,11 @@ export default new Vuex.Store({
       return tables
     },
     attributes: state => {
-      var attr = {}
-      let ds, table
+      let attr = {}
       for (let dsid in state.datasources) {
-        ds = state.datasources[dsid]
+        let ds = ds = state.datasources[dsid]
         for (let tid in ds.tables) {
-          table = ds.tables[tid]
+          let table = ds.tables[tid]
           for (let attrId in table.attributes) {
             attr[attrId] = table.attributes[attrId]
             attr[attrId].datasourceId = dsid
@@ -277,12 +313,52 @@ export default new Vuex.Store({
         jpt[join.t2][join.t1] = jSwapped
       }
       return jpt
+    },
+    validationErrors: state => {
+      let ve = {}
+      for (let route in state.errorChecks) {
+        if (state.onEdit[route]) {
+          let checks = state.errorChecks[route]
+          let errors = {}
+          for (let target in checks) {
+            let checkObj = checks[target]
+            if (typeof checkObj === 'string') {
+              checkObj = {
+                msg: checkObj,
+                check(v) {
+                  if (Array.isArray(v)) return (v.length > 0)
+                  return !(!(v))
+                }
+              }
+            }
+            let checkResult = checkObj.check(state.tools.deepValue(state.detailItem[route], target))
+            if (checkResult === false) {
+              errors[target] = checkObj.msg
+              continue
+            }
+            if (typeof checkResult === 'string') {
+              errors[target] = checkObj.msg[checkResult]
+            }
+          }
+          ve[route] = errors
+        } else {
+          ve[route] = {}
+        }
+      }
+      return ve
     }
   },
   mutations: {
     updateItem(state, {toUpdate, data}) {
       clone(state[toUpdate], data)
       state.loaded[toUpdate] = true
+    },
+    updateDetailItem(state, {route, key, value}) {
+      let targetObj = state.detailItem[route]
+      key = key.split('.')
+      let l = key.length
+      for (let i = 0; i < l - 1; i++) targetObj = targetObj[key[i]]
+      Vue.set(targetObj, key[l - 1], value)
     },
     loading(state, route) {
       if (typeof route === 'string') {
@@ -307,7 +383,7 @@ export default new Vuex.Store({
     },
     setDetailItem(state, {route, item}) {
       let toUpdate = state.detailItem[route]
-      update(toUpdate, item)
+      clone(toUpdate, item)
     },
     setRouteSpecific(state, {subroute, id, data}) {
       let list = state[subroute][id]
@@ -336,21 +412,16 @@ export default new Vuex.Store({
     },
     setProjectId(state, projectId) {
       state.projectId = projectId
-      for (let r in state.detailsVisible) {
-        state.detailsVisible[r] = false
-      }
+      for (let r in state.detailsVisible) state.detailsVisible[r] = false
     },
     setDetailsVisible(state, route) {
-      Vue.set(state.detailsVisible, route, true)
+      Vue.set(state.detailsVisible, route, false) // to allow the animation
+      setTimeout(() => {
+        Vue.set(state.detailsVisible, route, true)
+      }, 10)
     },
     setDetailsNotVisible(state, route) {
       Vue.set(state.detailsVisible, route, false)
-    },
-    signingIn(state) {
-      Vue.set(state, 'signingIn', true)
-    },
-    signedIn(state) {
-      Vue.set(state, 'signingIn', false)
     },
     setLoadLimitedCount(state, {subroute, id, count}) {
       Vue.set(state.loadLimitedCount[subroute], id, count)
@@ -374,11 +445,7 @@ export default new Vuex.Store({
         Vue.set(this.state.keywordName, attrId, '')
         sel = this.state.detailItem.keywords[attrId]
       }
-      if (id in sel) {
-        Vue.delete(sel, id)
-      } else {
-        Vue.set(sel, id, keyword)
-      }
+      (id in sel) ? Vue.delete(sel, id) : Vue.set(sel, id, keyword)
     },
     clearKeywordSelected(state, {attrId}) {
       Vue.set(this.state.detailItem.keywords, attrId, {})
@@ -393,9 +460,7 @@ export default new Vuex.Store({
         t = state.detailItem.trainings[intentId]
       }
       for (let newKey in training) {
-        if (training[newKey] !== undefined) {
-          Vue.set(t, newKey, training[newKey])
-        }
+        if (training[newKey] !== undefined) Vue.set(t, newKey, training[newKey])
       }
     },
     newTraining(state, intentId) {
@@ -566,7 +631,7 @@ export default new Vuex.Store({
       })
     },
     getRouteSpecific(context, {subroute, id, forceReload}) {
-      return new Promise(function (resolve, reject) {
+      return new Promise(async function (resolve, reject) {
         context.commit('loading', {route: subroute, valId: id})
         if (forceReload) {
           context.commit('clearRouteSpecific', {subroute, id})
@@ -574,19 +639,12 @@ export default new Vuex.Store({
         let list = context.state[subroute][id]
         if (!(list) || list.length === 0) {
           let route = api.getSubroute(subroute, id) + '/count'
-          api.call('GET', route)
-            .then((d) => {
-              context.commit('setLoadLimitedCount', {subroute, id, count: d.count})
-              context.dispatch('getNextLoadLimited', {subroute, id})
-                .then(() => {
-                  context.dispatch('createPagination', {subroute, id})
-                    .then(() => {
-                      context.commit('finishedLoading', {route: subroute, valId: id})
-                      resolve()
-                    })
-                })
-            }, () => {
-            })
+          let d = await api.call('GET', route)
+          context.commit('setLoadLimitedCount', {subroute, id, count: d.count})
+          await context.dispatch('getNextLoadLimited', {subroute, id})
+          await context.dispatch('createPagination', {subroute, id})
+          context.commit('finishedLoading', {route: subroute, valId: id})
+          resolve()
         } else {
           context.commit('finishedLoading', {route: subroute, valId: id})
           resolve()
@@ -694,43 +752,37 @@ export default new Vuex.Store({
       // TODO
     },
     saveTraining(context, {intentId, patch}) {
-      return new Promise(function (resolve, reject) {
+      return new Promise(async function (resolve, reject) {
         context.commit('loading', {route: 'trainings', valId: intentId})
         let mode = (patch ? 'PATCH' : 'POST')
         let d = context.state.detailItem.trainings[intentId]
         let route = (patch ? 'trainings/' + d.id : 'trainings')
-        api.call(mode, route, d)
-          .then(() => {
-            context.dispatch('getRouteSpecific', {subroute: 'trainings', id: intentId, forceReload: true})
-              .then(() => {
-                context.commit('loading', {route: 'finishedLoading', valId: intentId})
-                resolve()
-              })
-          })
+        await api.call(mode, route, d)
+        await context.dispatch('getRouteSpecific', {subroute: 'trainings', id: intentId, forceReload: true})
+        context.commit('loading', {route: 'finishedLoading', valId: intentId})
+        resolve()
       })
     },
     deleteTraining(context, intentId) {
-      return new Promise(function (resolve, reject) {
+      return new Promise(async function (resolve, reject) {
         context.commit('loading', {route: 'trainings', valId: intentId})
         let id = context.state.detailItem.trainings[intentId].id
-        api.call('DELETE', 'trainings/' + id)
-          .then(() => {
-            context.dispatch('getRouteSpecific', {subroute: 'trainings', id: intentId, forceReload: true})
-              .then(() => {
-                context.commit('loading', {route: 'finishedLoading', valId: intentId})
-                resolve()
-              })
-          })
+        await api.call('DELETE', 'trainings/' + id)
+        await context.dispatch('getRouteSpecific', {subroute: 'trainings', id: intentId, forceReload: true})
+        context.commit('loading', {route: 'finishedLoading', valId: intentId})
+        resolve()
       })
     },
     errorHandling(context, {err, route, data}) {
-      err.route = route
-      err.sentData = data
-      context.commit('error', err)
+      let error = {
+        route,
+        sentData: JSON.stringify(data),
+        message: err.response.data.error.message || err.message,
+        status: err.request.status + ' ' + err.request.statusText,
+        full: err
+      }
+      context.commit('error', error)
       context.commit('finishedLoading', route.split('/')[0])
     }
-  },
-  created() {
-    alert('created')
   }
 })

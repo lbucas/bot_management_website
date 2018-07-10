@@ -245,7 +245,7 @@
           t2 = this.joinDetails.table1
         }
         if (t2.id !== table.id) {
-          this.$root.clone(t1, table)
+          this.$tools.clone(t1, table)
           try {
             var j = this.joinsPerTable[t1.id][t2.id]
             if (oneOrTwo === 2) {
@@ -267,8 +267,8 @@
               id: '',
               name: ''
             }
-            this.$root.clone(this.joinDetails.table2, table2)
-            this.$root.clone(this.joinDetails.table1, table)
+            this.$tools.clone(this.joinDetails.table2, table2)
+            this.$tools.clone(this.joinDetails.table1, table)
           }
         }
       }

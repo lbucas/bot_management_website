@@ -1,7 +1,7 @@
 <template>
   <div id="signin">
     <div class="card" id="loginCard">
-      <img src="../assets/logo/emdgreen.png"/>
+      <img src="../../assets/logo/emdgreen.png"/>
       <h6>Signing you in automatically..</h6>
     </div>
   </div>
@@ -18,8 +18,7 @@
       this.$tools.cookies.set('access_token', token)
       this.$tools.cookies.set('access_token_validUntil', today.setDate(today.getDate() + 14))
       this.$parent.projectCheck()
-      this.$store.commit('signedIn')
-      this.$parent.route()
+      this.$router.push('/')
     }
   }
 </script>

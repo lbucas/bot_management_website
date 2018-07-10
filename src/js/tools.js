@@ -1,6 +1,8 @@
+import Vue from 'vue'
+
 export default {
   cookies: {
-    get: function(sName) {
+    get: function (sName) {
       sName = sName.toLowerCase()
       var oCrumbles = document.cookie.split(';')
       for (var i = 0; i < oCrumbles.length; i++) {
@@ -13,13 +15,13 @@ export default {
       }
       return ''
     },
-    set: function(sName, sValue) {
+    set: function (sName, sValue) {
       var oDate = new Date()
       oDate.setYear(oDate.getFullYear() + 1)
       var sCookie = encodeURIComponent(sName) + '=' + encodeURIComponent(sValue) + ';expires=' + oDate.toGMTString() + ';path=/'
       document.cookie = sCookie
     },
-    clear: function(sName) {
+    clear: function (sName) {
       this.set(sName, '')
     }
   },
@@ -43,5 +45,22 @@ export default {
       a.push(obj[key])
     }
     return a
+  },
+  clone(toSet, toClone) {
+    for (var k in toClone) Vue.set(toSet, k, toClone[k])
+    for (var s in toSet) {
+      if (!(s in toClone)) {
+        Vue.delete(toSet, s)
+      }
+    }
+  },
+  deepValue(obj, path) {
+    if (obj && path) {
+      for (let p of path.split('.')) {
+        obj = obj[p]
+      }
+      return obj
+    }
+    return undefined
   }
 }

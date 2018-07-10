@@ -1,11 +1,14 @@
 <template>
   <FormRowBlank :label="label">
     <input v-if="!big" :type="inputtype" v-bind:readonly="!onEdit"
-           :class="{ 'form-control-plaintext': !onEdit || !editable, 'form-control': onEdit && editable }"
+           :class="{ 'form-control-plaintext': !onEdit || !editable, 'form-control': onEdit && editable, 'is-invalid': !valid}"
            v-model="inputValue"/>
     <textarea v-if="big" :type="inputtype" v-bind:readonly="!onEdit"
-              :class="{ 'form-control-plaintext': !onEdit || !editable, 'form-control': onEdit && editable }"
+              :class="{ 'form-control-plaintext': !onEdit || !editable, 'form-control': onEdit && editable, 'is-invalid': !valid }"
               v-model="inputValue" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+    <div class="invalid-feedback">
+      {{error}}
+    </div>
   </FormRowBlank>
 </template>
 
@@ -18,10 +21,10 @@
     mixins: [FormComponent],
     components: {FormRowBlank},
     props: {
-      value: String,
       change: {
         type: Function,
-        default: function () {}
+        default: function () {
+        }
       },
       editable: {
         type: Boolean,
@@ -34,20 +37,6 @@
       big: {
         type: Boolean,
         default: false
-      }
-    },
-    data() {
-      return {
-        inputValue: this.$props.value
-      }
-    },
-    watch: {
-      inputValue(v) {
-        this.$emit("input", v)
-        this.change()
-      },
-      value(v) {
-        this.inputValue = v
       }
     }
   }

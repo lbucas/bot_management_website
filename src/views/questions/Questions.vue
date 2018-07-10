@@ -3,14 +3,14 @@
     <div>
       <b-tabs>
         <b-tab class="tabTitle" title="General" active>
-          <custom-form id="intentDetails" :on-edit="onEdit">
-            <form-row-input v-model="intentDetail.name" :editable="!intentDetail.id" label="Title"/>
-            <form-row-attribute-select v-model="intentDetail.targetValueId" label="Target Value"/>
-            <form-row-select v-model="intentDetail.aggregationId" label="Aggregation" list-display-value="operation"
+          <custom-form id="intentDetails" route="intents">
+            <form-row-input model-key="name" :editable="!intentDetail.id" label="Title"/>
+            <form-row-attribute-select model-key="targetValueId" label="Target Value"/>
+            <form-row-select model-key="aggregationId" label="Aggregation" list-display-value="operation"
                              :list="aggregations"/>
-            <form-row-select v-model="intentDetail.charttypeId" label="Charttype" :list="charttypes"/>
-            <form-row-select v-model="intentDetail.groupById" label="Group by" :list="entities"/>
-            <form-row-array-input v-model="intentDetail.filterByIds" :lookup-list="entitiesWithoutGroupedBy"
+            <form-row-select model-key="charttypeId" label="Charttype" :list="charttypes"/>
+            <form-row-select model-key="groupById" label="Group by" :list="entities"/>
+            <form-row-array-input model-key="filterByIds" :lookup-list="entitiesWithoutGroupedBy"
                                   label="Filterable by"
                                   :placeholder="'Add Entities to filter by'"/>
           </custom-form>
@@ -93,7 +93,7 @@
       this.getIntentOptions()
     },
     methods: {
-      getIntents(showAfterLoading) {
+      getIntents() {
         this.$store.dispatch('load', 'intents')
       },
       getIntentOptions() {
@@ -101,15 +101,13 @@
       },
       saveIntent() {
         let intDet = {}
-        this.$root.clone(intDet, this.intentDetail)
+        this.$tools.clone(intDet, this.intentDetail)
         intDet.groupById = [intDet.groupById]
         intDet.targetValueId = [intDet.targetValueId]
         intDet.projectId = this.$store.projectId
-        if (intDet.id) {
-          this.$store.dispatch('patch', {route: 'intents', toPatch: intDet})
-        } else {
-          this.$store.dispatch('create', {route: 'intents', toCreate: intDet})
-        }
+        intDet.id
+          ? this.$store.dispatch('patch', {route: 'intents', toPatch: intDet})
+          : this.$store.dispatch('create', {route: 'intents', toCreate: intDet})
       },
       deleteIntent() {
         this.$store.dispatch('delete', {route: 'intents', toDelete: this.intentDetail.id})

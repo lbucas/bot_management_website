@@ -1,20 +1,21 @@
 <template>
   <div>
     <MasterDetail tableheading="Available Entities" route="entities">
-      <b-tabs id="dsDetails">
+      <b-tabs>
         <b-tab class="tabTitle" title="General" active>
-          <custom-form id="entityForm" :on-edit="onEdit">
-            <form-row v-model="entityDetail.name" label="Title" :editable="!(entityDetail.id)"/>
-            <form-row v-model="entityDetail.description" label="Description"  big/>
-            <form-row-attribute-select v-model="entityDetail.attributeId" label="Connected Attribute"/>
+          <custom-form id="entityForm" route="entities" :errors-visible="errorsVisible">
+            <form-row-input model-key="name" label="Title" :editable="!(entityDetail.id)"/>
+            <form-row-input model-key="description" label="Description" big/>
+            <form-row-attribute-select model-key="attributeId" label="Connected Attribute"/>
           </custom-form>
           <edit-button route="entities"/>
           <delete-button :on-delete="deleteEntity" v-if="!onEdit"/>
-          <save-button :on-save="saveEntity" id="saveEntity" :disabled="notSaveable" v-if="onEdit"/>
+          <save-button :on-save="saveEntity" id="saveEntity" :disabled="notSaveable" v-if="onEdit"
+                       @mouseover="test"/>
           <cancel-button route="entities" v-if="onEdit"/>
         </b-tab>
         <b-tab class="tabTitle" title="Keywords" v-if="!onEdit">
-            <keywords/>
+          <keywords/>
         </b-tab>
       </b-tabs>
     </MasterDetail>
@@ -24,7 +25,7 @@
 
 <script>
   import MasterDetail from '../../components/MasterDetail.vue'
-  import FormRow from '../../components/form/FormRowInput'
+  import FormRowInput from '../../components/form/FormRowInput'
   import Loader from '../../components/Loader'
   import FormRowBlank from "../../components/form/FormRowBlank"
   import DeleteButton from "../../components/buttons/DeleteButton"
@@ -48,19 +49,24 @@
       DeleteButton,
       FormRowBlank,
       Loader,
-      FormRow,
+      FormRowInput,
       MasterDetail
     },
     name: "entities",
+    data() {
+      return {
+        errorsVisible: false
+      }
+    },
     computed: {
-      onEdit() {
-        return this.$store.state.onEdit.entities
+      loadingEntities() {
+        return this.$store.state.loaders.entities
       },
       entityDetail() {
         return this.$store.state.detailItem.entities
       },
-      loadingEntities() {
-        return this.$store.state.loaders.entities
+      onEdit() {
+        return this.$store.state.onEdit.entities
       },
       notSaveable() {
         let ed = this.entityDetail
@@ -79,12 +85,9 @@
         this.$store.dispatch('load', 'datasources')
       },
       saveEntity() {
-        var t = this
-        if (t.entityDetail.id) {
-          t.$store.dispatch('patch', {route: 'entities', toPatch: t.entityDetail})
-        } else {
-          t.$store.dispatch('create', {route: 'entities', toCreate: t.entityDetail})
-        }
+        this.entityDetail.id
+          ? this.$store.dispatch('patch', {route: 'entities', toPatch: this.entityDetail})
+          : this.$store.dispatch('create', {route: 'entities', toCreate: this.entityDetail})
       },
       deleteEntity() {
         this.$store.dispatch('delete', {route: 'entities', toDelete: this.entityDetail.id})

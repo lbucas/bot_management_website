@@ -66,9 +66,6 @@
       UpdateButton,
       Loader
     },
-    data() {
-      return {}
-    },
     computed: {
       keywordsLoading() {
         let l = this.$store.state.loaders.keywords[this.attributeId]
@@ -100,24 +97,18 @@
       },
       keywordsToSummarize() {
         let kts = ''
-        let name
         for (let id in this.selected) {
-          if (kts !== '') {
-            kts += ', '
-          }
+          kts !== '' && (kts += ', ')
           kts += "'" + this.selected[id].value + "'"
         }
         return kts
       },
       connectedAttributeVals() {
         let cav = ''
-        let s
         for (let id in this.selected) {
-          s = this.selected[id]
+          let s = this.selected[id]
           for (let av in s.attributeValues) {
-            if (cav !== '') {
-              cav += ', '
-            }
+            cav !== '' && (cav += ', ')
             cav += "'" + s.attributeValues[av].value + "'"
           }
         }
@@ -139,20 +130,15 @@
       loadKeywords(forceReload) {
         this.$store.dispatch('getRouteSpecific', {subroute: 'keywords', id: this.attributeId, forceReload: forceReload})
       },
-      updateKeywords() {
-        var t = this
-        this.$store.dispatch('getKeywordsFromDs', {entityId: this.entityId, attributeId: this.attributeId})
-          .then(() => {
-            t.loadKeywords(true)
-          })
+      async updateKeywords() {
+        await this.$store.dispatch('getKeywordsFromDs', {entityId: this.entityId, attributeId: this.attributeId})
+        this.loadKeywords(true)
       }
     },
     watch: {
       attributeId(attributeId) {
         this.keywords = {}
-        if (attributeId) {
-          this.loadKeywords()
-        }
+        attributeId && this.loadKeywords()
       },
       selectedLength(l, old) {
         if (l === 1) {

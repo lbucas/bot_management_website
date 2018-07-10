@@ -1,0 +1,25 @@
+.fade-enter-active, .fade-leave-active {
+  transition: opacity .2s ease;
+}
+.fade-enter, .fade-leave-to{
+  opacity: 0;
+}
+
+.unfold-enter-active, .unfold-leave-active {
+  transition: all 100ms ease-out;
+}
+.unfold-enter, .unfold-leave-to{
+  opacity: 0;
+  width: 0;
+  transform: translateX(-10px);
+}
+
+.view-enter-active, .view-leave-active {
+  transition: all 100ms;
+}
+
+.view-enter, .view-leave-to{
+  transform: translateX(10px);
+  opacity: 0;
+}
+

@@ -1,7 +1,7 @@
 <template>
   <div id="signin">
     <div class="card" id="loginCard">
-      <img src="../assets/logo/emdgreen.png"/>
+      <img src="../../assets/logo/emdgreen.png"/>
       <h6>Signing you in automatically..</h6>
     </div>
 
@@ -13,7 +13,6 @@
   export default {
     name: "signin",
     created() {
-      this.$tools.cookies.set('signingIn', true)
       let apiUrl = this.$store.state.apiUrl
       let scope
       switch (window.location.hostname) {

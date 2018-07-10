@@ -1,24 +1,18 @@
 <template>
   <div>
-    <MasterDetail tableheading="Available Datasources" route="datasources">
+    <MasterDetail tableheading="Available Databases" route="datasources">
       <b-tabs id="dsDetails">
         <b-tab class="tabTitle" title="General" active>
-          <custom-form id="dsform" :on-edit="onEdit">
-            <form-row-input label="Title" v-model="dsDetails.name"/>
-            <form-row-file v-if="isExcel" label="Files" v-model="demoV"/>
-            <form-row-select v-if="!isExcel" v-model="dsDetails.datasourceTypeId" :on-edit="onEdit" :list="datasourcetypes" label="Type"
-                           :change="connectionNotTested"/>
-            <form-row-input v-if="!isExcel" label="Host" v-model="dsDetails.connectionObj.host" :on-edit="onEdit" big
-                          :change="connectionNotTested"/>
-            <form-row-input v-if="!isExcel" label="Port" v-model="dsDetails.connectionObj.port"
-                          :change="connectionNotTested"/>
-            <form-row-input v-if="!isExcel" label="DB-Name" v-model="dsDetails.connectionObj.db"
-                          :change="connectionNotTested"/>
-            <form-row-input v-if="!isExcel" label="User" v-model="dsDetails.connectionObj.user"
-                          :change="connectionNotTested"/>
-            <form-row-input v-if="!isExcel" label="Password" v-model="dsDetails.connectionObj.password"
-                          inputtype="password"
-                          :change="connectionNotTested"/>
+          <custom-form id="dsform" route="datasources">
+            <form-row-input label="Title" model-key="name"/>
+            <form-row-select model-key="datasourceTypeId"
+                             :list="datasourcetypes" label="Database Type"/>
+            <form-row-input label="Host" model-key="connectionObj.host" big/>
+            <form-row-input label="Port" model-key="connectionObj.port"/>
+            <form-row-input label="DB-Name" model-key="connectionObj.db"/>
+            <form-row-input label="User" model-key="connectionObj.user"/>
+            <form-row-input label="Password" model-key="connectionObj.password"
+                            inputtype="password"/>
           </custom-form>
           <edit-button route="datasources"/>
           <b-button variant="primary" id="saveDS" @click="createOrEditDs" :disabled="!connectionTested"
@@ -26,10 +20,13 @@
                     title="Please test the connection first!">
             Save
           </b-button>
-          <b-button variant="info" @click="testConnection" v-if="!connectionTested && !isExcel">{{connectionTestLabel}}</b-button>
-          <b-button variant="success" v-if="connectionTested" @click="connectionTested=false && !isExcel">Success!</b-button>
+          <b-button variant="info" @click="testConnection" v-if="!connectionTested">
+            {{connectionTestLabel}}
+          </b-button>
+          <b-button variant="success" v-if="connectionTested" @click="connectionTested=false">Success!
+          </b-button>
 
-          <delete-button :on-delete="deleteDS" v-if="!onEdit && !isExcel"/>
+          <delete-button :on-delete="deleteDS" v-if="!onEdit"/>
           <cancel-button route="datasources"/>
         </b-tab>
         <b-tab class="tabTitle" title="Tables" v-if="!onEdit">
@@ -76,22 +73,22 @@
 </template>
 
 <script>
-  import MasterDetail from '../components/MasterDetail'
-  import UpdateButton from "../components/buttons/UpdateButton"
-  import Loader from "../components/Loader"
-  import FormRowInput from "../components/form/FormRowInput"
-  import FormRowBlank from "../components/form/FormRowBlank"
-  import DeleteButton from "../components/buttons/DeleteButton"
-  import FormRowSelect from "../components/form/FormRowSelect"
-  import CustomForm from "../components/form/CustomForm"
-  import ExpandIcon from "../components/ExpandIcon"
-  import CancelButton from "../components/buttons/CancelButton"
-  import StoreItems from '../components/mixins/StoreItems'
-  import EditButton from "../components/buttons/EditButton"
-  import FormRowFile from "../components/form/FormRowFile"
+  import MasterDetail from '../../components/MasterDetail'
+  import UpdateButton from "../../components/buttons/UpdateButton"
+  import Loader from "../../components/Loader"
+  import FormRowInput from "../../components/form/FormRowInput"
+  import FormRowBlank from "../../components/form/FormRowBlank"
+  import DeleteButton from "../../components/buttons/DeleteButton"
+  import FormRowSelect from "../../components/form/FormRowSelect"
+  import CustomForm from "../../components/form/CustomForm"
+  import ExpandIcon from "../../components/ExpandIcon"
+  import CancelButton from "../../components/buttons/CancelButton"
+  import StoreItems from '../../components/mixins/StoreItems'
+  import EditButton from "../../components/buttons/EditButton"
+  import FormRowFile from "./ExcelInput"
 
   export default {
-    name: 'Datasources',
+    name: 'Databases',
     components: {
       FormRowFile,
       EditButton,
@@ -114,8 +111,6 @@
         expanded: {},
         updatingAttr: {},
         tablesLoading: false,
-        isExcel: true,
-        demoV: {fileName: 'a', fileId: 'b'},
         connectionTestLabel: 'Test Connection'
       }
     },
@@ -142,77 +137,63 @@
       getDS() {
         this.$store.dispatch('load', 'datasources')
       },
-      updateDS(showAfterLoading) {
-        var t = this
+      updateDS() {
         this.$store.dispatch('update', 'datasources')
       },
       createOrEditDs() {
-        if (this.dsDetails.id) {
-          this.editDs()
-        } else {
-          this.createDs()
-        }
+        this.dsDetails.id ? this.editDs() : this.createDs()
       },
       getDsTypes() {
         this.$store.dispatch('load', 'datasourcetypes')
       },
       createDs() {
-        this.$store.dispatch('create', {route: 'datasources', toCreate: this.dsDetails})
+        let newDs = {}
+        this.$tools.clone(newDs, this.dsDetails)
+        delete newDs.tables
+        this.$store.dispatch('create', {route: 'datasources', toCreate: newDs})
       },
       editDs() {
-        var t = this
-        var patched = {}
-        this.$root.clone(patched, this.dsDetails)
+        let patched = {}
+        this.$tools.clone(patched, this.dsDetails)
         delete patched.tables
         this.$store.dispatch('patch', {route: 'datasources', toPatch: patched})
       },
       deleteDS() {
         this.$store.dispatch('delete', {route: 'datasources', toDelete: this.dsDetails.id})
       },
-      testConnection() {
-        var t = this
-        t.connectionTestLabel = 'Testing..'
-        var details = t.dsDetails.connectionObj
-        details.datasourceTypeId = t.dsDetails.datasourceTypeId
-        this.$store.dispatch('post', {route: 'dataSources/testconnection', toPost: details})
-          .then((res) => {
-            t.connectionTestLabel = "Test Connection"
-            t.connectionTested = true
-            t.editLoading = false
-          }, (err) => {
-            t.connectionErr = err.responseJSON.error.message
-            t.$root.modalOpen('connectionTestModal')
-            t.connectionTestLabel = 'Test Connection'
-            t.editLoading = false
-          })
-      },
-      updateTables() {
-        var t = this
-        let toPost = {datasourceId: t.dsDetails.id}
-        this.tablesLoading = true
-        this.$store.dispatch('post', {route: 'datasources/updateTables', toPost: toPost})
-          .then(() => {
-            t.tablesLoading = false
-            t.updateDS()
-          })
-      },
-      expandtable(id) {
-        var e = this.expanded
-        if (id in e) {
-          this.$delete(e, id, true)
-        } else {
-          this.$set(e, id, true)
+      async testConnection() {
+        this.connectionTestLabel = 'Testing..'
+        let details = this.dsDetails.connectionObj
+        details.datasourceTypeId = this.dsDetails.datasourceTypeId
+        try {
+          let res = await this.$store.dispatch('post', {route: 'dataSources/testconnection', toPost: details})
+          this.connectionTestLabel = "Test Connection"
+          this.connectionTested = true
+          this.editLoading = false
+        } catch (err) {
+          this.connectionErr = err.responseJSON.error.message
+          this.$roothis.modalOpen('connectionTestModal')
+          this.connectionTestLabel = 'Test Connection'
+          this.editLoading = false
         }
       },
-      updateAttributes(id) {
-        var t = this
+      async updateTables() {
+        let toPost = {datasourceId: this.dsDetails.id}
+        this.tablesLoading = true
+        await this.$store.dispatch('post', {route: 'datasources/updateTables', toPost: toPost})
+        this.tablesLoading = false
+        this.updateDS()
+      },
+      expandtable(id) {
+        let e = this.expanded
+        id in e ? this.$delete(e, id, true) : this.$set(e, id, true)
+      },
+      async updateAttributes(id) {
         let toPost = {tableId: id}
         this.$set(this.updatingAttr, id, true)
-        this.$store.dispatch('post', {route: 'tables/updateAttributes', toPost: toPost})
-          .then(() => {
-            this.$set(this.updatingAttr, id, false)
-            t.updateDS()
-          })
+        await this.$store.dispatch('post', {route: 'tables/updateAttributes', toPost: toPost})
+        this.$set(this.updatingAttr, id, false)
+        this.updateDS()
       },
       connectionNotTested() {
         this.connectionTested = false
@@ -232,7 +213,7 @@
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="less">
-  @import "../assets/less/mixins";
+  @import "../../assets/less/mixins";
 
   .nav-tabs {
     a {

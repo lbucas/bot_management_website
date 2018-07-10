@@ -1,14 +1,14 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Home from '@/views/Home'
-import Datasources from '@/views/Datasources'
+import Datasources from '@/views/datasources/Datasources'
 import Questions from '@/views/questions/Questions'
 import Connections from '@/views/connections/Connections'
 import Entities from '@/views/entities/Entities'
 import Settings from '@/views/Settings'
 import Users from '@/views/Users'
-import Signin from '@/views/SignIn'
-import Signedin from '@/views/SignedIn'
+import Signin from '@/views/signin/SignIn'
+import Signedin from '@/views/signin/SignedIn'
 
 Vue.use(Router)
 

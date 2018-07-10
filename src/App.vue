@@ -1,7 +1,7 @@
 <template>
   <b-container fluid id="app">
     <b-row>
-      <b-col md="3" lg="2" id="sidenavigation" v-if="!signingIn">
+      <b-col md="3" lg="2" id="sidenavigation" v-if="!onSignIn">
         <b-row>
           <b-col>
             <div id="logoDiv">
@@ -10,14 +10,15 @@
           </b-col>
         </b-row>
         <h5>Bot Management</h5>
-        <h6 id="projectTitle" @click=" $root.modalOpen('projectModal')">
-          <icon id="projectIcon" icon="Projects"/>
+        <h6 class="projectTitle" @click=" $root.modalOpen('projectModal')">
+          <icon class="projectIcon" icon="Projects"/>
           {{project.name}}
         </h6>
-        <div id="links">
+        <div class="links">
           <ul v-for="nl in navLinks">
-            <li class="navLink font-weight-light" @click="route(nl)" :active="current === nl">
-              <icon :icon="nl" class="navIcon"/>
+            <li class="navLink font-weight-light" @click="route(navLinkKeys[nl] || nl)"
+                :active="$route.name === (navLinkKeys[nl] || nl)">
+              <icon :icon="navLinkKeys[nl] || nl" class="navIcon"/>
               {{nl}}
             </li>
           </ul>
@@ -25,10 +26,10 @@
 
       </b-col>
       <b-col id="mainCol">
-        <b-row id="nav-info" class="shadow" v-if="!signingIn">
+        <b-row id="nav-info" class="shadow" v-if="!onSignIn">
           <b-col id="currentPage" class="text-left">
             <h4>
-              <icon :icon="current"/>
+              <icon id="currentPageIcon" :icon="navLinkKeys[$route.name] || $route.name"/>
               {{$route.name}}
             </h4>
           </b-col>
@@ -36,9 +37,32 @@
             <icon icon="Notification"/>
             {{userDisplayName}}
           </b-col>
+          <b-col id="mobileMenuIconCol" class="text-right">
+            <div @click="mobileMenuOpen = !mobileMenuOpen">
+              <Icon id="mobileMenuIcon" icon="menu"/>
+            </div>
+          </b-col>
         </b-row>
+        <transition name="fade">
+          <div id="mobileMenu" v-if="mobileMenuOpen">
+            <h6>{{userDisplayName}}</h6>
+            <h6 class="projectTitleMobile" @click=" $root.modalOpen('projectModal')">
+              <icon class="projectIcon" icon="Projects"/>
+              {{project.name}}
+            </h6>
+            <div class="links">
+              <ul v-for="nl in navLinks">
+                <li class="navLink font-weight-light" @click="route(navLinkKeys[nl] || nl); mobileMenuOpen = false"
+                    :active="$route.name === (navLinkKeys[nl] || nl)">
+                  <icon :icon="navLinkKeys[nl] || nl" class="navIcon"/>
+                  {{nl}}
+                </li>
+              </ul>
+            </div>
+          </div>
+        </transition>
         <div id="routerContent">
-          <transition name="component-fade" mode="out-in">
+          <transition name="view" mode="out-in">
             <keep-alive>
               <router-view/>
             </keep-alive>
@@ -84,14 +108,12 @@
     </b-modal>
 
     <b-modal id="errorModal" title="An Error occurred" cancel-disabled>
-      <div v-if="error.statusText">
-        <h6>It seems like an error occurred within the application:</h6>
-        <br>
-        <error-display :src="error.statusText" desc="Type"/>
-        <error-display :src="error.responseJSON.error.message" desc="Message"/>
-        <error-display :src="error.route" desc="Target"/>
-        <error-display :src="JSON.stringify(error.sentData)" desc="Sent Data"/>
-      </div>
+      <h6>It seems like an error occurred within the application:</h6>
+      <br>
+      <error-display :src="error.status" desc="Type"/>
+      <error-display :src="error.message" desc="Message"/>
+      <error-display :src="error.route" desc="Target"/>
+      <error-display :src="error.sentData" desc="Sent Data"/>
     </b-modal>
 
     <div id="flaticon">Icons made by <a href="https://www.flaticon.com/authors/smashicons"
@@ -113,7 +135,6 @@
     components: {ErrorDisplay, Icon, Loader},
     data() {
       return {
-        current: 'Home',
         navLinks: [
           'Datasources',
           'Connections',
@@ -122,12 +143,14 @@
           'Users',
           'Settings'
         ],
+        navLinkKeys: {},
         project: {
           name: ''
         },
         createProject: false,
         newProjectName: '',
-        datasources: {}
+        datasources: {},
+        mobileMenuOpen: false
       }
     },
     computed: {
@@ -143,11 +166,11 @@
       projectsLoading() {
         return this.$store.state.loaders.projects
       },
-      signingIn() {
-        return this.$store.state.signingIn
-      },
       error() {
         return this.$store.state.error
+      },
+      onSignIn() {
+        return this.$route.name === 'Signin' || this.$route.name === 'Signedin'
       }
     },
     methods: {
@@ -161,61 +184,52 @@
         if (p) {
           p = JSON.parse(p)
           this.chooseProject(p)
+        } else {
+          this.$root.modalOpen('projectModal')
         }
       },
       chooseProject(p, onModal) {
         this.project = p
         this.$store.dispatch('setProjectId', p.id)
         this.$tools.cookies.set('project', JSON.stringify(p))
-        if (onModal) {
-          this.$root.modalClose('projectModal')
-        }
+        if (onModal) this.$root.modalClose('projectModal')
         this.$store.dispatch('updateProjectDependent')
       },
       loadProjects() {
-        var t = this
         this.$store.dispatch('load', ['projects'])
       },
-      saveProject() {
-        var t = this
-        var project = {
-          name: t.newProjectName,
-          merckUserId: t.user.id
+      async saveProject() {
+        let project = {
+          name: this.newProjectName,
+          merckUserId: this.user.id
         }
-        this.$store.dispatch('create', {route: 'projects', toCreate: project})
-          .then(() => {
-            t.createProject = false
-          })
+        await this.$store.dispatch('create', {route: 'projects', toCreate: project})
+        this.createProject = false
       },
       getUser() {
         this.$store.dispatch('load', {route: 'merckUsers/whoAmI', target: 'user'})
       }
     },
     created() {
-      this.current = this.$router.history.current.name
-      let at = this.$tools.cookies.get('access_token')
-      let expires = this.$tools.cookies.get('access_token_validUntil')
-      let today = new Date()
-      if (at && parseInt(expires) > new Date().getTime()) {
-        this.$store.dispatch('setAccessToken', at)
-        this.projectCheck()
-        this.getUser()
-      } else {
+      if (this.$route.name === 'Signin' || this.$route.name === 'Signedin') {
         this.$store.commit('signingIn')
-        if (!(this.current === 'Signin' || this.current === 'Signedin')) {
-          this.route('Signin')
+      } else {
+        let at = this.$tools.cookies.get('access_token')
+        let expires = this.$tools.cookies.get('access_token_validUntil')
+        let today = new Date()
+        if (at && parseInt(expires) > new Date().getTime()) {
+          this.$store.dispatch('setAccessToken', at)
+          this.projectCheck()
+          this.getUser()
+        } else {
+          this.$router.push('/signin')
         }
       }
     },
     mounted() {
-      if (!this.project.id && !this.signingIn) {
-        this.$root.modalOpen('projectModal')
-      }
+      if (!this.onSignIn) this.projectCheck()
     },
     watch: {
-      $route(to) {
-        this.current = to.name
-      },
       error() {
         this.$root.modalOpen('errorModal')
       }
@@ -227,6 +241,7 @@
   // Variables for Merck CI;
   @import "assets/less/colors";
   @import "assets/less/mixins";
+  @import "assets/less/transitions";
 
   // global settings
   #app {
@@ -243,6 +258,26 @@
     }
   }
 
+  @media (max-width: 768px) {
+    #sidenavigation {
+      display: none;
+    }
+
+    #userInfo {
+      display: none;
+    }
+  }
+
+  @media (min-width: 768.1px) {
+    #mobileMenu {
+      display: none;
+    }
+
+    #mobileMenuIconCol {
+      display: none;
+    }
+  }
+
   // wrapper
   #sidenavigation {
     background: @richPurple;
@@ -254,6 +289,8 @@
 
   #nav-info {
     height: 3em;
+    padding: 0 1rem 0 1rem;
+    z-index: 10
   }
 
   #emdlogo {
@@ -269,7 +306,7 @@
     width: 1.3em !important;
   }
 
-  #links {
+  .links {
     margin-top: 7vh;
     ul {
       list-style-type: none;
@@ -298,13 +335,14 @@
     text-align: center;
   }
 
-  #projectIcon {
+  .projectIcon {
     width: .8em;
   }
 
   #projectModal {
+    #noUserSelect;
     .modal-footer {
-      display: none;
+      display: none !important;
     }
     th {
       border-top: none;
@@ -320,7 +358,7 @@
     }
   }
 
-  #projectTitle {
+  .projectTitle {
     cursor: pointer;
   }
 
@@ -329,7 +367,7 @@
     color: white;
     border-bottom: 2px solid @richPurple;
     padding-top: .5em;
-    z-index: 3;
+    z-index: 5;
   }
 
   #routerContent {
@@ -348,26 +386,15 @@
     margin-right: 1em;
   }
 
+  #mobileMenuIcon {
+    cursor: pointer;
+  }
+
   .btn {
     float: right;
     margin-left: .5em;
     margin-bottom: 1em;
     display: inline-block;
-  }
-
-  //tabs
-  .nav-item a {
-    color: black !important;
-  }
-
-  //transitions
-  .component-fade-enter-active, .component-fade-leave-active {
-    transition: opacity .2s ease;
-  }
-
-  .component-fade-enter, .component-fade-leave-to
-    /* .component-fade-leave-active below version 2.1.8 */ {
-    opacity: 0;
   }
 
   .cpButton {
@@ -376,6 +403,24 @@
 
   #saveProject {
     float: left;
+  }
+
+  #currentPageIcon {
+    width: 1.5rem !important;
+  }
+
+  #mobileMenu {
+    color: white;
+    z-index: 4;
+    background: @richPurple;
+    position: absolute;
+    width: 100vw;
+    padding: .5rem 0 1rem 0;
+  }
+
+  //tabs
+  .nav-item a {
+    color: black !important;
   }
 
 

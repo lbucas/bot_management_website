@@ -20,10 +20,12 @@
         </div>
       </b-col>
       <b-col lg="8">
-        <div class="mddetail" v-if="detailsVisible">
-          <Loader :loading="loading"/>
-          <slot class="mdSlot"></slot>
-        </div>
+        <transition name="unfold">
+          <div class="mddetail" v-if="detailsVisible">
+            <Loader :loading="loading"/>
+            <slot class="mdSlot"></slot>
+          </div>
+        </transition>
       </b-col>
     </b-row>
   </div>
@@ -32,6 +34,7 @@
 <script>
   import UpdateButton from "./buttons/UpdateButton"
   import Loader from "./Loader"
+
   export default {
     components: {UpdateButton, Loader},
     props: {
@@ -48,13 +51,9 @@
     name: "masterdetail",
     methods: {
       chooseEntry(entry) {
-        if (entry) {
-          this.setDetailsVisible()
-          this.$store.commit('endEditing', this.route)
-          this.$store.commit('setDetailItem', {route: this.route, item: entry})
-        } else {
-          this.detailsVisible = false
-        }
+        this.setDetailsVisible()
+        this.$store.commit('endEditing', this.route)
+        this.$store.commit('setDetailItem', {route: this.route, item: entry})
       },
       addNew() {
         this.setDetailsVisible()
@@ -107,6 +106,8 @@
   @import "../assets/less/mixins";
 
   .mdtable {
+    z-index: 2;
+    background: @background;
     #noUserSelect;
     h5 {
       margin-top: 1em;
@@ -134,10 +135,10 @@
         }
       }
       &:hover {
-        background: rgba(0,0,0,.075);
+        background: rgba(0, 0, 0, .075);
       }
     }
-  @media-bottom (max-width: 991px) {
+  @media-bottom (max-width: 991 px) {
     margin-bottom: 2em;
   }
     button {
@@ -154,6 +155,7 @@
   }
 
   .mddetail {
+    z-index: 1;
     padding-top: 1em;
     font-size: .9rem
   }

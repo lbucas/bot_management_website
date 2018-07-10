@@ -1,4 +1,4 @@
-import jqajax from 'jquery-ajax'
+import axios from 'axios'
 import Promise from 'bluebird'
 
 const mainUrl = 'https://api.emd-databots.com/'
@@ -35,7 +35,8 @@ const api = {
       return data
     }
   },
-  errorHandler() {},
+  errorHandler() {
+  },
   getSubroute(route, id) {
     switch (route) {
       case 'keywords':
@@ -44,7 +45,7 @@ const api = {
         return 'intents/' + id + '/trainings'
     }
   },
-  get(route, data) {
+  get (route, data) {
     return new Promise(function (resolve, reject) {
       api.call('GET', route, data)
         .then((data) => {
@@ -76,55 +77,26 @@ const api = {
   dependentFromProject: {
     datasources: true,
     entities: true,
-    intents: true
+    intents: true,
+    excelFiles: true
   },
   fireCall({type, route, data}) {
     return new Promise(function (resolve, reject) {
       data = data || {}
-      var callBackWrapper = (data, suc, info) => {
-        if (data === undefined) {
-          data = JSON.parse(info.responseText)
-        }
-        resolve(data)
+      let params = {
+        accessToken: api.token
       }
-      var errorCallback = (err) => {
-        api.errorHandler(err, route, data)
+      let url = api.url() + api.translateRoute(route)
+      if (type === 'GET' && data) {
+        for (let key in data) params[key] = data[key]
       }
-      if (type in ['GET', 'POST']) {
-        route = api.translateRoute(route)
-      }
-      var url = api.url() + api.translateRoute(route) + '?accessToken=' + api.token + '&'
-      if (type === 'GET' && data !== undefined && data !== null) {
-        for (var key in data) {
-          let p = data[key]
-          if (typeof p === 'object') {
-            p = encodeURIComponent(JSON.stringify(p))
-          }
-          url += key + '=' + p + '&'
-        }
-      }
-      var ajaxObj = {
-        type: type,
-        url: url,
-        success: callBackWrapper,
-        dataType: 'json',
-        error: errorCallback,
-        contentType: 'application/json'
-      }
-      if (type !== 'GET') {
-        ajaxObj.data = JSON.stringify(data)
-      } else {
-        if (data !== undefined && data !== null) {
-          for (var fkey in data) {
-            let p = data[fkey]
-            if (typeof p === 'object') {
-              p = encodeURIComponent(JSON.stringify(p))
-            }
-            url += key + '=' + p + '&'
-          }
-        }
-      }
-      jqajax.ajax(ajaxObj)
+      axios({url, method: type, data, params})
+        .then(res => {
+          resolve(res.data)
+        })
+        .catch(err => {
+          api.errorHandler(err, route, data)
+        })
     })
   },
   translateRoute(route) {
