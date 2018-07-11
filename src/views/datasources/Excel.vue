@@ -38,7 +38,11 @@
       Masterdetail
     },
     data() {
-      return {}
+      return {
+        file() {
+          return this.$store.state.detailItem.excelFiles
+        }
+      }
     },
     computed: {
       onEdit() {
@@ -53,10 +57,10 @@
     },
     methods: {
       deleteExcel() {
-        //
+        this.$store.dispatch('delete', {route: 'excelFiles', toDelete: this.file.id})
       },
       updateExcel() {
-        //
+        this.$store.dispatch('patch', {route: 'excelFiles', toPatch: this.file})
       }
     },
     watch: {}

@@ -5,87 +5,25 @@
       <b-tab class="tabTitle" title="Standard" active>
         <div>
           <b-row>
-            <b-col>
-              <table class="table connectionTable">
-                <tbody>
-                <tr v-for="ds in datasources" >
-                  <td>
-                <span class="" v-b-toggle="'tablesFor1' + ds.id" @click="expand(1, ds.id)">
-                  <expand-icon :expanded="(ds.id in expanded.t1)"/>
-                  {{ds.name}}
-                </span>
-                    <b-collapse v-bind:id="'tablesFor1' + ds.id" class="mt-2">
-                      <ul>
-                        <li v-for="t in ds.tables" @click="choose(1, t)"
-                            v-bind:active="joinDetails.table1.id == t.id">
-                          {{t.name}}
-                        </li>
-                      </ul>
-                    </b-collapse>
-                  </td>
-                </tr>
-                </tbody>
-              </table>
-            </b-col>
-            <b-col>
-              <table class="table connectionTable">
-                <tbody>
-                <tr v-for="(ds, id) in datasources">
-                  <td>
-                <span v-b-toggle="'tablesFor2' + id" @click="expand(2, id)">
-                  <expand-icon :expanded="(ds.id in expanded.t2)"/>
-                  {{ds.name}}
-                </span>
-                    <b-collapse v-bind:id="'tablesFor2' + id" class="mt-2">
-                      <ul>
-                       <li
-                          v-bind:class="{'isjoined': checkIfJoined(joinDetails.table1.id, t.id), 'disabledTable': joinDetails.table1.id == t.id}"
-                          v-for="t in ds.tables" v-bind:active="joinDetails.table2.id == t.id"
-                          @click="choose(2, t)">{{t.name}}
-                        </li>
-                      </ul>
-                    </b-collapse>
-                  </td>
-                </tr>
-                </tbody>
-              </table>
-            </b-col>
+            <table-selection v-model="editJoin.table1"/>
+            <table-selection v-model="editJoin.table2" :joined="isJoined" :disabled="editJoin.table1"/>
             <b-col lg="6" id="selectionCol">
               <h6>Choose attributes to connect the tables</h6>
               <b-row>
-                <b-col class="text-center">
-                  <span class="selectNote" v-if="joinDetails.table1.name == ''">Please choose a table from the left side</span>
-                  <span v-if="!(joinDetails.table1.name == '')">{{joinDetails.table1.name}}</span>
-                  <select class="form-control" v-if="!((joinDetails.table1.name == '') || (joinDetails.table2.name == ''))"
-                          v-model="joinDetails.editjoin.id1"
-                          v-bind:disabled="!editing && joinDetails.editjoin.id !== ''">
-                    <option value="none"></option>
-                    <option v-for="a in joinDetails.table1.attributes" v-bind:value="a.id">{{a.name}} ({{a.datatype}})</option>
-                  </select>
-                </b-col>
+                <attribute-select v-model="editJoin.attribute1" :table-id="editJoin.table1"
+                                  :disabled="editJoin.id && !editing"/>
                 <b-col cols="1">
                   <icon icon="arrowtwoway"/>
-                  <button v-if="!editing && joinDetails.editjoin.id !== ''" @click="editing = true" type="button"
+                  <button v-if="editJoin.id && !editing" @click="editing = true" type="button"
                           id="editConnection" class="close">×
                   </button>
                 </b-col>
-                <b-col class="text-center">
-                  <span class="selectNote" v-if="joinDetails.table2.name == ''">Please choose a table from the right side</span>
-                  <span v-if="!(joinDetails.table2.name == '')">{{joinDetails.table2.name}}</span>
-                  <select class="form-control" v-if="!((joinDetails.table1.name == '') || (joinDetails.table2.name == ''))"
-                          v-model="joinDetails.editjoin.id2"
-                          v-bind:disabled="!editing && joinDetails.editjoin.id !== ''">
-                    <option value="none"></option>
-                    <option v-for="a in joinDetails.table2.attributes" v-bind:value="a.id">{{a.name}} ({{a.datatype}})</option>
-                  </select>
-                </b-col>
+                <attribute-select v-model="editJoin.attribute2" :table-id="editJoin.table2"
+                                  :disabled="editJoin.id && !editing"/>
               </b-row>
               <div>
-                <b-button class="connectionBtns" variant="primary" @click="save"
-                          v-bind:disabled="(joinDetails.editjoin.id1 === 'none') || (joinDetails.editjoin.id2 === 'none') || (!editing && joinDetails.editjoin.id !== '')">
-                  Save
-                </b-button>
-                <DeleteButton class="connectionBtns" :on-delete="deleteConnection" v-if="joinDetails.editjoin.id !== ''" />
+                <save-button v-if="editing || !editJoin.id" class="connectionBtns" :on-save="saveJoin"/>
+                <delete-button class="connectionBtns" :on-delete="deleteConnection" v-if="editJoin.id"/>
               </div>
             </b-col>
           </b-row>
@@ -101,7 +39,7 @@
                 <span v-b-toggle="'tablesFor3' + id" @click="expand(3, id)">
                   <b-form-checkbox @change="checkboxDs(id)"/>
                   {{ds.name}}
-                  <expand-icon :expanded="(ds.id in expanded.t3)"/>
+                  <expand-icon :expanded="(ds.id in expanded)"/>
                 </span>
                   <b-collapse v-bind:id="'tablesFor3' + id" class="mt-2">
                     <ul>
@@ -132,16 +70,31 @@
   import ExpandIcon from "../../components/ExpandIcon"
   import Icon from "../../components/Icon"
   import ConnectionsVisual from "./ConnectionsVisual"
+  import TableSelection from "../../components/TableSelection"
+  import AttributeSelect from "../../components/AttributeSelect"
+  import SaveButton from "../../components/buttons/SaveButton"
+
   export default {
     name: "connections",
-    components: {ConnectionsVisual, Icon, ExpandIcon, DeleteButton, Loader},
+    components: {
+      SaveButton,
+      AttributeSelect,
+      TableSelection,
+      ConnectionsVisual,
+      Icon,
+      ExpandIcon,
+      DeleteButton,
+      Loader
+    },
     data() {
       return {
-        dragDropView: true,
-        expanded: {
-          t1: {},
-          t2: {},
-          t3: {}
+        expanded: {},
+        editJoin: {
+          id: null,
+          table1: null,
+          table2: null,
+          attribute1: null,
+          attribute2: null
         },
         editing: false,
         checkboxDsState: {},
@@ -166,6 +119,21 @@
       },
       joinDetails() {
         return this.$store.state.detailItem.joins
+      },
+      isJoined() {
+        return this.editJoin.table1 ? this.joinsPerTable[this.editJoin.table1] : {}
+      },
+      activeJoin() {
+        let t1 = this.editJoin.table1
+        let t2 = this.editJoin.table2
+        if (t1 && t2) {
+          try {
+            let j = this.joinsPerTable[t1][t2]
+            return j
+          } catch (e) {
+          }
+        }
+        return null
       }
     },
     created() {
@@ -173,102 +141,56 @@
     },
     methods: {
       getJoinsAndDs() {
-        var t = this
         this.$store.dispatch('load', ['datasources', 'joins'])
-          .then(() => {
-            if (t.joinDetails.table1.id !== '') {
-              t.choose(1, t.joinDetails.table1)
-            }
-          })
       },
       expand(table, id) {
-        var e = this.expanded['t' + table]
-        if (id in e) {
-          this.$delete(e, id, true)
+        if (id in this.expanded) {
+          this.$delete(this.expanded, id)
         } else {
-          this.$set(e, id, true)
+          this.$set(this.expanded, id, true)
         }
       },
-      save() {
-        var t = this
-        var toSave = {
+      saveJoin() {
+        let toSave = {
           attributeIds: [
-            t.joinDetails.editjoin.id1, t.joinDetails.editjoin.id2
+            this.editJoin.attribute1, this.editJoin.attribute2
           ]
         }
-        if (t.joinDetails.editjoin.id === '') {
-          this.$store.dispatch('create', {route: 'joins', toCreate: toSave})
-            .then(() => {
-              t.choose(2, t.joinDetails.table2)
-            })
+        if (this.editJoin.id) {
+          toSave.id = this.editJoin.id
+          this.$store.dispatch('patch', {route: 'joins', toCreate: toSave})
         } else {
-          toSave.id = t.joinDetails.editjoin.id
-          this.$store.dispatch('patch', {route: 'joins', toPatch: toSave})
-            .then(() => {
-              t.choose(2, t.joinDetails.table2)
-            })
+          this.$store.dispatch('create', {route: 'joins', toCreate: toSave})
         }
       },
       deleteConnection() {
-        var t = this
-        this.$store.dispatch('delete', {route: 'joins', toDelete: this.joinDetails.editjoin.id})
-          .then(() => {
-            t.choose(2, t.joinDetails.table2)
-          })
-      },
-      checkIfJoined(t1, t2) {
-        try {
-          if (this.joinsPerTable[t1][t2]) {
-            return true
-          }
-        } catch (e) {
-        }
-        return false
+        this.$store.dispatch('delete', {route: 'joins', toDelete: this.editJoin.id})
       },
       checkboxDs(id) {
-        var ds = this.datasources[id].tables
-        var state = !(this.checkboxDsState[id])
+        let ds = this.datasources[id].tables
+        let state = !(this.checkboxDsState[id])
         if (state === undefined) {
           state = true
         }
-        for (var k in ds) {
+        for (let k in ds) {
           ds[k].visible = state
         }
         this.checkboxDsState[id] = state
-      },
-      choose(oneOrTwo, table) {
-        this.editing = false
-        var t1 = this.joinDetails.table1
-        var t2 = this.joinDetails.table2
-        if (oneOrTwo === 2) {
-          t1 = this.joinDetails.table2
-          t2 = this.joinDetails.table1
-        }
-        if (t2.id !== table.id) {
-          this.$tools.clone(t1, table)
-          try {
-            var j = this.joinsPerTable[t1.id][t2.id]
-            if (oneOrTwo === 2) {
-              this.joinDetails.editjoin.id1 = j.a2
-              this.joinDetails.editjoin.id2 = j.a1
-            } else {
-              this.joinDetails.editjoin.id1 = j.a1
-              this.joinDetails.editjoin.id2 = j.a2
-            }
-            this.joinDetails.editjoin.id = j.id
-          } catch (e) {
-            this.joinDetails.editjoin.id1 = "none"
-            this.joinDetails.editjoin.id2 = "none"
-            this.joinDetails.editjoin.id = ''
-          }
-        } else {
-          if (oneOrTwo !== 2) {
-            let table2 = {
-              id: '',
-              name: ''
-            }
-            this.$tools.clone(this.joinDetails.table2, table2)
-            this.$tools.clone(this.joinDetails.table1, table)
+      }
+    },
+    watch: {
+      activeJoin: {
+        deep: true,
+        handler(aj) {
+          if (aj) {
+            this.editJoin.attribute1 = aj.a1
+            this.editJoin.attribute2 = aj.a2
+            this.editJoin.id = aj.id
+            this.editing = false
+          } else {
+            this.editJoin.attribute1 = null
+            this.editJoin.attribute2 = null
+            this.editJoin.id = null
           }
         }
       }
@@ -280,45 +202,8 @@
   @import "../../assets/less/colors";
   @import "../../assets/less/mixins";
 
-  .connectionTable {
-    #noUserSelect !important;
-    span {
-      cursor: pointer !important;
-    }
-    ul {
-      list-style: none;
-      padding-left: 0;
-    }
-    li {
-      &:hover {
-        background: lightgrey;
-      }
-      &[active] {
-        font-weight: bold;
-      }
-      &.disabledTable {
-        cursor: auto;
-        color: gray;
-        &:hover {
-          background: none;
-        }
-      }
-      cursor: pointer;
-      padding-left: 1em;
-    }
-  }
-
-  .isjoined {
-    color: @vibGreenDarker;
-  }
-
   #selectionCol {
     text-align: center;
-    .selectNote {
-      font-weight: 100;
-      color: gray;
-      font-style: italic;
-    }
     select {
       margin-top: .5em;
     }

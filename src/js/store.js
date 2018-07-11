@@ -774,10 +774,16 @@ export default new Vuex.Store({
       })
     },
     errorHandling(context, {err, route, data}) {
+      let errMsg
+      try {
+        errMsg = err.response.data.error.message
+      } catch (e) {
+        errMsg = err.message
+      }
       let error = {
         route,
         sentData: JSON.stringify(data),
-        message: err.response.data.error.message || err.message,
+        message: errMsg,
         status: err.request.status + ' ' + err.request.statusText,
         full: err
       }

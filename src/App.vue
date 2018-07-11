@@ -211,6 +211,7 @@
       }
     },
     created() {
+      this.getUser()
       if (this.$route.name === 'Signin' || this.$route.name === 'Signedin') {
         this.$store.commit('signingIn')
       } else {
@@ -220,7 +221,6 @@
         if (at && parseInt(expires) > new Date().getTime()) {
           this.$store.dispatch('setAccessToken', at)
           this.projectCheck()
-          this.getUser()
         } else {
           this.$router.push('/signin')
         }

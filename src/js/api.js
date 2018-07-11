@@ -103,11 +103,7 @@ const api = {
     return (route in api.dependentFromProject ? 'projects/' + api.projectId + '/' + route : route)
   },
   checkDependencies(route) {
-    if (api.token && (!api.dependentFromProject[route] || api.projectId)) {
-      return true
-    } else {
-      return false
-    }
+    return (api.token && (!api.dependentFromProject[route] || api.projectId))
   },
   queue: [],
   flushQueue() {
