@@ -40,17 +40,22 @@ const update = (oldItem, newItem) => {
   }
 }
 
+let excelDatasourceId = null
+let flatfileDatasourceId = null
+
 export default new Vuex.Store({
   state: {
     apiUrl: api.url(),
     projects: {},
     projectId: '',
+    databases: {},
     datasources: {},
     excelFiles: {},
     entities: {},
+    flatfiles: {},
     intents: {},
     joins: {},
-    datasourcetypes: {},
+    databasetypes: {},
     user: {
       user: {
         firstname: '',
@@ -64,7 +69,7 @@ export default new Vuex.Store({
     api: api,
     tools: tools,
     detailItem: {
-      datasources: {
+      databases: {
         name: '',
         datasourceTypeId: "",
         connectionObj: {
@@ -88,7 +93,7 @@ export default new Vuex.Store({
         charttypeId: "",
         calculationNeeded: false,
         id: null,
-        targetValueId: null,
+        targetValueIds: [],
         groupById: null,
         filterByIds: [],
         aggregationId: null
@@ -117,11 +122,20 @@ export default new Vuex.Store({
         projectId: 0,
         datasourceId: 0
       },
+      flatfiles: {
+        name: "",
+        location: "",
+        eTag: "",
+        bucket: "",
+        key: "",
+        projectId: 0,
+        datasourceId: 0
+      },
       keywords: {},
       trainings: {}
     },
     newItem: {
-      datasources: {
+      databases: {
         id: null,
         name: '',
         datasourceTypeId: 1,
@@ -144,7 +158,7 @@ export default new Vuex.Store({
         charttypeId: null,
         calculationNeeded: false,
         id: null,
-        targetValueId: null,
+        targetValueIds: [61, 65],
         groupById: null,
         filterByIds: [],
         aggregationId: null,
@@ -163,10 +177,19 @@ export default new Vuex.Store({
         key: "",
         projectId: 0,
         datasourceId: 0
+      },
+      flatfiles: {
+        name: "",
+        location: "",
+        eTag: "",
+        bucket: "",
+        key: "",
+        projectId: 0,
+        datasourceId: 0
       }
     },
     errorChecks: {
-      datasources: {},
+      databases: {},
       entities: {
         name: 'Please provide a title for the entity',
         description: 'Please provide a description for the entity',
@@ -181,39 +204,43 @@ export default new Vuex.Store({
       }
     },
     onEdit: {
-      datasources: false,
+      databases: false,
       entities: false,
       intents: false,
-      excelFiles: false
+      excelFiles: false,
+      flatfiles: false
     },
     loaded: {
       projects: false,
-      datasources: false,
+      databases: false,
       entities: false,
       intents: false,
       joins: false,
-      datasourcetypes: false,
+      databasestypes: false,
       user: false,
       charttypes: false,
-      excelFiles: false
+      excelFiles: false,
+      flatfiles: false
     },
     loaders: {
       projects: false,
-      datasources: false,
+      databases: false,
       entities: false,
       intents: false,
       joins: false,
       excelFiles: false,
+      flatfiles: false,
       keywords: {},
       trainings: {}
     },
     detailsVisible: {
-      datasources: false,
+      databases: false,
       entities: false,
       intents: false,
       joins: false,
       excelFiles: false
     },
+    notifications: {},
     // subroute specific
     onPage: {
       keywords: {},
@@ -235,7 +262,6 @@ export default new Vuex.Store({
     entriesPerPage: 12,
     keywordName: {},
     error: {}
-
   },
   getters: {
     tables: state => {
@@ -346,6 +372,28 @@ export default new Vuex.Store({
         }
       }
       return ve
+    },
+    tablesPerExcel: state => {
+      if (!excelDatasourceId) {
+        let found = false
+        for (let id in state.datasources) {
+          let ds = state.datasources[id]
+          if (ds.name === "Excel Files") {
+            excelDatasourceId = id
+            found = true
+            break
+          }
+        }
+        if (!found) return {}
+      }
+      let excelDs = state.datasources[excelDatasourceId]
+      let tpe = {}
+      for (let tid in excelDs.tables) {
+        let t = excelDs.tables[tid]
+        tpe[t.excelFileId] = tpe[t.excelFileId] || {}
+        tpe[t.excelFileId][tid] = t
+      }
+      return tpe
     }
   },
   mutations: {
@@ -415,10 +463,10 @@ export default new Vuex.Store({
       for (let r in state.detailsVisible) state.detailsVisible[r] = false
     },
     setDetailsVisible(state, route) {
-      Vue.set(state.detailsVisible, route, false) // to allow the animation
-      setTimeout(() => {
+      Vue.set(state.detailsVisible, route, false)
+      setTimeout(() => { // to allow the animation
         Vue.set(state.detailsVisible, route, true)
-      }, 10)
+      }, 20)
     },
     setDetailsNotVisible(state, route) {
       Vue.set(state.detailsVisible, route, false)
@@ -504,33 +552,26 @@ export default new Vuex.Store({
           })
       })
     },
-    update(context, toLoad) {
+    async update(context, toLoad) {
       if (typeof toLoad === 'string') {
         toLoad = {
           route: toLoad,
           target: toLoad
         }
       }
-      var activeId
+      let activeId
       try {
         activeId = context.state.detailItem[toLoad.target].id
       } catch (e) {
       }
       context.commit('loading', toLoad.route)
-      return new Promise(function (resolve, reject) {
-        let filter = (filters[toLoad.route] ? {'filter': filters[toLoad.route]} : {})
-        api.get(toLoad.route, filter)
-          .then((data) => {
-            context.commit('updateItem', {toUpdate: toLoad.target, data: data})
-            if (activeId) {
-              context.commit('setDetailItem', {route: toLoad.target, item: context.state[toLoad.target][activeId]})
-            }
-            context.commit('finishedLoading', toLoad.route)
-            resolve()
-          }, (err) => {
-            reject(err)
-          })
-      })
+      let filter = (filters[toLoad.route] ? {'filter': filters[toLoad.route]} : {})
+      let data = await api.get(toLoad.route, filter)
+      context.commit('updateItem', {toUpdate: toLoad.target, data: data})
+      if (activeId) {
+        context.commit('setDetailItem', {route: toLoad.target, item: context.state[toLoad.target][activeId]})
+      }
+      context.commit('finishedLoading', toLoad.route)
     },
     updateProjectDependent(context) {
       for (let item in context.state.loaded) {
@@ -541,94 +582,65 @@ export default new Vuex.Store({
         }
       }
     },
-    create(context, {route, toCreate}) {
-      delete toCreate.id
+    async create(context, {route, toCreate}) {
+      if (toCreate.id) delete toCreate.id
+      if (toCreate.projectId) toCreate.projectId = context.state.api.projectId
       context.commit('loading', route)
-      return new Promise(function (resolve, reject) {
-        api.call('POST', route, toCreate)
-          .then((data) => {
-            if (data.id) {
-              let temp = {}
-              temp[data.id] = data
-              data = temp
-            }
-            let callback = api.getCallbacks[route]
-            if (callback) {
-              data = callback(data)
-            }
-            context.commit('set', {route, item: data})
-            context.commit('endEditing', route)
-            if (route in context.state.detailItem) {
-              context.commit('setDetailItem', {route, item: data[Object.keys(data)[0]]})
-            }
-            context.commit('finishedLoading', route)
-            resolve(data)
-          }, (err) => {
-            reject(err)
-          })
-      })
+      let data = await api.call('POST', route, toCreate)
+      if (data.id) {
+        let temp = {}
+        temp[data.id] = data
+        data = temp
+      }
+      let callback = api.getCallbacks[route]
+      if (callback) {
+        data = callback(data)
+      }
+      context.commit('set', {route, item: data})
+      context.commit('endEditing', route)
+      if (route in context.state.detailItem) {
+        context.commit('setDetailItem', {route, item: data[Object.keys(data)[0]]})
+      }
+      context.commit('finishedLoading', route)
+      return data
     },
-    patch(context, {route, toPatch}) {
+    async patch(context, {route, toPatch}) {
       context.commit('loading', route)
-      return new Promise(function (resolve, reject) {
-        let patchRoute = route + '/' + toPatch.id
-        api.call('PATCH', patchRoute, toPatch)
-          .then((data) => {
-            if (data.id) {
-              let temp = {}
-              temp[data.id] = data
-              data = temp
-            }
-            let callback = api.getCallbacks[route]
-            if (callback) {
-              data = callback(data)
-            }
-            context.commit('set', {route, item: data})
-            context.commit('endEditing', route)
-            if (route in context.state.detailItem) {
-              context.commit('setDetailItem', {route, item: data[Object.keys(data)[0]]})
-            }
-            context.commit('finishedLoading', route)
-            resolve(data)
-          }, (err) => {
-            reject(err)
-          })
-      })
+      let patchRoute = route + '/' + toPatch.id
+      let data = await api.call('PATCH', patchRoute, toPatch)
+      if (data.id) {
+        let temp = {}
+        temp[data.id] = data
+        data = temp
+      }
+      let callback = api.getCallbacks[route]
+      if (callback) {
+        data = callback(data)
+      }
+      context.commit('set', {route, item: data})
+      context.commit('endEditing', route)
+      if (route in context.state.detailItem) {
+        context.commit('setDetailItem', {route, item: data[Object.keys(data)[0]]})
+      }
+      context.commit('finishedLoading', route)
+      return data
     },
-    delete(context, {route, toDelete}) {
+    async delete(context, {route, toDelete}) {
       context.commit('loading', route)
-      return new Promise(function (resolve, reject) {
-        let deleteRoute = route + '/' + toDelete
-        api.call('DELETE', deleteRoute)
-          .then(() => {
-            context.commit('delete', {route, item: toDelete})
-            context.commit('setDetailsNotVisible', route)
-            context.commit('finishedLoading', route)
-            resolve()
-          }, (err) => {
-            reject(err)
-          })
-      })
+      let deleteRoute = route + '/' + toDelete
+      await api.call('DELETE', deleteRoute)
+      context.commit('delete', {route, item: toDelete})
+      context.commit('setDetailsNotVisible', route)
+      context.commit('finishedLoading', route)
     },
-    post(context, {route, toPost}) {
-      return new Promise(function (resolve, reject) {
-        api.call('POST', route, toPost)
-          .then((data) => {
-            resolve(data)
-          }, (err) => {
-            reject(err)
-          })
-      })
+    async post(context, {route, toPost}) {
+      return await api.call('POST', route, toPost)
     },
-    get(context, {route, filter}) {
-      return new Promise(function (resolve, reject) {
-        api.call('GET', route, filter)
-          .then((data) => {
-            resolve(data)
-          }, (err) => {
-            reject(err)
-          })
-      })
+    async patchReq(context, {route, toPatch}) {
+      return await api.call('PATCH', route, toPatch)
+    },
+    async get(context, {route, filter}) {
+      return await api.call('GET', route, filter)
     },
     getRouteSpecific(context, {subroute, id, forceReload}) {
       return new Promise(async function (resolve, reject) {
@@ -695,7 +707,8 @@ export default new Vuex.Store({
       api.setProjectId(projectId)
     },
     newDetailItem(context, route) {
-      context.commit('setDetailItem', {route, item: context.state.newItem[route]})
+      let item = JSON.parse(JSON.stringify(context.state.newItem[route]))
+      context.commit('setDetailItem', {route, item})
     },
     setBackEditing(context, route) {
       let id = context.state.detailItem[route].id
@@ -742,8 +755,37 @@ export default new Vuex.Store({
       context.commit('page', {subroute, id, page: newPage})
       context.dispatch('calculateOnPage', {subroute, id})
     },
-    notificationStream(context) {
-
+    async notificationStream(context, notify) {
+      let sse = await api.serverSentEvent('notifications/startNotifications')
+      sse.addEventListener('data', async event => {
+        let d = JSON.parse(event.data)
+        d.data.timestamp = new Date().getDate()
+        let item = tools.arrayToObject([d.data])
+        let msg = await context.dispatch('notificationHandler', {message: d.data.message, ctx: d.data.context})
+        notify({
+          group: 'all',
+          title: msg.title,
+          text: msg.detail
+        })
+        context.commit('set', {route: 'notifications', item})
+      })
+    },
+    notificationHandler(context, {message, ctx}) {
+      switch (message) {
+        case 'GLUE_JOB_DONE': {
+          context.dispatch('update', 'datasources')
+          return {
+            title: 'Schema was built',
+            detail: 'Filename: ' + ctx.value
+          }
+        }
+        case 'GLUE_JOB_STARTED': {
+          return {
+            title: 'Schema is beeing built in the background',
+            detail: 'Filename: ' + ctx.value
+          }
+        }
+      }
     },
     updateKeyword(context, attributeId) {
       // TODO

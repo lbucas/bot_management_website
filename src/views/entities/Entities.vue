@@ -10,8 +10,8 @@
           </custom-form>
           <edit-button route="entities"/>
           <delete-button :on-delete="deleteEntity" v-if="!onEdit"/>
-          <save-button :on-save="saveEntity" id="saveEntity" :disabled="notSaveable" v-if="onEdit"
-                       @mouseover="test"/>
+          <save-button :on-save="saveEntity" id="saveEntity" :disabled="notSaveable" v-if="onEdit"/>
+                       <!--@mouseover="test"-->
           <cancel-button route="entities" v-if="onEdit"/>
         </b-tab>
         <b-tab class="tabTitle" title="Keywords" v-if="!onEdit">

@@ -70,11 +70,12 @@ const api = {
             reject(err)
           })
       } else {
-        api.queue.push({args, resolve, reject})
+        api.queue.push({args, resolve, reject, type: 'call'})
       }
     })
   },
   dependentFromProject: {
+    databases: true,
     datasources: true,
     entities: true,
     intents: true,
@@ -84,7 +85,7 @@ const api = {
     return new Promise(function (resolve, reject) {
       data = data || {}
       let params = {
-        accessToken: api.token
+        access_token: api.token
       }
       let url = api.url() + api.translateRoute(route)
       if (type === 'GET' && data) {
@@ -109,14 +110,23 @@ const api = {
   flushQueue() {
     let call, args
     for (let i = 0; i < this.queue.length; i++) {
-      call = this.queue[i]
+      call = this.queue.pop()
       args = call.args
-      this.call(args.type, args.route, args.data)
-        .then((data) => {
-          call.resolve(data)
-        }, (err) => {
-          call.reject(err)
-        })
+      if (call.type === 'call') {
+        this.call(args.type, args.route, args.data)
+          .then((data) => {
+            call.resolve(data)
+          }, (err) => {
+            call.reject(err)
+          })
+      } else {
+        this.serverSentEvent(args.route)
+          .then((sse) => {
+            call.resolve(sse)
+          }, (err) => {
+            call.reject(err)
+          })
+      }
     }
   },
   arrayToObject(toTransform, akey) {
@@ -140,6 +150,16 @@ const api = {
   },
   setErrorHandler(handler) {
     api.errorHandler = handler
+  },
+  serverSentEvent(route) {
+    return new Promise(function (resolve, reject) {
+      if (api.checkDependencies(route)) {
+        resolve(new EventSource(`${api.url()}${route}?access_token=${api.token}`))
+      } else {
+        let args = {route}
+        api.queue.push({args, resolve, reject, type: 'sse'})
+      }
+    })
   }
 }
 

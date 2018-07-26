@@ -21,7 +21,7 @@
             ry="15"></rect>
       <g class="textGroup" :width="tableWidth" :height="tableHeadingHeight"
          :transform="'translate(' + tableWidth/2 + ',' + getYTranslation(tableHeadingHeight) + ')'">
-        <text class="tableName" :class="getDsColor(t.datasourceId)">{{t.name}}</text>
+        <text class="tableName" :class="getDsColor(t.datasourceId)">{{t.displayName}}</text>
       </g>
       <g @mousedown="drag(t)" @mouseup="undrag()">
         <rect class="dragDetector" :width="tableWidth" :height="tableHeight"/>
@@ -146,7 +146,7 @@
     fill: black;
     #noUserSelect;
     user-select: none;
-    &.color1, &.color2, &.color4, &.color4 {
+    &.color1, &.color2, &.color3, &.color4 {
       fill: white;
     }
   }

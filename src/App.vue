@@ -34,7 +34,6 @@
             </h4>
           </b-col>
           <b-col id="userInfo" class="text-right">
-            <icon icon="Notification"/>
             {{userDisplayName}}
           </b-col>
           <b-col id="mobileMenuIconCol" class="text-right">
@@ -107,6 +106,21 @@
       </div>
     </b-modal>
 
+    <notifications group="all" position="bottom right" :duration="(-1)" :max="(5)">
+      <template slot="body" scope="props">
+        <div class="vue-notification">
+          <a class="vn-title">
+            {{props.item.title}}
+          </a>
+          <a class="close" @click="props.close">
+            ×
+          </a>
+          <div v-html="props.item.text">
+          </div>
+        </div>
+      </template>
+    </notifications>
+
     <b-modal id="errorModal" title="An Error occurred" cancel-disabled>
       <h6>It seems like an error occurred within the application:</h6>
       <br>
@@ -129,10 +143,11 @@
   import Loader from "./components/Loader"
   import Icon from "./components/Icon"
   import ErrorDisplay from "./components/ErrorDisplay"
+  import Training from "./views/questions/Training"
 
   export default {
     name: 'app',
-    components: {ErrorDisplay, Icon, Loader},
+    components: {Training, ErrorDisplay, Icon, Loader},
     data() {
       return {
         navLinks: [
@@ -155,6 +170,7 @@
     },
     computed: {
       userDisplayName() {
+        if (this.user.firstname === 'Marvin') return 'Penner'
         return this.user.firstname + ' ' + this.user.lastname
       },
       projects() {
@@ -212,6 +228,7 @@
     },
     created() {
       this.getUser()
+      this.$store.dispatch('notificationStream', this.$notify)
       if (this.$route.name === 'Signin' || this.$route.name === 'Signedin') {
         this.$store.commit('signingIn')
       } else {
@@ -423,5 +440,15 @@
     color: black !important;
   }
 
+  .vue-notification {
+    text-align: left;
+    background: @richBlue;
+    border-left-color: @richBlueDarker;
+    cursor: pointer;
+    font-size: .7rem;
+    .vn-title {
+      font-size: .9rem;
+    }
+  }
 
 </style>

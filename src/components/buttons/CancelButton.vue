@@ -9,7 +9,11 @@
   export default {
     name: "CancelButton",
     props: {
-      route: String
+      route: String,
+      onCancel: {
+        type: Function,
+        default() {}
+      }
     },
     computed: {
       newItem() {
@@ -29,6 +33,7 @@
         } else {
           this.$store.dispatch('setBackEditing', this.route)
         }
+        this.onCancel()
       }
     }
   }

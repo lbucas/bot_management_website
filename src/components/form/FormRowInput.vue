@@ -1,6 +1,6 @@
 <template>
-  <FormRowBlank :label="label">
-    <input v-if="!big" :type="inputtype" v-bind:readonly="!onEdit"
+  <form-row-blank :label="label">
+    <input v-if="!big" :type="inputtype" :readonly="!onEdit"
            :class="{ 'form-control-plaintext': !onEdit || !editable, 'form-control': onEdit && editable, 'is-invalid': !valid}"
            v-model="inputValue"/>
     <textarea v-if="big" :type="inputtype" v-bind:readonly="!onEdit"
@@ -9,7 +9,7 @@
     <div class="invalid-feedback">
       {{error}}
     </div>
-  </FormRowBlank>
+  </form-row-blank>
 </template>
 
 <script>

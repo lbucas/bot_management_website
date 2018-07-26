@@ -12,7 +12,7 @@
             <ul>
               <li v-for="(t, tid) in ds.tables" :class="{'isjoined': (tid in joined), 'disabledTable': tid == disabled}"
                 :active="tableId == tid" @click="tableId = tid">
-                  {{t.name}}
+                  {{t.displayName}}
               </li>
             </ul>
           </b-collapse>

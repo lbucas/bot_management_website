@@ -219,13 +219,11 @@
     margin-top: 1em;
   }
 
-  .table-fade-enter-active, .table-fade-leave-active {
-    transition: opacity .5s ease;
-  }
-
-  .table-fade-enter, .table-fade-leave-to
-    /* .component-fade-leave-active below version 2.1.8 */ {
-    opacity: 0;
+  .connectionTable {
+    #noUserSelect;
+    td, .custom-checkbox {
+      cursor: pointer;
+    }
   }
 
 

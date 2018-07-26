@@ -5,14 +5,15 @@
         <b-tab class="tabTitle" title="General" active>
           <custom-form id="intentDetails" route="intents">
             <form-row-input model-key="name" :editable="!intentDetail.id" label="Title"/>
-            <form-row-attribute-select model-key="targetValueId" label="Target Value"/>
+            <target-values/>
+            <form-row-calculation model-key="calculationNeeded" label="Calculation"
+                                  :target-value-added="targetValueAdded"/>
             <form-row-select model-key="aggregationId" label="Aggregation" list-display-value="operation"
                              :list="aggregations"/>
             <form-row-select model-key="charttypeId" label="Charttype" :list="charttypes"/>
             <form-row-select model-key="groupById" label="Group by" :list="entities"/>
             <form-row-array-input model-key="filterByIds" :lookup-list="entitiesWithoutGroupedBy"
-                                  label="Filterable by"
-                                  :placeholder="'Add Entities to filter by'"/>
+                                  label="Filterable by" :placeholder="'Add Entities to filter by'"/>
           </custom-form>
           <save-button :on-save="saveIntent" v-if="onEdit" :disabled="notSaveable"/>
           <cancel-button route="intents"/>
@@ -43,9 +44,15 @@
   import EditButton from "../../components/buttons/EditButton"
   import DeleteButton from "../../components/buttons/DeleteButton"
   import Training from "./Training"
+  import FormRowBlank from "../../components/form/FormRowBlank"
+  import FormRowCalculation from "../../components/form/FormRowCalculation"
+  import TargetValues from "./TargetValues"
 
   export default {
     components: {
+      TargetValues,
+      FormRowCalculation,
+      FormRowBlank,
       Training,
       DeleteButton,
       EditButton,
@@ -111,6 +118,9 @@
       },
       deleteIntent() {
         this.$store.dispatch('delete', {route: 'intents', toDelete: this.intentDetail.id})
+      },
+      targetValueAdded(tv) {
+        debugger
       }
     },
     watch: {

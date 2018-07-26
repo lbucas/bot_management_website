@@ -9,11 +9,13 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 import tools from './js/tools'
 import VueClip from 'vue-clip'
+import VueNotification from 'vue-notification'
 
 Vue.use(BootstrapVue)
 Vue.config.productionTip = false
 Vue.prototype.$tools = tools
 Vue.use(VueClip)
+Vue.use(VueNotification)
 
 /* eslint-disable no-new */
 new Vue({

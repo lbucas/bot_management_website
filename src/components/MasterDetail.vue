@@ -46,16 +46,22 @@
       secondary: {
         type: String,
         default: ''
+      },
+      onItemChange: {
+        type: Function,
+        default() {}
       }
     },
     name: "masterdetail",
     methods: {
       chooseEntry(entry) {
+        this.onItemChange()
         this.setDetailsVisible()
         this.$store.commit('endEditing', this.route)
         this.$store.commit('setDetailItem', {route: this.route, item: entry})
       },
       addNew() {
+        this.onItemChange()
         this.setDetailsVisible()
         this.$store.commit('editing', this.route)
         this.$store.dispatch('newDetailItem', this.route)

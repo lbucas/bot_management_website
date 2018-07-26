@@ -1,7 +1,7 @@
 <template>
     <div class="expandWrapper">
-      <icon class="testttt" v-if="!expanded" icon="expand-button"/>
-      <icon v-if="expanded" icon="expand-arrow"/>
+      <icon v-if="!expanded" icon="notExpanded"/>
+      <icon v-if="expanded" icon="expanded"/>
     </div>
 </template>
 

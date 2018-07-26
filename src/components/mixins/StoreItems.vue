@@ -6,11 +6,11 @@
   export default {
     name: "StoreItems",
     computed: {
-      datasources() {
-        return this.$store.state.datasources
+      databases() {
+        return this.$store.state.databases
       },
-      datasourcetypes() {
-        return this.$store.state.datasourcetypes
+      databasetypes() {
+        return this.$store.state.databasetypes
       },
       intents() {
         return this.$store.state.intents

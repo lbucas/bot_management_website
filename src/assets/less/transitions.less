@@ -6,11 +6,10 @@
 }
 
 .unfold-enter-active, .unfold-leave-active {
-  transition: all 100ms ease-out;
+  transition: all 200ms ease-out;
 }
 .unfold-enter, .unfold-leave-to{
   opacity: 0;
-  width: 0;
   transform: translateX(-10px);
 }
 
@@ -22,4 +21,17 @@
   transform: translateX(10px);
   opacity: 0;
 }
+
+.inflate-enter-active, .inflate-leave-active {
+  transition: all 200ms ease-out;
+}
+
+.inflate-enter, .inflate-leave-to{
+  width: 0;
+}
+
+.inflate-enter-to{
+  width: 1rem;
+}
+
 

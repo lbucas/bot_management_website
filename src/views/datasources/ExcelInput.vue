@@ -1,39 +1,26 @@
 <template>
   <div>
-
-
     <!--  <Icon v-if="file.uploaded" icon="donePurple"/>
     <Icon v-if="!file.uploaded" icon="uploading"/> -->
-    <b-progress v-if="uploading" :value="progress" :max="1" show-progress animated/>
-    <vue-clip :options="options" :on-added-file="fileAdded" :on-complete="fileUploaded" :on-sending="beforeFileSend"
-              :on-total-progress="totalProgress">
-      <template slot="clip-uploader-action">
-          <div>
-            <Icon icon="excelDark" size="xl"/>
-            <div class="dz-message">Click or Drag and Drop .xlsx files here to upload</div>
-          </div>
-      </template>
-    </vue-clip>
+    <file-input :options="options" :uploaded="fileUploaded" v-model="file.name">
+      <div>
+        <icon icon="excelDark" size="xl"/>
+        <div class="dz-message">Click or drop .xlsx files here to upload</div>
+      </div>
+    </file-input>
 
   </div>
 </template>
 
 <script>
-  import Table from "../../components/Table"
+  import FileInput from '../../components/FileInput'
   import Icon from "../../components/Icon"
-  import DeleteButton from "../../components/buttons/DeleteButton"
 
   export default {
     name: "ExcelInput",
-    components: {DeleteButton, Icon, Table},
-    data() {
-      return {
-        // fileName: this.$props.value.fileName,
-        // fileId: this.$props.value.fileId,
-        progress: 0,
-        uploading: false,
-        name: ''
-      }
+    components: {Icon, FileInput},
+    props: {
+      value: Object
     },
     computed: {
       options() {
@@ -42,8 +29,8 @@
         return {
           url() {
             return file.id
-              ? `${api.url()}excelFiles/${file.id}/upload?access_token=${api.token}&projectId=${api.projectId}`
-              : `${api.url()}excelFiles/upload?access_token=${api.token}&projectId=${api.projectId}&name=${file.name}`
+              ? `${api.url()}excelFiles/${file.id}/analyze?access_token=${api.token}&projectId=${api.projectId}`
+              : `${api.url()}excelFiles/analyze?access_token=${api.token}&projectId=${api.projectId}`
           },
           paramName: 'file',
           acceptedFiles: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
@@ -54,50 +41,28 @@
       },
       onEdit() {
         return this.$store.state.onEdit.excelFiles
+      },
+      parsedFile: {
+        get() {
+          return this.value
+        },
+        set(v) {
+          this.$emit("input", v)
+        }
       }
     },
     methods: {
-      fileAdded(file) {
-        if (!this.file.name) this.file.name = file.name
-      },
-      beforeFileSend(file, xhr, formData) {
-        this.uploading = true
-        // formData.append('_projectId', this.$store.state.api.projectId)
-      },
       fileUploaded(file, status, xhr) {
-        setTimeout(() => {
-          this.uploading = false
-        }, 2000)
-      },
-      totalProgress(progress, totalBytes, bytesSent) {
-        this.progress = bytesSent / totalBytes
-        console.log(this.progress)
+        this.uploading = false
+        if (status === 'success') {
+          this.parsedFile = JSON.parse(xhr.response)
+          // this.$store.commit('endEditing', 'excelFiles')
+        }
       }
     }
   }
 </script>
 
-<style lang="less">
-  @import "../../assets/less/mixins";
-  @import "../../assets/less/colors";
-  @import "../../assets/less/transitions";
-
-  .dz-clickable {
-    width: 100%;
-    height: 9rem;
-    border: 1px solid lightgrey;
-    background: #f0ecf8;
-    text-align: center;
-    padding-top: 2rem;
-    font-size: 1rem;
-    cursor: pointer;
-    &.dz-drag-hover {
-      background: #e1d9f2;
-    }
-  }
-
-  .dz-message {
-
-  }
+<style>
 
 </style>
