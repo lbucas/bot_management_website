@@ -1,12 +1,12 @@
 <template>
-  <masterdetail tableheading="Available Excel Files" route="excelFiles" :on-item-change="emptyParsedFile">
+  <master-detail tableheading="Available Excel Files" route="excelFiles" :on-item-change="emptyParsedFile">
     <b-tabs>
       <b-tab class="tab-title" title="General">
         <b-row id="excelFileDetails">
           <b-col>
             <custom-form route="excelFiles">
-              <form-row-input model-key="name" label="Title"/>
-              <form-row-display model-key="uploaded" label="Last updated" filter="date"/>
+              <fr-input model-key="name" label="Title"/>
+              <fr-display model-key="uploaded" label="Last updated" filter="date"/>
             </custom-form>
             <div v-if="onEdit">
               <excel-input v-model="parsedFile" v-if="!fileParsed"/>
@@ -43,10 +43,10 @@
                 </ul>
               </div>
             </div>
-            <edit-button route="excelFiles"/>
-            <delete-button :on-delete="deleteExcel" v-if="!onEdit"/>
-            <save-button :on-save="importExcel" :disabled="!importable" text="Import" v-if="fileParsed"/>
-            <cancel-button :on-cancel="emptyParsedFile" route="excelFiles" v-if="fileParsed"/>
+            <edit route="excelFiles"/>
+            <delete :on-delete="deleteExcel" v-if="!onEdit"/>
+            <save :on-save="importExcel" :disabled="!importable" text="Import" v-if="fileParsed"/>
+            <cancel :on-cancel="emptyParsedFile" route="excelFiles" v-if="fileParsed"/>
           </b-col>
         </b-row>
       </b-tab>
@@ -55,40 +55,18 @@
       </b-tab>
     </b-tabs>
 
-  </masterdetail>
+  </master-detail>
 </template>
 
 <script>
-  import Masterdetail from "../../components/MasterDetail"
-  import CustomForm from "../../components/form/CustomForm"
   import ExcelInput from "./ExcelInput"
-  import FormRowInput from "../../components/form/FormRowInput"
-  import EditButton from "../../components/buttons/EditButton"
-  import DeleteButton from "../../components/buttons/DeleteButton"
-  import SaveButton from "../../components/buttons/SaveButton"
-  import CancelButton from "../../components/buttons/CancelButton"
-  import FormRowDisplay from "../../components/form/FormRowDisplay"
   import ExpandIcon from "../../components/ExpandIcon"
   import Expandable from "../../components/mixins/Expandable"
-  import FormRowBlank from "../../components/form/FormRowBlank"
   import Tables from "../../components/Tables"
 
   export default {
     name: "ExcelFiles",
-    components: {
-      Tables,
-      FormRowBlank,
-      ExpandIcon,
-      FormRowDisplay,
-      CancelButton,
-      SaveButton,
-      DeleteButton,
-      EditButton,
-      FormRowInput,
-      ExcelInput,
-      CustomForm,
-      Masterdetail
-    },
+    components: {Tables, ExcelInput, ExpandIcon},
     mixins: [Expandable],
     data() {
       return {

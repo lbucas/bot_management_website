@@ -142,7 +142,7 @@
   }
 
   .tableName {
-    font: 1em @font;
+    font: .7em @font;
     fill: black;
     #noUserSelect;
     user-select: none;

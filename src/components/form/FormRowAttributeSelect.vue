@@ -1,23 +1,28 @@
 <template>
-  <form-row-blank :label="label">
+  <fr-blank :label="label">
     <input v-if="!onEdit" type="text" readonly class="form-control-plaintext"
            v-model="currentAttributeFullName">
-    <attribute-select v-else v-model="inputValue" :valid="valid"/>
+    <attribute-select v-else v-model="inputValue" :valid="valid" :datatype="datatype"/>
     <div class="validationMessage" v-if="error">
       {{error}}
     </div>
-  </form-row-blank>
+  </fr-blank>
 </template>
 
 <script>
-  import FormRowBlank from "./FormRowBlank"
   import FormComponent from "../mixins/FormComponent"
   import AttributeSelect from "./AttributeCompleteSelect"
 
   export default {
     name: "FormRowAttributeSelect",
     mixins: [FormComponent],
-    components: {AttributeSelect, FormRowBlank},
+    components: {AttributeSelect},
+    props: {
+      datatype: {
+        type: String,
+        default: null
+      }
+    },
     computed: {
       datasources() {
         return this.$store.state.datasources
@@ -29,13 +34,7 @@
         return this.$store.getters.attributes
       },
       currentAttributeFullName() {
-        try {
-          let attr = this.attributes[this.inputValue]
-          return this.datasources[attr.datasourceId].name + ' - ' + this.tables[attr.tableId].name + ' - ' +
-            attr.name
-        } catch (e) {
-          return ''
-        }
+        return this.$tools.attributeFullName(this.inputValue)
       }
     }
   }

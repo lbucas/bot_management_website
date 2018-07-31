@@ -1,11 +1,10 @@
 <template>
-  <form-row-blank :label="label" v-if="!onEdit">
+  <fr-blank :label="label" v-if="!onEdit">
     <input type="text" readonly class="form-control-plaintext" v-model="displayValue"/>
-  </form-row-blank>
+  </fr-blank>
 </template>
 
 <script>
-  import FormRowBlank from "./FormRowBlank"
   import FormComponent from "../mixins/FormComponent"
 
   const filters = {
@@ -15,7 +14,6 @@
   }
   export default {
     name: "FormRowDisplay",
-    components: {FormRowBlank},
     mixins: [FormComponent],
     props: {
       modelKey: String,

@@ -1,6 +1,6 @@
 <template>
   <b-row id="trainings">
-    <Loader :loading="loading"/>
+    <loader :loading="loading"/>
     <b-col lg="12" id="newSentence">
       <center-button v-if="!trainingDetail">
         <b-button variant="primary" id="addNewSentence" @click="addTraining">Add new sentence</b-button>
@@ -27,10 +27,10 @@
             </td>
           </tr>
         </Table>
-        <save-button id="saveTraining" class="trainingButton" :on-save="saveTraining"
+        <save id="saveTraining" class="trainingButton" :on-save="saveTraining"
                      :text="(trainingDetail.id ? 'Update':'Add')" :disabled="notSaveable"/>
         <b-button variant="secondary" class="trainingButton" @click="addTraining">Clear</b-button>
-        <delete-button v-show="trainingDetail.id" :on-delete="deleteTraining"/>
+        <delete v-show="trainingDetail.id" :on-delete="deleteTraining"/>
 
       </div>
     </b-col>
@@ -54,14 +54,11 @@
 <script>
   import Table from "../../components/Table"
   import CenterButton from "../../components/buttons/CenterButton"
-  import Loader from "../../components/Loader"
   import Pagination from "../../components/Pagination"
-  import SaveButton from "../../components/buttons/SaveButton"
-  import DeleteButton from "../../components/buttons/DeleteButton"
 
   export default {
     name: "Training",
-    components: {DeleteButton, SaveButton, Pagination, Loader, CenterButton, Table},
+    components: {Pagination, CenterButton, Table},
     props: {
       intentId: {}
     },

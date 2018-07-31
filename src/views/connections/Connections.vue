@@ -1,6 +1,6 @@
 <template>
   <div id="editConnections">
-    <Loader :loading="connectionLoading"/>
+    <loader :loading="connectionLoading"/>
     <b-tabs id="connectionTabs">
       <b-tab class="tabTitle" title="Standard" active>
         <div>
@@ -38,11 +38,11 @@
                 <td>
                 <span v-b-toggle="'tablesFor3' + id" @click="expand(3, id)">
                   <b-form-checkbox @change="checkboxDs(id)"/>
-                  {{ds.name}}
                   <expand-icon :expanded="(ds.id in expanded)"/>
+                  {{ds.name}}
                 </span>
                   <b-collapse v-bind:id="'tablesFor3' + id" class="mt-2">
-                    <ul>
+                    <ul class="tableListCheckBox">
                       <li v-for="t in ds.tables">
                         <b-form-checkbox v-model="t.visible">
                           {{t.name}}
@@ -221,6 +221,9 @@
 
   .connectionTable {
     #noUserSelect;
+    .tableListCheckBox {
+      list-style: none;
+    }
     td, .custom-checkbox {
       cursor: pointer;
     }

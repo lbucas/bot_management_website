@@ -1,5 +1,5 @@
 <template>
-  <form-row-blank :label="label">
+  <fr-blank :label="label">
     <input readonly v-if="!onEdit" class="form-control-plaintext" v-model="plainTextArray"/>
     <div v-if="onEdit">
       <div class="arrayInputDisplay">
@@ -12,18 +12,17 @@
       </div>
       <suggestion-select v-model="addNext" :list="remainingOptions" :placeholder="placeholder" clear-after-select/>
     </div>
-  </form-row-blank>
+  </fr-blank>
 </template>
 
 <script>
-  import FormRowBlank from "./FormRowBlank"
   import SuggestionSelect from "./SuggestionSelect"
   import FormComponent from "../mixins/FormComponent"
 
   export default {
     name: "FormRowArrayInput",
     mixins: [FormComponent],
-    components: {SuggestionSelect, FormRowBlank},
+    components: {SuggestionSelect},
     props: {
       value: Array,
       lookupList: Object,

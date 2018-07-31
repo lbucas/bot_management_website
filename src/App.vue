@@ -38,7 +38,7 @@
           </b-col>
           <b-col id="mobileMenuIconCol" class="text-right">
             <div @click="mobileMenuOpen = !mobileMenuOpen">
-              <Icon id="mobileMenuIcon" icon="menu"/>
+              <icon id="mobileMenuIcon" icon="menu"/>
             </div>
           </b-col>
         </b-row>
@@ -74,7 +74,7 @@
              no-close-on-backdrop
              hide-header-close ok-disabled>
       <div class="table-responsive">
-        <Loader :loading="projectsLoading"/>
+        <loader :loading="projectsLoading"/>
         <table class="table table-hover">
           <thead>
           <thead>
@@ -107,7 +107,7 @@
     </b-modal>
 
     <notifications group="all" position="bottom right" :duration="(-1)" :max="(5)">
-      <template slot="body" scope="props">
+      <template slot="body" slot-scope="props">
         <div class="vue-notification">
           <a class="vn-title">
             {{props.item.title}}
@@ -140,14 +140,11 @@
 </template>
 
 <script>
-  import Loader from "./components/Loader"
-  import Icon from "./components/Icon"
   import ErrorDisplay from "./components/ErrorDisplay"
-  import Training from "./views/questions/Training"
 
   export default {
     name: 'app',
-    components: {Training, ErrorDisplay, Icon, Loader},
+    components: {ErrorDisplay},
     data() {
       return {
         navLinks: [

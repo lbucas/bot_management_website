@@ -1,24 +1,26 @@
 <template>
-  <MasterDetail route="intents" tableheading="Available Questions">
+  <master-detail route="intents" tableheading="Available Questions">
     <div>
       <b-tabs>
         <b-tab class="tabTitle" title="General" active>
           <custom-form id="intentDetails" route="intents">
-            <form-row-input model-key="name" :editable="!intentDetail.id" label="Title"/>
+            <fr-input model-key="name" :editable="!intentDetail.id" label="Title"/>
             <target-values/>
-            <form-row-calculation model-key="calculationNeeded" label="Calculation"
-                                  :target-value-added="targetValueAdded"/>
-            <form-row-select model-key="aggregationId" label="Aggregation" list-display-value="operation"
-                             :list="aggregations"/>
-            <form-row-select model-key="charttypeId" label="Charttype" :list="charttypes"/>
-            <form-row-select model-key="groupById" label="Group by" :list="entities"/>
-            <form-row-array-input model-key="filterByIds" :lookup-list="entitiesWithoutGroupedBy"
-                                  label="Filterable by" :placeholder="'Add Entities to filter by'"/>
+            <fr-select v-if="intentDetail.calculationNeeded === null"
+                       model-key="aggregationId" label="Aggregation" :disabled="targetValues.length > 1"
+                       list-display-value="operation" :list="aggregations"/>
+            <custom-calculation/>
+            <fr-select v-if="chartUsable" model-key="charttypeId" label="Charttype" :list="charttypes"
+                       list-display-value="displayName"/>
+            <fr-attribute-select v-if="chartUsable" model-key="groupById" label="Group By" :datatype="groupByDatatype"/>
+            <fr-array-input model-key="filterByIds" :lookup-list="entitiesWithoutGroupedBy"
+                            label="Filterable by" :placeholder="'Add Entities to filter by'"/>
+            <fixed-filters/>
           </custom-form>
-          <save-button :on-save="saveIntent" v-if="onEdit" :disabled="notSaveable"/>
-          <cancel-button route="intents"/>
-          <edit-button route="intents"/>
-          <delete-button v-if="!onEdit" :on-delete="deleteIntent"/>
+          <save :on-save="saveIntent" v-if="onEdit" :disabled="!savable"/>
+          <cancel route="intents"/>
+          <edit route="intents"/>
+          <delete v-if="!onEdit" :on-delete="deleteIntent"/>
         </b-tab>
         <b-tab v-if="!onEdit" class="tabTitle" title="Training sentences">
           <training :intentId="intentDetail.id"/>
@@ -26,46 +28,19 @@
       </b-tabs>
 
     </div>
-  </MasterDetail>
+  </master-detail>
 
 </template>
 
 <script>
-  import MasterDetail from '../../components/MasterDetail'
-  import FormRowInput from "../../components/form/FormRowInput"
-  import FormRowSelect from "../../components/form/FormRowSelect"
-  import SuggestionSelect from "../../components/form/SuggestionSelect"
-  import FormRowArrayInput from "../../components/form/FormRowArrayInput"
-  import CustomForm from "../../components/form/CustomForm"
-  import FormRowAttributeSelect from "../../components/form/FormRowAttributeSelect"
   import StoreItems from '../../components/mixins/StoreItems'
-  import SaveButton from "../../components/buttons/SaveButton"
-  import CancelButton from "../../components/buttons/CancelButton"
-  import EditButton from "../../components/buttons/EditButton"
-  import DeleteButton from "../../components/buttons/DeleteButton"
   import Training from "./Training"
-  import FormRowBlank from "../../components/form/FormRowBlank"
-  import FormRowCalculation from "../../components/form/FormRowCalculation"
   import TargetValues from "./TargetValues"
+  import CustomCalculation from "./CustomCalculation"
+  import FixedFilters from "./FixedFilters"
 
   export default {
-    components: {
-      TargetValues,
-      FormRowCalculation,
-      FormRowBlank,
-      Training,
-      DeleteButton,
-      EditButton,
-      CancelButton,
-      SaveButton,
-      FormRowAttributeSelect,
-      CustomForm,
-      FormRowArrayInput,
-      SuggestionSelect,
-      FormRowSelect,
-      FormRowInput,
-      MasterDetail
-    },
+    components: {FixedFilters, CustomCalculation, TargetValues, Training},
     mixins: [StoreItems],
     name: "intents",
     computed: {
@@ -87,12 +62,24 @@
         }
         return e
       },
-      groupById() {
-        return this.intentDetail.groupById
+      savable() {
+        return this.$store.getters.savable.intents
       },
-      notSaveable() {
-        let ind = this.intentDetail
-        return (ind.name === '' || !ind.charttypeId || !ind.targetValueId || !ind.aggregationId || !ind.groupById)
+      groupByDatatype() {
+        try {
+          return this.charttypes[this.intentDetail.charttypeId].name === 'Graph' ? 'datetime' : null
+        } catch (e) {
+          return null
+        }
+      },
+      chartUsable() {
+        return (this.intentDetail.targetValueIds.length === 1 &&
+          this.intentDetail.aggregationId !== null &&
+          this.aggregations[this.intentDetail.aggregationId].operation !== 'NONE') ||
+          this.intentDetail.calculationNeeded
+      },
+      targetValues() {
+        return this.intentDetail.targetValueIds
       }
     },
     created() {
@@ -109,8 +96,12 @@
       saveIntent() {
         let intDet = {}
         this.$tools.clone(intDet, this.intentDetail)
+        if (Array.isArray(intDet.fixedFilter)) {
+          let v = {}
+          for (let f of intDet.fixedFilter) v[f.attributeId] = f.filters
+          intDet.fixedFilter = v
+        }
         intDet.groupById = [intDet.groupById]
-        intDet.targetValueId = [intDet.targetValueId]
         intDet.projectId = this.$store.projectId
         intDet.id
           ? this.$store.dispatch('patch', {route: 'intents', toPatch: intDet})
@@ -118,14 +109,21 @@
       },
       deleteIntent() {
         this.$store.dispatch('delete', {route: 'intents', toDelete: this.intentDetail.id})
-      },
-      targetValueAdded(tv) {
-        debugger
       }
     },
     watch: {
-      groupById(id) {
-        this.intentDetail.filterByIds = this.$tools.removeFromArray(this.intentDetail.filterByIds, id)
+      targetValues: {
+        deep: true,
+        handler(t) {
+          if (t.length > 1) {
+            for (let agId in this.aggregations) {
+              if (this.aggregations[agId].operation === 'NONE') {
+                this.$store.commit('updateDetailItem', {route: 'intents', key: 'aggregationId', value: agId})
+                break
+              }
+            }
+          }
+        }
       }
     }
   }

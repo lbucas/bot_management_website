@@ -3,7 +3,11 @@
     name: "FormComponent",
     props: {
       label: String,
-      modelKey: String
+      modelKey: String,
+      disabled: {
+        type: Boolean,
+        default: false
+      }
     },
     data() {
       return {

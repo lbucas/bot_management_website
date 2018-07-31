@@ -1,6 +1,7 @@
 import Vue from 'vue'
 
 export default {
+  store: null,
   cookies: {
     get: function (sName) {
       sName = sName.toLowerCase()
@@ -30,9 +31,18 @@ export default {
   },
   arrayToObject(toTransform, akey) {
     if (Array.isArray(toTransform)) {
-      akey = akey || 'id'
-      return toTransform.reduce(function (acc, cur, i) {
-        acc[cur[akey]] = cur
+      let isStringArray = false
+      if (typeof toTransform[0] === 'string') {
+        isStringArray = true
+      } else {
+        akey = akey || 'id'
+      }
+      return toTransform.reduce((acc, cur) => {
+        if (isStringArray) {
+          acc[cur] = {name: cur}
+        } else {
+          acc[cur[akey]] = cur
+        }
         return acc
       }, {})
     } else {
@@ -62,5 +72,21 @@ export default {
       return obj
     }
     return undefined
+  },
+  arrayIndexOf(arr, key, value) {
+    for (let i = 0; i < arr.length; i++) {
+      if (arr[i][key] == value) return i // eslint-disable-line eqeqeq
+    }
+    return -1
+  },
+  attributeFullName(id) {
+    try {
+      let g = this.store.getters
+      let attr = g.attributes[id]
+      let table = g.tables[attr.tableId]
+      return `${this.store.state.datasources[table.datasourceId].name}-${table.name}-${attr.name}`
+    } catch (e) {
+      return ''
+    }
   }
 }

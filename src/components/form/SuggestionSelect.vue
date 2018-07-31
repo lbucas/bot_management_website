@@ -1,22 +1,27 @@
 <template>
-  <div>
-    <input :class="{'suseInput': true, 'form-control': true, 'valueSelected': valueSelected}" autocomplete="off"
-           :disabled="disabled" v-model="inputValue" @click="suggestionsVisible=true"
-           @keyup.up="suggestionKeyChange(false)"
-           @keyup.down="suggestionKeyChange(true)" @keyup.enter="select" :placeholder="placeholder"/>
-    <div class="suggestions" v-if="suggestionsVisible" :valueSelected="valueSelected">
-      <span class="closeSuggestions" @click.stop="suggestionsVisible=false" v-if="(Object.keys(suggestions).length !== 0)">×</span>
-      <ul class="suggestionList">
-        <li v-if="(Object.keys(suggestions).length == 0) && inputValue.length > 0" class="noItems">No items to select
-        </li>
-        <li v-for="(suggestion, id) in suggestions" :active="activeId == id"
-            @mouseover="activeId=id"
-            @click="select">
-          {{suggestion[listDisplayValue]}}
-        </li>
-      </ul>
-    </div>
-  </div>
+  <b-row>
+    <b-col>
+      <input :class="{'suseInput': true, 'form-control': true, 'valueSelected': valueSelected}" autocomplete="off"
+             :disabled="disabled" v-model="inputValue" @click="suggestionsVisible=true"
+             @keyup.up="suggestionKeyChange(false)"
+             @keyup.down="suggestionKeyChange(true)" @keyup.enter="select" :placeholder="placeholder"/>
+      <div class="suggestions" v-if="suggestionsVisible" :valueSelected="valueSelected">
+      <span class="closeSuggestions" @click.stop="suggestionsVisible=false"
+            v-if="(Object.keys(suggestions).length !== 0)">×</span>
+        <ul class="suggestionList">
+          <li v-if="showNoItemsMsg" class="noItems">No items to select
+          </li>
+          <li v-for="(suggestion, id) in suggestions" :active="activeId == id" @mouseover="activeId=id"
+              @click="select">
+            {{suggestion[listDisplayValue]}}
+          </li>
+        </ul>
+      </div>
+    </b-col>
+    <b-col v-if="addButton && inputValue.length>0" cols="1">
+      <b-button variant="outline-primary" size="sm" @click="addInputValue">+</b-button>
+    </b-col>
+  </b-row>
 </template>
 
 <script>
@@ -24,7 +29,20 @@
     name: 'SuggestionSelect',
     props: {
       value: String,
-      list: Object,
+      list: {
+        type: Object,
+        default() {
+          return {}
+        }
+      },
+      addButton: {
+        type: Boolean,
+        default: false
+      },
+      apilookup: {
+        type: String,
+        default: null
+      },
       listDisplayValue: {
         type: String,
         default: 'name'
@@ -81,6 +99,12 @@
           c++
         }
         return si
+      },
+      showNoItemsMsg() {
+        let noSuggestions = Object.keys(this.suggestions).length === 0
+        return this.apilookup
+          ? noSuggestions && this.inputValue.length > 2
+          : noSuggestions && this.inputValue.length > 0
       }
     },
     created() {
@@ -115,23 +139,42 @@
           this.suggestionsVisible = true
         }
       },
-      searchList() {
-        var val = this.inputValue.toLowerCase()
-        var list = this.list
-        if (!val) {
-          this.suggestions = list
-        }
-        var s = {}
-        var dval = this.listDisplayValue
-        for (let lkey in list) {
-          if (list[lkey][dval].toLowerCase().indexOf(val) !== -1) {
-            s[lkey] = list[lkey]
+      async searchList() {
+        let val = this.inputValue.toLowerCase()
+        let list = this.list
+        if (Object.keys(list).length === 0 && this.apilookup) {
+          let filteredFromApi = {}
+          if (val.length > 2) {
+            filteredFromApi = await this.$store.dispatch('get', {
+              route: this.apilookup,
+              data: {searchTerm: val, projectId: this.$store.state.projectId}
+            })
+            filteredFromApi = this.$tools.arrayToObject(filteredFromApi.values)
+            this.suggestionsVisible = true
+          }
+          this.suggestions = filteredFromApi
+        } else {
+          if (!val) {
+            this.suggestions = list
+          } else {
+            let s = {}
+            let dval = this.listDisplayValue
+            for (let lkey in list) {
+              if (list[lkey][dval].toLowerCase().indexOf(val) !== -1) s[lkey] = list[lkey]
+            }
+            this.suggestions = s
           }
         }
-        this.suggestions = s
+      },
+      addInputValue() {
+        this.$emit("input", this.inputValue.trim())
+        this.afterSelect()
       },
       select() {
         this.$emit("input", this.activeId)
+        this.afterSelect()
+      },
+      afterSelect() {
         this.suggestionsVisible = false
         this.valueSelected = true
         if (this.$props.clearAfterSelect) {

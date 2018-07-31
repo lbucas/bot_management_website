@@ -91,12 +91,13 @@ export default new Vuex.Store({
       intents: {
         name: "",
         charttypeId: "",
-        calculationNeeded: false,
+        calculationNeeded: null,
         id: null,
         targetValueIds: [],
         groupById: null,
         filterByIds: [],
-        aggregationId: null
+        aggregationId: null,
+        fixedFilter: {}
       },
       joins: {
         table1: {
@@ -156,13 +157,14 @@ export default new Vuex.Store({
       intents: {
         name: "",
         charttypeId: null,
-        calculationNeeded: false,
+        calculationNeeded: null,
         id: null,
-        targetValueIds: [61, 65],
+        targetValueIds: [null],
         groupById: null,
         filterByIds: [],
         aggregationId: null,
-        projectId: null
+        projectId: null,
+        fixedFilter: {}
       },
       training: {
         sentence: '',
@@ -197,10 +199,43 @@ export default new Vuex.Store({
       },
       intents: {
         name: 'Please provide a title for the question',
-        targetValueId: 'Please provide a target value for the question',
-        aggregationId: 'Please select an aggregation method for the question',
-        charttypeId: "Please select a charttype for the visulization of the question's results",
-        groupById: 'Please select an entity by which the results will be grouped by'
+        targetValueIds: {
+          msg: 'Please provide atleast one target value for the question',
+          check(v) {
+            return (v.length > 0 && v.indexOf(null) === -1)
+          }
+        },
+        aggregationId: {
+          msg: 'Please select an aggregation method for the question',
+          check(v, detailItem) {
+            return !(!v && !detailItem.calculationNeeded)
+          }
+        },
+        charttypeId: {
+          msg: "Please select a charttype for the visulization of the question's results",
+          check(v, detailItem) {
+            return !(!v) || (detailItem.aggregationId == 1 && !detailItem.calculationNeeded)
+          }
+        },
+        groupById: {
+          msg: 'Please select an attribute by which the results will be grouped by',
+          check(v, detailItem) {
+            return !(!v) || (detailItem.aggregationId == 1 && !detailItem.calculationNeeded)
+          }
+        },
+        fixedFilter: {
+          msg: 'Please provide filter values for each fixed filter',
+          check(v) {
+            for (let i in v) {
+              try {
+                if (v[i].filters.length === 0) return false
+              } catch (e) {
+                if (v[i].length === 0) return false
+              }
+            }
+            return true
+          }
+        }
       }
     },
     onEdit: {
@@ -357,8 +392,9 @@ export default new Vuex.Store({
                 }
               }
             }
-            let checkResult = checkObj.check(state.tools.deepValue(state.detailItem[route], target))
-            if (checkResult === false) {
+            let checkResult = checkObj.check(state.tools.deepValue(state.detailItem[route], target),
+              state.detailItem[route])
+            if (!checkResult) {
               errors[target] = checkObj.msg
               continue
             }
@@ -372,6 +408,13 @@ export default new Vuex.Store({
         }
       }
       return ve
+    },
+    savable: (state, getters) => {
+      let s = {}
+      for (let route in state.errorChecks) {
+        s[route] = Object.keys(getters.validationErrors[route]).length === 0
+      }
+      return s
     },
     tablesPerExcel: state => {
       if (!excelDatasourceId) {
@@ -639,8 +682,8 @@ export default new Vuex.Store({
     async patchReq(context, {route, toPatch}) {
       return await api.call('PATCH', route, toPatch)
     },
-    async get(context, {route, filter}) {
-      return await api.call('GET', route, filter)
+    async get(context, {route, data}) {
+      return await api.call('GET', route, data)
     },
     getRouteSpecific(context, {subroute, id, forceReload}) {
       return new Promise(async function (resolve, reject) {

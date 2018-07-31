@@ -1,5 +1,5 @@
 <template>
-  <form-row-blank :label="label">
+  <fr-blank :label="label">
     <input type="text" :readonly="!onEdit"
            :class="{ 'form-control-plaintext': !onEdit , 'form-control': onEdit, 'is-invalid': !valid}"
            v-model="inputValue"/>
@@ -8,7 +8,7 @@
     </div>
     <attribute-select v-model="attributeToAdd"/>
     <b-button v-if="attributeToAddName" variant="primary" @click="addAttribute">+</b-button>
-  </form-row-blank>
+  </fr-blank>
 </template>
 
 <script>

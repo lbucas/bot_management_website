@@ -5,7 +5,7 @@
         <h5 class="mdtableHeader">
           <span class="tabHeading">{{theading}} ({{tlength}})</span>
           <b-button size="sm" variant="primary" @click="addNew">+</b-button>
-          <UpdateButton :loading="loading" :update="update" size="sm" variant="secondary"></UpdateButton>
+          <update :loading="loading" :update="update" size="sm" variant="secondary"></update>
         </h5>
         <div class="table-responsive">
           <table class="table table-hover">
@@ -22,7 +22,7 @@
       <b-col lg="8">
         <transition name="unfold">
           <div class="mddetail" v-if="detailsVisible">
-            <Loader :loading="loading"/>
+            <loader :loading="loading"/>
             <slot class="mdSlot"></slot>
           </div>
         </transition>
@@ -32,11 +32,7 @@
 </template>
 
 <script>
-  import UpdateButton from "./buttons/UpdateButton"
-  import Loader from "./Loader"
-
   export default {
-    components: {UpdateButton, Loader},
     props: {
       route: String,
       tableheading: {

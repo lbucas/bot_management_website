@@ -1,14 +1,14 @@
 <template>
   <div id="settings">
-    <Loader :loading="loading"/>
+    <loader :loading="loading"/>
     <b-row>
       <b-col lg="6">
         <h5>Project Settings</h5>
         <form>
           <form-row-input v-model="project.name" label="Project Name"/>
-          <form-row-blank big  label="Collaborators">
+          <fr-blank big  label="Collaborators">
 
-          </form-row-blank>
+          </fr-blank>
           <b-button @click="saveProject" variant="primary">Save</b-button>
           <b-button @click="" variant="secondary">Reset</b-button>
         </form>

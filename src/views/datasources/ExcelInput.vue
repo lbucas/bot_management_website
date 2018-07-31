@@ -1,7 +1,7 @@
 <template>
   <div>
-    <!--  <Icon v-if="file.uploaded" icon="donePurple"/>
-    <Icon v-if="!file.uploaded" icon="uploading"/> -->
+    <!--  <icon v-if="file.uploaded" icon="donePurple"/>
+    <icon v-if="!file.uploaded" icon="uploading"/> -->
     <file-input :options="options" :uploaded="fileUploaded" v-model="file.name">
       <div>
         <icon icon="excelDark" size="xl"/>

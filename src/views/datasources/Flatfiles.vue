@@ -1,10 +1,10 @@
 <template>
-  <masterdetail tableheading="Available Flat Files" route="flatfiles">
+  <master-detail tableheading="Available Flat Files" route="flatfiles">
     <b-row id="excelFileDetails">
       <b-col>
         <custom-form route="flatfiles">
-          <form-row-input model-key="name" label="Title"/>
-          <form-row-display model-key="uploaded" label="Last updated" filter="date"/>
+          <fr-input model-key="name" label="Title"/>
+          <fr-display model-key="uploaded" label="Last updated" filter="date"/>
         </custom-form>
         <div v-if="onEdit">
           <file-input v-model="file.name" :options="options" :uploaded="fileUploaded">
@@ -14,12 +14,12 @@
             </div>
           </file-input>
         </div>
-        <edit-button route="flatfiles" v-if="!onEdit"/>
-        <delete-button :on-delete="deleteFlatfile" v-if="!onEdit"/>
-        <cancel-button route="flatfiles" v-if="onEdit"/>
+        <edit route="flatfiles" v-if="!onEdit"/>
+        <delete :on-delete="deleteFlatfile" v-if="!onEdit"/>
+        <cancel route="flatfiles" v-if="onEdit"/>
       </b-col>
     </b-row>
-    </masterdetail>
+    </master-detail>
 </template>
 
 <script>
@@ -36,14 +36,6 @@
   export default {
     name: "Flatfiles",
     components: {
-      Icon,
-      Masterdetail,
-      CancelButton,
-      DeleteButton,
-      EditButton,
-      CustomForm,
-      FormRowDisplay,
-      FormRowInput,
       FileInput
     },
     computed: {

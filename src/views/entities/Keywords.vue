@@ -1,12 +1,12 @@
 <template>
   <b-row id="keywords">
-    <Loader :loading="loading"/>
+    <loader :loading="loading"/>
     <b-col lg="6" class="mdtable">
       <div class="updateKeywordsWrapper">
-        <CenterButton>
+        <center-button>
           <update-button class="updateKeywords" :update="updateKeywords" :loading="keywordsLoading"
                          text="Load Keywords from Datasource" size="sm"/>
-        </CenterButton>
+        </center-button>
       </div>
       <Pagination subroute="keywords" :id="attributeId"/>
       <Table>
@@ -25,31 +25,26 @@
     <b-col lg="6">
       <h6 class="selectKwHint" v-show="selectedLength == 0">Select entries from the table to rename them or to summarize
         multiple to one shared keyword</h6>
-      <CustomForm v-show="selectedLength > 0" :inline="false">
-        <FormRowInput label="New Keyword Name" v-model="keywordName"/>
-        <FormRowBlank label="Keywords to Summarize" v-show="selectedLength > 1">
+      <custom-form v-show="selectedLength > 0" :inline="false">
+        <fr-input label="New Keyword Name" v-model="keywordName"/>
+        <fr-blank label="Keywords to Summarize" v-show="selectedLength > 1">
           <div id="keywordsToSummarize">{{keywordsToSummarize}}</div>
-        </FormRowBlank>
-        <FormRowBlank label="Connected Attribute Values">
+        </fr-blank>
+        <fr-blank label="Connected Attribute Values">
           <div id="connectedAttributeVals">{{connectedAttributeVals}}</div>
-        </FormRowBlank>
-      </CustomForm>
-      <SaveButton v-show="selectedLength === 1" text="Update"
-                  @click="$store.dispatch('updateKeyword', attributeId)"></SaveButton>
-      <SaveButton v-show="selectedLength > 1" text="Summarize"
-                  @click="$store.dispatch('summarizeKeyword', attributeId)"></SaveButton>
+        </fr-blank>
+      </custom-form>
+      <save v-show="selectedLength === 1" text="Update"
+                  @click="$store.dispatch('updateKeyword', attributeId)"></save>
+      <save v-show="selectedLength > 1" text="Summarize"
+                  @click="$store.dispatch('summarizeKeyword', attributeId)"></save>
     </b-col>
   </b-row>
 </template>
 
 <script>
-  import Loader from "../../components/Loader"
-  import UpdateButton from "../../components/buttons/UpdateButton"
   import Pagination from "../../components/Pagination"
   import CustomForm from "../../components/form/CustomForm"
-  import FormRowInput from "../../components/form/FormRowInput"
-  import FormRowBlank from "../../components/form/FormRowBlank"
-  import SaveButton from "../../components/buttons/SaveButton"
   import Table from "../../components/Table"
   import CenterButton from "../../components/buttons/CenterButton"
 
@@ -58,13 +53,8 @@
     components: {
       CenterButton,
       Table,
-      SaveButton,
-      FormRowBlank,
-      FormRowInput,
       CustomForm,
-      Pagination,
-      UpdateButton,
-      Loader
+      Pagination
     },
     computed: {
       keywordsLoading() {

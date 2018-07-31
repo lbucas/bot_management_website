@@ -38,6 +38,20 @@
   }
 }
 
+.btn-outline-primary {
+  border-color: @richPurple !important;
+  color: @richPurple !important;
+  &:hover {
+    background-color: @richPurpleDarker !important;
+    border-color: @richPurpleDarker !important;
+    color: white !important;
+  }
+  &[disabled] {
+    background-color: @richPurpleLighter !important;
+    border-color: @richPurpleLighter !important;
+  }
+}
+
 .btn-info {
   background: @vibCyan !important;
   border-color: @vibCyan !important;
@@ -79,8 +93,10 @@
 
 .btn-outline-danger {
   border-color: @richRed !important;
+  color: @richRed !important;
   &:hover {
     background-color: @richRed !important;
+    color: white !important;
   }
   &[disabled] {
     border-color: @richRedLighter !important;

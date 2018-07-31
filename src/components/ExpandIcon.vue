@@ -6,10 +6,8 @@
 </template>
 
 <script>
-  import Icon from "./Icon"
   export default {
     name: "ExpandIcon",
-    components: {Icon},
     props: {
       expanded: Boolean
     }
