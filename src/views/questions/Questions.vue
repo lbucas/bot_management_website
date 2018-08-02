@@ -6,13 +6,18 @@
           <custom-form id="intentDetails" route="intents">
             <fr-input model-key="name" :editable="!intentDetail.id" label="Title"/>
             <target-values/>
-            <fr-select v-if="intentDetail.calculationNeeded === null"
-                       model-key="aggregationId" label="Aggregation" :disabled="targetValues.length > 1"
-                       list-display-value="operation" :list="aggregations"/>
+            <transition name="view" mode="out-in">
+              <fr-select v-if="intentDetail.calculationNeeded === null"
+                         model-key="aggregationId" label="Aggregation" :disabled="targetValueLength > 1"
+                         list-display-value="operation" :list="aggregations"/>
+            </transition>
             <custom-calculation/>
-            <fr-select v-if="chartUsable" model-key="charttypeId" label="Charttype" :list="charttypes"
-                       list-display-value="displayName"/>
-            <fr-attribute-select v-if="chartUsable" model-key="groupById" label="Group By" :datatype="groupByDatatype"/>
+            <fr-select model-key="charttypeId" label="Charttype" :list="charttypes" list-display-value="displayName"
+                       :disabled="targetValueLength > 1 && !intentDetail.calculationNeeded"/>
+            <transition name="view" mode="out-in">
+              <fr-attribute-select v-if="groupByVisible" model-key="groupById" label="Group By"
+                                   :datatype="groupByDatatype"/>
+            </transition>
             <fr-array-input model-key="filterByIds" :lookup-list="entitiesWithoutGroupedBy"
                             label="Filterable by" :placeholder="'Add Entities to filter by'"/>
             <fixed-filters/>
@@ -72,14 +77,28 @@
           return null
         }
       },
-      chartUsable() {
-        return (this.intentDetail.targetValueIds.length === 1 &&
-          this.intentDetail.aggregationId !== null &&
-          this.aggregations[this.intentDetail.aggregationId].operation !== 'NONE') ||
-          this.intentDetail.calculationNeeded
+      groupByVisible() {
+        return this.intentDetail.targetValueIds.length === 1 || this.intentDetail.calculationNeeded
       },
       targetValues() {
         return this.intentDetail.targetValueIds
+      },
+      targetValueLength() {
+        return this.targetValues.length
+      },
+      noAggregationId() {
+        for (let agId in this.aggregations) {
+          if (this.aggregations[agId].operation === 'NONE') {
+            return agId
+          }
+        }
+      },
+      charttypeTableId() {
+        for (let tId in this.charttypes) {
+          if (this.charttypes[tId].name === 'Table') {
+            return tId
+          }
+        }
       }
     },
     created() {
@@ -112,17 +131,18 @@
       }
     },
     watch: {
-      targetValues: {
-        deep: true,
-        handler(t) {
-          if (t.length > 1) {
-            for (let agId in this.aggregations) {
-              if (this.aggregations[agId].operation === 'NONE') {
-                this.$store.commit('updateDetailItem', {route: 'intents', key: 'aggregationId', value: agId})
-                break
-              }
-            }
-          }
+      targetValueLength(len, oldLen) {
+        if (len === 2 && oldLen === 1) { // Agrregation NONE is assigned
+          this.$store.commit('updateDetailItem', {
+            route: 'intents',
+            key: 'aggregationId',
+            value: this.noAggregationId
+          })
+          this.$store.commit('updateDetailItem', {
+            route: 'intents',
+            key: 'charttypeId',
+            value: this.charttypeTableId
+          })
         }
       }
     }

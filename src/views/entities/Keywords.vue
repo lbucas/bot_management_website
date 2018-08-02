@@ -4,7 +4,7 @@
     <b-col lg="6" class="mdtable">
       <div class="updateKeywordsWrapper">
         <center-button>
-          <update-button class="updateKeywords" :update="updateKeywords" :loading="keywordsLoading"
+          <update class="updateKeywords" :update="updateKeywords" :loading="keywordsLoading"
                          text="Load Keywords from Datasource" size="sm"/>
         </center-button>
       </div>
@@ -44,7 +44,6 @@
 
 <script>
   import Pagination from "../../components/Pagination"
-  import CustomForm from "../../components/form/CustomForm"
   import Table from "../../components/Table"
   import CenterButton from "../../components/buttons/CenterButton"
 
@@ -53,7 +52,6 @@
     components: {
       CenterButton,
       Table,
-      CustomForm,
       Pagination
     },
     computed: {

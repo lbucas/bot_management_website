@@ -1,8 +1,10 @@
 <template>
   <b-button-group class="deleteButtonGroup">
-    <b-button variant="outline-danger" :size="size" @click="deleteWrapper" v-if="confirmDialog">
-      Confirm
-    </b-button>
+    <transition name="view" mode="out-in">
+      <b-button variant="outline-danger" :size="size" @click="deleteWrapper" v-if="confirmDialog">
+        Confirm
+      </b-button>
+    </transition>
     <b-button variant="danger" :size="size" @click="confirmDialog = !confirmDialog">
       {{deleteText}}
     </b-button>
@@ -42,7 +44,8 @@
   }
 </script>
 
-<style scoped>
+<style lang="less" scoped>
+  @import "../../assets/less/transitions";
   .deleteButtonGroup {
     float: right;
   }

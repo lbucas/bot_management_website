@@ -205,22 +205,14 @@ export default new Vuex.Store({
             return (v.length > 0 && v.indexOf(null) === -1)
           }
         },
-        aggregationId: {
-          msg: 'Please select an aggregation method for the question',
-          check(v, detailItem) {
-            return !(!v && !detailItem.calculationNeeded)
-          }
-        },
-        charttypeId: {
-          msg: "Please select a charttype for the visulization of the question's results",
-          check(v, detailItem) {
-            return !(!v) || (detailItem.aggregationId == 1 && !detailItem.calculationNeeded)
-          }
-        },
+        aggregationId: 'Please select an aggregation method for the question',
+        charttypeId: "Please select a charttype for the visulization of the question's results",
         groupById: {
           msg: 'Please select an attribute by which the results will be grouped by',
-          check(v, detailItem) {
-            return !(!v) || (detailItem.aggregationId == 1 && !detailItem.calculationNeeded)
+          check(v, detailItem, state, getters) {
+            return !(!v) ||
+              (detailItem.targetValueLength > 1 && detailItem.calculationNeeded) ||
+              detailItem.charttypeId == getters.charttypeTable
           }
         },
         fixedFilter: {
@@ -375,7 +367,7 @@ export default new Vuex.Store({
       }
       return jpt
     },
-    validationErrors: state => {
+    validationErrors: (state, getters) => {
       let ve = {}
       for (let route in state.errorChecks) {
         if (state.onEdit[route]) {
@@ -393,7 +385,7 @@ export default new Vuex.Store({
               }
             }
             let checkResult = checkObj.check(state.tools.deepValue(state.detailItem[route], target),
-              state.detailItem[route])
+              state.detailItem[route], state, getters)
             if (!checkResult) {
               errors[target] = checkObj.msg
               continue
@@ -437,6 +429,12 @@ export default new Vuex.Store({
         tpe[t.excelFileId][tid] = t
       }
       return tpe
+    },
+    charttypeTable: state => {
+      for (let ctk in state.charttypes) {
+        if (state.charttypes[ctk].name === 'Table') return ctk
+      }
+      return null
     }
   },
   mutations: {

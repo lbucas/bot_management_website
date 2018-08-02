@@ -167,7 +167,6 @@
     },
     computed: {
       userDisplayName() {
-        if (this.user.firstname === 'Marvin') return 'Penner'
         return this.user.firstname + ' ' + this.user.lastname
       },
       projects() {
