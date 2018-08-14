@@ -99,11 +99,12 @@
     "welcome": "Willkommen bei Ihrem Bot Management Dashboard!"
   },
   "signin": {
-    "signinAuto": "Sie werden automatisch angemeldet.."
+    "singinAuto": "Sie werden automatisch angemeldet.."
   },
   "settings": {
     "projectSettings": "Projekteinstellungen:",
     "team": "Team:",
-    "addMember": "Fügen Sie ein Teammitglied per MUID hizu"
+    "addMember": "Fügen Sie ein Teammitglied per MUID hizu",
+    "deleteProj": "Projekt löschen"
   }
 }

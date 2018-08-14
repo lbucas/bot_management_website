@@ -79,7 +79,8 @@ const api = {
     datasources: true,
     entities: true,
     intents: true,
-    excelFiles: true
+    excelFiles: true,
+    flatfiles: true
   },
   fireCall({type, route, data}) {
     return new Promise(function (resolve, reject) {

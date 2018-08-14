@@ -104,6 +104,13 @@
   "settings": {
     "projectSettings": "Project Settings:",
     "team": "Team Members:",
-    "addMember": "Add a team member by MUID"
+    "addMember": "Add a team member by MUID",
+    "deleteProj": "Delete Project"
+  },
+  "checks": {
+    "entName": "Please provide a title for the entity",
+    "entDescription": "Please provide a description for the entity",
+    "entAttributeId": "Please select a connected attribute",
+    "intName": "Please provide a title for the question"
   }
 }

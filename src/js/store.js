@@ -437,6 +437,28 @@ export default new Vuex.Store({
         if (state.charttypes[ctk].name === 'Table') return ctk
       }
       return null
+    },
+    tablesPerFlatfile: state => {
+      if (!flatfileDatasourceId) {
+        let found = false
+        for (let id in state.datasources) {
+          let ds = state.datasources[id]
+          if (ds.name === "Flat Files") {
+            flatfileDatasourceId = id
+            found = true
+            break
+          }
+        }
+        if (!found) return {}
+      }
+      let flatfileDs = state.datasources[excelDatasourceId]
+      let tpf = {}
+      for (let tid in flatfileDs.tables) {
+        let t = flatfileDs.tables[tid]
+        tpf[t.flatfileId] = {}
+        tpf[t.flatfileId][tid] = t
+      }
+      return tpf
     }
   },
   mutations: {
@@ -871,6 +893,7 @@ export default new Vuex.Store({
     },
     errorHandling(context, {err, route, data, router}) {
       if (err.response.status === 401) {
+        debugger
         router.push('/signin')
       } else {
         let errMsg

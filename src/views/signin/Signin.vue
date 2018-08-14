@@ -2,7 +2,7 @@
   <div id="signin">
     <div class="card" id="loginCard">
       <img src="../../assets/logo/emdgreen.png"/>
-      <h6>S{{l.singinAuto}}</h6>
+      <h6>{{l.singinAuto}}</h6>
     </div>
 
   </div>

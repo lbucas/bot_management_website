@@ -83,7 +83,7 @@ new Vue({
       t.$store.dispatch('errorHandling', {err, route, data, router: t.$router})
     })
     t.$tools.store = t.$store
-    let langPreference = tools.cookies.get('langPreference') || 'DE'
+    let langPreference = tools.cookies.get('langPreference') || 'EN'
     t.$store.commit('setLang', {lang: t.$tools.lang(langPreference), name: langPreference})
   },
   methods: {

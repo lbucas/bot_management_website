@@ -234,14 +234,13 @@
       selectLang(name) {
         let lang = this.$tools.lang(name)
         this.$store.commit('setLang', {lang, name})
+        this.$tools.cookies.set('langPreference', name)
       }
     },
     created() {
       this.getUser()
       this.$store.dispatch('notificationStream', this.$notify)
-      if (this.$route.name === 'Signin' || this.$route.name === 'Signedin') {
-        this.$store.commit('signingIn')
-      } else {
+      if (!(this.$route.name === 'Signin' || this.$route.name === 'Signedin')) {
         let at = this.$tools.cookies.get('access_token')
         let expires = this.$tools.cookies.get('access_token_validUntil')
         let today = new Date()

@@ -12,7 +12,7 @@
       </b-col>
       <b-col></b-col>
       <b-col lg="5">
-        <h5>Danger Zone</h5>
+        <h5>{{l.deleteProj}}</h5>
         <center-button>
           <delete :on-delete="deleteProject"/>
         </center-button>
