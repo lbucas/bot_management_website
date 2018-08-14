@@ -1,5 +1,5 @@
 <template>
-  <fr-blank label="Target Values">
+  <fr-blank :label="l.targetValues">
     <div v-if="onEdit">
       <b-row v-for="targetInd in targetIndex" class="targetValue">
         <b-col>
@@ -9,7 +9,8 @@
           <a @click="targets.splice(targetInd, 1)">×</a>
         </b-col>
       </b-row>
-      <b-button @click="addTargets" v-if="newTargetPossible" size="sm" variant="outline-primary">Add Target</b-button>
+      <b-button @click="addTargets" v-if="newTargetPossible" size="sm" variant="outline-primary">{{l.addTarget}}
+      </b-button>
     </div>
     <div v-else>
       <p v-for="t in targets">{{$tools.attributeFullName(t)}}</p>
@@ -28,6 +29,9 @@
       value: Array
     },
     computed: {
+      l() {
+        return this.$store.state.lang.intents
+      },
       targets: {
         get() {
           return this.$store.state.detailItem.intents.targetValueIds

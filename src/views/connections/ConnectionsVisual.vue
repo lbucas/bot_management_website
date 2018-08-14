@@ -119,8 +119,8 @@
 </script>
 
 <style lang="less" scoped>
-  @import "../../assets/less/colors";
-  @import "../../assets/less/mixins";
+  @import "../../style/colors";
+  @import "../../style/mixins";
 
   #connectionTabs {
     .nav-tabs {

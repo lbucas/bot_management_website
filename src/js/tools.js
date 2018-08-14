@@ -1,7 +1,9 @@
 import Vue from 'vue'
+import lang from '../lang'
 
 export default {
   store: null,
+  lang,
   cookies: {
     get: function (sName) {
       sName = sName.toLowerCase()

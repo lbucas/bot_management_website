@@ -3,14 +3,14 @@
     <loader :loading="loading"/>
     <b-col lg="12" id="newSentence">
       <center-button v-if="!trainingDetail">
-        <b-button variant="primary" id="addNewSentence" @click="addTraining">Add new sentence</b-button>
+        <b-button variant="primary" id="addNewSentence" @click="addTraining">{{l.addSentence}}</b-button>
       </center-button>
       <div v-else>
-        <label for="trainingSentence">Training sentence:</label>
+        <label for="trainingSentence">{{l.trainingSenctence}}</label>
         <textarea class="form-control" id="trainingSentence" type="text" v-model="trainingDetail.sentence"
                   @select="sentenceSelected"/>
-        <p id="markHint"><i>Mark sentence parts in the input field to add annotations</i></p>
-        <Table :head="['Value', 'Entity', '']" v-show="trainingDetail._annotations.length > 0">
+        <p id="markHint"><i>{{l.markHint}}</i></p>
+        <Table :head="[l.value, l.entity, '']" v-show="trainingDetail._annotations.length > 0">
           <tr v-for="(a, ind) in trainingDetail._annotations">
             <td>{{a.value}}</td>
             <td>
@@ -28,8 +28,8 @@
           </tr>
         </Table>
         <save id="saveTraining" class="trainingButton" :on-save="saveTraining"
-                     :text="(trainingDetail.id ? 'Update':'Add')" :disabled="notSaveable"/>
-        <b-button variant="secondary" class="trainingButton" @click="addTraining">Clear</b-button>
+                     :text="(trainingDetail.id ? $root.l.update:$root.l.add)" :disabled="notSaveable"/>
+        <b-button variant="secondary" class="trainingButton" @click="addTraining">{{$root.l.clear}}</b-button>
         <delete v-show="trainingDetail.id" :on-delete="deleteTraining"/>
 
       </div>
@@ -38,7 +38,7 @@
       <Pagination subroute="trainings" :id="intentId"/>
       <Table :head="tableheader" id="trainingsAvailable">
         <tr v-if="trainingsCount == 0">
-          <td>No trainings added yet.</td>
+          <td>{{l.noTrainings}}</td>
         </tr>
         <tr v-for="(t, id) in trainingsOnPage" :active="activeId == t.id"
             @click="$store.commit('trainingSelected', {intentId: intentId, training: t})">
@@ -69,6 +69,9 @@
       }
     },
     computed: {
+      l() {
+        return this.$store.state.lang.intents
+      },
       trainingsOnPage() {
         return this.$store.state.onPage.trainings[this.intentId] || {}
       },
@@ -83,7 +86,7 @@
       },
       tableheader() {
         let count = this.$store.state.loadLimitedCount.trainings[this.intentId] || 0
-        return ['Trained Sentences (' + count + ')']
+        return [`${this.l.trainedSentences} (${count})`]
       },
       entities() {
         return this.$store.state.entities
@@ -168,8 +171,8 @@
 </script>
 
 <style scoped lang="less">
-  @import "../../assets/less/mixins";
-  @import "../../assets/less/colors";
+  @import "../../style/mixins";
+  @import "../../style/colors";
 
   #trainings {
     #trainingSentence {

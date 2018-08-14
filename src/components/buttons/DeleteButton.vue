@@ -2,11 +2,11 @@
   <b-button-group class="deleteButtonGroup">
     <transition name="view" mode="out-in">
       <b-button variant="outline-danger" :size="size" @click="deleteWrapper" v-if="confirmDialog">
-        Confirm
+        {{$root.l.confirm}}
       </b-button>
     </transition>
     <b-button variant="danger" :size="size" @click="confirmDialog = !confirmDialog">
-      {{deleteText}}
+      {{textOnButton}}
     </b-button>
   </b-button-group>
 </template>
@@ -16,9 +16,9 @@
     name: "DeleteButton",
     props: {
       onDelete: Function,
-      addDeleteText: {
+      text: {
         type: String,
-        default: ''
+        default: null
       },
       size: {
         type: String,
@@ -31,8 +31,11 @@
       }
     },
     computed: {
+      textOnButton() {
+        return (this.confirmDialog ? this.$root.l.cancel : this.deleteText)
+      },
       deleteText() {
-        return (this.confirmDialog ? "Cancel" : "Delete" + this.addDeleteText)
+        return (this.text ? this.text : this.$root.l.delete)
       }
     },
     methods: {
@@ -45,7 +48,7 @@
 </script>
 
 <style lang="less" scoped>
-  @import "../../assets/less/transitions";
+  @import "../../style/transitions";
   .deleteButtonGroup {
     float: right;
   }

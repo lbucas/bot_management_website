@@ -1,12 +1,12 @@
 <template>
   <div>
-    <master-detail tableheading="Available Entities" route="entities">
+    <master-detail :tableheading="l.entities" route="entities">
       <b-tabs>
-        <b-tab class="tabTitle" title="General" active>
+        <b-tab class="tabTitle" :title="$root.l.general" active>
           <custom-form id="entityForm" route="entities" :errors-visible="errorsVisible">
-            <fr-input model-key="name" label="Title" :editable="!(entityDetail.id)"/>
-            <fr-input model-key="description" label="Description" big/>
-            <fr-attribute-select model-key="attributeId" label="Connected Attribute"/>
+            <fr-input model-key="name" :label="$root.l.title" :editable="!(entityDetail.id)"/>
+            <fr-input model-key="description" :label="l.desc" big/>
+            <fr-attribute-select model-key="attributeId" :label="l.connectedAttr"/>
           </custom-form>
           <edit route="entities"/>
           <delete :on-delete="deleteEntity" v-if="!onEdit"/>
@@ -14,7 +14,7 @@
                        <!--@mouseover="test"-->
           <cancel route="entities" v-if="onEdit"/>
         </b-tab>
-        <b-tab class="tabTitle" title="Keywords" v-if="!onEdit">
+        <b-tab class="tabTitle" :title="l.keywords" v-if="!onEdit">
           <keywords/>
         </b-tab>
       </b-tabs>
@@ -37,6 +37,9 @@
       }
     },
     computed: {
+      l() {
+        return this.$store.state.lang.entities
+      },
       loadingEntities() {
         return this.$store.state.loaders.entities
       },

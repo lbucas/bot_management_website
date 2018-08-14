@@ -1,0 +1,109 @@
+{
+  "global": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "clear": "Clear",
+    "edit": "Edit",
+    "add": "Add",
+    "update": "Update",
+    "delete": "Delete",
+    "reset": "Reset",
+    "remove": "Remove",
+    "confirm": "Confirm",
+    "general": "General",
+    "title": "Title",
+    "noItems": "No matching items",
+    "leftSide": "Please choose a table from the left side",
+    "rightSide": "Please choose a table from the right side",
+    "fileProcessing": "The file is being processed..",
+    "noEntries": "There's nothing to show..",
+    "page": "page",
+    "of": "of",
+    "noAttrs": "No attributes found for this table",
+    "schemaNotImp": "The schema is not imported yet",
+    "updateAttrs": "Update Attributes",
+    "updateTables": "Update Tables"
+  },
+  "app": {
+    "Datasources": "Datasources",
+    "Connections": "Conncections",
+    "Entities": "Entities",
+    "Questions": "Questions",
+    "Users": "Users",
+    "Settings": "Settings",
+    "Home": "Home"
+  },
+  "connections": {
+    "standard": "Standard",
+    "visual": "Visual",
+    "chooseAttr": "Choose attributes to connect the tables"
+  },
+  "datasources": {
+    "databases": "Databases",
+    "excel": "Excel Files",
+    "flatfiles": "Flatfiles",
+    "lastUpd": "Last Updated",
+    "selTables": "Select the tables to import:",
+    "tabName": "Table Name:",
+    "tabHeaders": "Detected Headers:",
+    "tabEntries": "Entries:",
+    "tables": "Tables",
+    "exUploadHelp": "Click or drop .xlsx files here to upload",
+    "host": "Host",
+    "dbType": "Database Type",
+    "dbName": "Database Name",
+    "port": "Port",
+    "password": "Password",
+    "user": "User",
+    "testLabel": "Test Connection",
+    "testing": "Testing..",
+    "success": "Success!",
+    "conFailed": "Connection to the database with the given credentials did not succeed.",
+    "errMsg": "Error Message:",
+    "uploadFlatfile": "Click or drop .csv, .tsv, or .json here to upload"
+  },
+  "entities": {
+    "entities": "Entities",
+    "desc": "Description",
+    "connectedAttr": "Connected Attribute",
+    "loadKeywords": "Load Keywords from Datasource",
+    "noKeywords": "No keywords added yet.",
+    "summarize": "Select entries from the table to rename them or to summarize multiple to one shared keyword",
+    "keywords": "Keywords"
+  },
+  "intents": {
+    "questions": "Questions",
+    "training": "Training sentences",
+    "aggregation": "Aggregation",
+    "charttype": "Charttype",
+    "groupBy": "Group by",
+    "filterBy": "Filterable by",
+    "filterByHint": "Add Entities to filter by",
+    "customCalc": "Custom Calculation",
+    "addCalc": "Add custom calculation",
+    "validSqlHint": "Please provide a valid SQL calculation containing your selected values:",
+    "fixedFilter": "Fixed Filters",
+    "enterFilterVal": "Enter a filter value",
+    "addFFilter": "Add fixed filter",
+    "targetValues": "Target Values",
+    "addTarget": "Add Target",
+    "addSentence": "Add new sentence",
+    "trainingSentence": "Training sentence:",
+    "markHint": "Mark sentence parts in the input field to add annotations",
+    "value": "Value",
+    "entity": "Entity",
+    "noTrainings": "No trainings added yet.",
+    "trainedSentences": "Trained Sentences"
+  },
+  "home": {
+    "welcome": "Welcome to your Bot Management Dashboard!"
+  },
+  "signin": {
+    "signinAuto": "Signing you in automatically.."
+  },
+  "settings": {
+    "projectSettings": "Project Settings:",
+    "team": "Team Members:",
+    "addMember": "Add a team member by MUID"
+  }
+}

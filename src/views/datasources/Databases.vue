@@ -1,42 +1,40 @@
 <template>
   <div>
-    <master-detail tableheading="Available Databases" route="databases">
+    <master-detail :tableheading="l.databases" route="databases">
       <b-tabs id="dsDetails">
         <b-tab class="tabTitle" title="General" active>
           <custom-form id="dsform" route="databases">
-            <fr-input label="Title" model-key="name"/>
+            <fr-input :label="$root.l.title" model-key="name"/>
             <fr-select model-key="databaseTypeId"
-                             :list="databasetypes" label="Database Type"/>
-            <fr-input label="Host" model-key="connectionObj.host" big/>
-            <fr-input label="Port" model-key="connectionObj.port"/>
-            <fr-input label="DB-Name" model-key="connectionObj.db"/>
-            <fr-input label="User" model-key="connectionObj.user"/>
-            <fr-input label="Password" model-key="connectionObj.password"
-                            inputtype="password"/>
+                       :list="databasetypes" :label="l.dbType"/>
+            <fr-input :label="l.host" model-key="connectionObj.host" big/>
+            <fr-input :label="l.port" model-key="connectionObj.port"/>
+            <fr-input :label="l.dbName" model-key="connectionObj.db"/>
+            <fr-input :label="l.user" model-key="connectionObj.user"/>
+            <fr-input :label="l.password" model-key="connectionObj.password"
+                      inputtype="password"/>
           </custom-form>
           <edit route="databases"/>
-          <b-button variant="primary" id="saveDS" @click="createOrEditDs" :disabled="!connectionTested"
-                    v-if="onEdit" data-toggle="tooltip" data-placement="bottom"
-                    title="Please test the connection first!">
-            Save
+          <b-button variant="primary" id="saveDS" @click="createOrEditDs" v-if="onEdit">
+            {{$root.l.save}}
           </b-button>
           <b-button variant="info" @click="testConnection" v-if="!connectionTested">
             {{connectionTestLabel}}
           </b-button>
-          <b-button variant="success" v-if="connectionTested" @click="connectionTested=false">Success!
+          <b-button variant="success" v-if="connectionTested" @click="connectionTested=false">{{l.success}}
           </b-button>
 
           <delete :on-delete="deleteDS" v-if="!onEdit"/>
           <cancel route="databases"/>
         </b-tab>
-        <b-tab class="tabTitle" title="Tables" v-if="!onEdit">
+        <b-tab class="tabTitle" :title="l.tables" v-if="!onEdit">
           <tables :database="dsDetails.id"/>
         </b-tab>
       </b-tabs>
     </master-detail>
     <b-modal id="connectionTestModal" title="Connection Failed!">
-      Connection to the database with the given credentials did not succeed.
-      Error Message: <br><br>
+      {{l.conFailed}}
+      {{l.errMsg}} <br><br>
       <p><em>{{connectionErr}}</em></p>
     </b-modal>
   </div>
@@ -56,10 +54,13 @@
       return {
         connectionTested: false,
         connectionErr: '',
-        connectionTestLabel: 'Test Connection'
+        connectionTestLabel: this.$store.state.lang.datasources.testLabel
       }
     },
     computed: {
+      l() {
+        return this.$store.state.lang.datasources
+      },
       loading() {
         return this.$store.state.loaders.databases
       },
@@ -107,18 +108,18 @@
         this.$store.dispatch('delete', {route: 'databases', toDelete: this.dsDetails.id})
       },
       async testConnection() {
-        this.connectionTestLabel = 'Testing..'
+        this.connectionTestLabel = this.l.testing
         let details = this.dsDetails.connectionObj
         details.databaseTypeId = this.dsDetails.databaseTypeId
         try {
           let res = await this.$store.dispatch('post', {route: 'databases/testconnection', toPost: details})
-          this.connectionTestLabel = "Test Connection"
+          this.connectionTestLabel = this.l.testLabel
           this.connectionTested = true
           this.editLoading = false
         } catch (err) {
           this.connectionErr = err.responseJSON.error.message
           this.$roothis.modalOpen('connectionTestModal')
-          this.connectionTestLabel = 'Test Connection'
+          this.connectionTestLabel = this.l.testLabel
           this.editLoading = false
         }
       },
@@ -140,7 +141,7 @@
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="less">
-  @import "../../assets/less/mixins";
+  @import "../../style/mixins";
 
   .nav-tabs {
     a {

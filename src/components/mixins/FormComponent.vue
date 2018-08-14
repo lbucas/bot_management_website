@@ -62,7 +62,7 @@
 </script>
 
 <style lang="less">
-  @import "../../assets/less/mixins";
+  @import "../../style/mixins";
   .validationMessage {
     #validationMessage
   }

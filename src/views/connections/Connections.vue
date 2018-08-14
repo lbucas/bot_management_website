@@ -2,13 +2,13 @@
   <div id="editConnections">
     <loader :loading="connectionLoading"/>
     <b-tabs id="connectionTabs">
-      <b-tab class="tabTitle" title="Standard" active>
+      <b-tab class="tabTitle" :title="l.standard" active>
         <div>
           <b-row>
             <table-selection v-model="editJoin.table1"/>
             <table-selection v-model="editJoin.table2" :joined="isJoined" :disabled="editJoin.table1"/>
             <b-col lg="6" id="selectionCol">
-              <h6>Choose attributes to connect the tables</h6>
+              <h6>{{l.chooseAttr}}</h6>
               <b-row>
                 <attribute-select v-model="editJoin.attribute1" :table-id="editJoin.table1"
                                   :disabled="editJoin.id && !editing"/>
@@ -29,7 +29,7 @@
           </b-row>
         </div>
       </b-tab>
-      <b-tab class="tabTitle" title="Visual">
+      <b-tab class="tabTitle" :title="l.visual">
         <b-row>
           <b-col cols="3">
             <table class="table connectionTable">
@@ -102,6 +102,9 @@
       }
     },
     computed: {
+      l() {
+        return this.$store.state.lang.connections
+      },
       datasources() {
         return this.$store.state.datasources
       },
@@ -199,10 +202,11 @@
 </script>
 
 <style lang="less">
-  @import "../../assets/less/colors";
-  @import "../../assets/less/mixins";
+  @import "../../style/colors";
+  @import "../../style/mixins";
 
   #selectionCol {
+    margin-top: 1rem;
     text-align: center;
     select {
       margin-top: .5em;

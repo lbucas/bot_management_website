@@ -1,29 +1,26 @@
 <template>
-  <fr-blank label="Fixed Filters">
+  <fr-blank :label="l.fixedFilter">
     <div v-for="filter in filters">
       <div v-if="currentActive == filter.attributeId && onEdit">
         <attribute-select v-model="changeAttribute"/>
-        <h5>
-          <b-badge v-for="(v,i) in currentValues">
-            {{v}}
-            <span class="removeFromList" @click="removeFromFilters(i)">×</span>
-          </b-badge>
-        </h5>
+        <badges :values="currentValues" :remove="removeFromFilters"/>
         <suggestion-select v-if="currentActive != -1" v-model="addNext" :apilookup="apilookup"
-                           placeholder="Enter a filter value" class="filterInput"
+                           :placeholder="l.enterFilterVal" class="filterInput"
                            clear-after-select add-button/>
       </div>
       <div v-else class="filterList">
         <div class="editFixedFilter" @click="edit(filter.attributeId)" v-if="onEdit">
           <icon icon="edit"/>
         </div>
-        <span class="attributeName">{{$tools.attributeFullName(filter.attributeId)}}:</span> {{filter.filters | filtersFlat}}
+        <span class="attributeName">{{$tools.attributeFullName(filter.attributeId)}}:</span> {{filter.filters |
+        filtersFlat}}
       </div>
     </div>
     <div id="filterButtons" v-if="onEdit">
-      <b-button v-if="newFilterPossible" variant="outline-primary" size="sm" @click="addNewFilter">Add fixed filter
+      <b-button v-if="newFilterPossible" variant="outline-primary" size="sm" @click="addNewFilter">{{l.addFFilter}}
       </b-button>
-      <b-button v-if="currentActive" variant="outline-danger" size="sm" @click="removeAttrFromFilters()">Remove
+      <b-button v-if="currentActive" variant="outline-danger" size="sm" @click="removeAttrFromFilters()">
+        {{$root.l.remove}}
       </b-button>
     </div>
   </fr-blank>
@@ -33,16 +30,20 @@
   import SuggestionSelect from "../../components/form/SuggestionSelect"
   import AttributeSelect from "../../components/form/AttributeCompleteSelect"
   import Icon from "../../components/Icon"
+  import Badges from "../../components/Badges"
 
   export default {
     name: "FixedFilters",
-    components: {Icon, AttributeSelect, SuggestionSelect},
+    components: {Badges, Icon, AttributeSelect, SuggestionSelect},
     data() {
       return {
         currentActive: null
       }
     },
     computed: {
+      l() {
+        return this.$store.state.lang.intents
+      },
       filters: {
         get() {
           let f = this.$store.state.detailItem.intents.fixedFilter
@@ -155,22 +156,6 @@
 </script>
 
 <style lang="less" scoped>
-  @import "../../assets/less/mixins";
-  @import "../../assets/less/colors";
-
-  h5 {
-    padding-top: .5rem;
-    .badge {
-      #noUserSelect;
-      margin: .25rem .25rem .25rem .25rem;
-      background: white;
-      color: @richPurple;
-      border: 1px solid @richPurple;
-      .removeFromList {
-        cursor: pointer;
-      }
-    }
-  }
 
   .editFixedFilter {
     display: inline-block;

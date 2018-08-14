@@ -1,12 +1,12 @@
 <template>
   <b-tabs id="dsTabs">
-    <b-tab title="Databases">
+    <b-tab :title="l.databases">
       <databases/>
     </b-tab>
-    <b-tab title="Excel Files">
+    <b-tab :title="l.excel">
       <excel/>
     </b-tab>
-    <b-tab title="Flatfiles">
+    <b-tab :title="l.flatfiles">
       <flatfiles/>
     </b-tab>
   </b-tabs>
@@ -22,6 +22,11 @@
     components: {Flatfiles, Databases, Excel},
     created() {
       this.$store.dispatch('load', 'datasources')
+    },
+    computed: {
+      l() {
+        return this.$store.state.lang.datasources
+      }
     }
   }
 </script>

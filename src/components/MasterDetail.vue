@@ -9,7 +9,7 @@
         </h5>
         <div class="table-responsive">
           <table class="table table-hover">
-            <span v-if="!loading && tclength == 0">There's nothing to show.</span>
+            <span v-if="!loading && tclength == 0">{{$root.l.noEntries}}</span>
             <tr v-for="(t, id) in tablecontent" @click="chooseEntry(t)" v-bind:active="(id == activeId)">
               <td>
                 <span class="tablePrimary float-left">{{t.name}}</span>
@@ -104,8 +104,8 @@
 </script>
 
 <style lang="less" scoped>
-  @import "../assets/less/colors";
-  @import "../assets/less/mixins";
+  @import "../style/colors";
+  @import "../style/mixins";
 
   .mdtable {
     z-index: 2;

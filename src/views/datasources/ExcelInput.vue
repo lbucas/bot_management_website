@@ -5,7 +5,7 @@
     <file-input :options="options" :uploaded="fileUploaded" v-model="file.name">
       <div>
         <icon icon="excelDark" size="xl"/>
-        <div class="dz-message">Click or drop .xlsx files here to upload</div>
+        <div class="dz-message">{{$store.state.lang.datasources.exUploadHelp}}</div>
       </div>
     </file-input>
 

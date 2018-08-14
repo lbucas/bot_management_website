@@ -1,25 +1,25 @@
 <template>
-  <master-detail route="intents" tableheading="Available Questions">
+  <master-detail route="intents" :tableheading="l.questions">
     <div>
       <b-tabs>
-        <b-tab class="tabTitle" title="General" active>
+        <b-tab class="tabTitle" :title="$root.l.general" active>
           <custom-form id="intentDetails" route="intents">
-            <fr-input model-key="name" :editable="!intentDetail.id" label="Title"/>
+            <fr-input model-key="name" :editable="!intentDetail.id" :label="$root.l.title"/>
             <target-values/>
             <transition name="view" mode="out-in">
               <fr-select v-if="intentDetail.calculationNeeded === null"
-                         model-key="aggregationId" label="Aggregation" :disabled="targetValueLength > 1"
+                         model-key="aggregationId" :label="l.aggregation" :disabled="targetValueLength > 1"
                          list-display-value="operation" :list="aggregations"/>
             </transition>
             <custom-calculation/>
-            <fr-select model-key="charttypeId" label="Charttype" :list="charttypes" list-display-value="displayName"
+            <fr-select model-key="charttypeId" :label="l.charttype" :list="charttypes" list-display-value="displayName"
                        :disabled="targetValueLength > 1 && !intentDetail.calculationNeeded"/>
             <transition name="view" mode="out-in">
-              <fr-attribute-select v-if="groupByVisible" model-key="groupById" label="Group By"
+              <fr-attribute-select v-if="groupByVisible" model-key="groupById" :label="l.groupBy"
                                    :datatype="groupByDatatype"/>
             </transition>
             <fr-array-input model-key="filterByIds" :lookup-list="entitiesWithoutGroupedBy"
-                            label="Filterable by" :placeholder="'Add Entities to filter by'"/>
+                            :label="l.filterBy" :placeholder="l.filterByHint"/>
             <fixed-filters/>
           </custom-form>
           <save :on-save="saveIntent" v-if="onEdit" :disabled="!savable"/>
@@ -27,7 +27,7 @@
           <edit route="intents"/>
           <delete v-if="!onEdit" :on-delete="deleteIntent"/>
         </b-tab>
-        <b-tab v-if="!onEdit" class="tabTitle" title="Training sentences">
+        <b-tab v-if="!onEdit" class="tabTitle" :title="l.training">
           <training :intentId="intentDetail.id"/>
         </b-tab>
       </b-tabs>
@@ -49,6 +49,9 @@
     mixins: [StoreItems],
     name: "intents",
     computed: {
+      l() {
+        return this.$store.state.lang.intents
+      },
       onEdit() {
         return this.$store.state.onEdit.intents
       },

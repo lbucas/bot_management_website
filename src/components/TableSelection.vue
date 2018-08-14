@@ -82,8 +82,8 @@
 </script>
 
 <style lang="less" scoped>
-  @import "../assets/less/mixins";
-  @import "../assets/less/colors";
+  @import "../style/mixins";
+  @import "../style/colors";
 
   .connectionTable {
     #noUserSelect !important;

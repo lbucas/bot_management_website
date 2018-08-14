@@ -5,13 +5,13 @@
       <div class="updateKeywordsWrapper">
         <center-button>
           <update class="updateKeywords" :update="updateKeywords" :loading="keywordsLoading"
-                         text="Load Keywords from Datasource" size="sm"/>
+                         :text="l.loadKeywords" size="sm"/>
         </center-button>
       </div>
       <Pagination subroute="keywords" :id="attributeId"/>
       <Table>
         <tr v-if="keywordsCount == 0">
-          <td>No keywords added yet.</td>
+          <td>{{l.noKeywords}}</td>
         </tr>
         <tr v-for="(k, id) in keywordsOnPage"
             @click="$store.commit('keywordSelected', {attrId: attributeId, keyword: k})"
@@ -23,8 +23,7 @@
       </Table>
     </b-col>
     <b-col lg="6">
-      <h6 class="selectKwHint" v-show="selectedLength == 0">Select entries from the table to rename them or to summarize
-        multiple to one shared keyword</h6>
+      <h6 class="selectKwHint" v-show="selectedLength == 0">{{l.summarize}}</h6>
       <custom-form v-show="selectedLength > 0" :inline="false">
         <fr-input label="New Keyword Name" v-model="keywordName"/>
         <fr-blank label="Keywords to Summarize" v-show="selectedLength > 1">
@@ -55,6 +54,9 @@
       Pagination
     },
     computed: {
+      l() {
+        return this.$store.state.lang.entities
+      },
       keywordsLoading() {
         let l = this.$store.state.loaders.keywords[this.attributeId]
         if (l === undefined) {
@@ -140,7 +142,7 @@
 </script>
 
 <style lang="less" scoped>
-  @import '../../assets/less/mixins';
+  @import '../../style/mixins';
 
   .updateKeywordsWrapper {
     width: 100%;

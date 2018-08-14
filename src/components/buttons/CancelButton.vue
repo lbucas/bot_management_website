@@ -23,7 +23,7 @@
         return this.$store.state.onEdit[this.route]
       },
       text() {
-        return (this.newItem ? 'Clear' : 'Cancel')
+        return (this.newItem ? this.$root.l.clear : this.$root.l.cancel)
       }
     },
     methods: {

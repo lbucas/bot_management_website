@@ -101,6 +101,8 @@ const api = {
     })
   },
   translateRoute(route) {
+    if (route === 'projects') return 'projects/getOwnProjects' // Projects route requires special treatment
+    // If the requested route is connected to a project the route project/{projectId}/{requestedRoute} is used
     return (route in api.dependentFromProject ? 'projects/' + api.projectId + '/' + route : route)
   },
   checkDependencies(route) {

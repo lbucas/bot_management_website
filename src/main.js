@@ -80,9 +80,11 @@ new Vue({
   created() {
     let t = this
     t.$store.state.api.setErrorHandler((err, route, data) => {
-      t.$store.dispatch('errorHandling', {err, route, data})
+      t.$store.dispatch('errorHandling', {err, route, data, router: t.$router})
     })
     t.$tools.store = t.$store
+    let langPreference = tools.cookies.get('langPreference') || 'DE'
+    t.$store.commit('setLang', {lang: t.$tools.lang(langPreference), name: langPreference})
   },
   methods: {
     modalOpen(id) {
@@ -90,6 +92,11 @@ new Vue({
     },
     modalClose(id) {
       this.$emit('bv::hide::modal', id)
+    }
+  },
+  computed: {
+    l() {
+      return this.$store.state.lang.global
     }
   }
 })

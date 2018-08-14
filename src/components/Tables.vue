@@ -3,7 +3,7 @@
     <table class="table" id="dsTables">
       <tbody>
       <tr v-if="Object.keys(tables).length == 0" class="noEntries">
-        <td>The schema is not imported yet</td>
+        <td>{{$root.l.schemaNotImp}}</td>
       </tr>
       <tr v-for="(t, id) in tables">
         <td>
@@ -13,14 +13,13 @@
         </span>
           <b-collapse :id="'tables' + id" class="mt-2">
             <ul>
-              <li v-if="Object.keys(t.attributes).length == 0" class="noEntries">No attributes found for this
-                table
+              <li v-if="Object.keys(t.attributes).length == 0" class="noEntries"> {{$root.l.noAttrs}}
               </li>
               <li v-for="a in t.attributes">
                 {{a.name}} ({{a.datatype}})
               </li>
               <li>
-                <update-button class="updateAttribute" text="Update Attributes"
+                <update-button class="updateAttribute" :text="$root.l.updateAttrs"
                                :update="function(){updateAttributes(t.id)}" v-if="database"
                                :loading="updatingAttr[t.id] || tablesLoading || false" size="sm"/>
               </li>
@@ -30,7 +29,7 @@
       </tr>
       </tbody>
     </table>
-    <update-button v-if="database" :loading="tablesLoading" :update="updateTables" text="Update Tables"/>
+    <update-button v-if="database" :loading="tablesLoading" :update="updateTables" :text="$root.l.updateTables"/>
   </div>
 </template>
 

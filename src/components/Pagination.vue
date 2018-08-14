@@ -1,7 +1,7 @@
 <template>
   <div class="pageNavigator" v-if="!loading && totalPages > 1">
     <b-button variant="outline-secondary" class="back" size="sm" v-if="page> 1" @click="pageTurn(false)" outline>←</b-button>
-    Page {{page}} of {{totalPages}}
+    {{$root.l.page}} {{page}} {{$root.l.of}} {{totalPages}}
     <b-button variant="outline-secondary" size="sm" v-if="page < totalPages" @click="pageTurn(true)">→</b-button>
   </div>
 

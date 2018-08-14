@@ -19,7 +19,7 @@
             <li class="navLink font-weight-light" @click="route(navLinkKeys[nl] || nl)"
                 :active="$route.name === (navLinkKeys[nl] || nl)">
               <icon :icon="navLinkKeys[nl] || nl" class="navIcon"/>
-              {{nl}}
+              {{l[nl]}}
             </li>
           </ul>
         </div>
@@ -30,10 +30,15 @@
           <b-col id="currentPage" class="text-left">
             <h4>
               <icon id="currentPageIcon" :icon="navLinkKeys[$route.name] || $route.name"/>
-              {{$route.name}}
+              {{l[$route.name]}}
             </h4>
           </b-col>
           <b-col id="userInfo" class="text-right">
+            <b-dropdown id="langSel" :text="$store.state.selectedLang">
+              <b-dropdown-item v-for="(dispLang, lang) in langs" @click="selectLang(lang)">
+                {{dispLang}}
+              </b-dropdown-item>
+            </b-dropdown>
             {{userDisplayName}}
           </b-col>
           <b-col id="mobileMenuIconCol" class="text-right">
@@ -93,7 +98,7 @@
               </div>
             </td>
             <td>
-              <b-button variant="primary" id="saveProject" @click="saveProject">Save</b-button>
+              <b-button variant="primary" id="saveProject" @click="saveProject">{{$root.l.save}}</b-button>
             </td>
           </tr>
           </tbody>
@@ -141,6 +146,7 @@
 
 <script>
   import ErrorDisplay from "./components/ErrorDisplay"
+  import supportedLangs from './lang/support'
 
   export default {
     name: 'app',
@@ -162,10 +168,14 @@
         createProject: false,
         newProjectName: '',
         datasources: {},
-        mobileMenuOpen: false
+        mobileMenuOpen: false,
+        langs: supportedLangs
       }
     },
     computed: {
+      l() {
+        return this.$store.state.lang.app
+      },
       userDisplayName() {
         return this.user.firstname + ' ' + this.user.lastname
       },
@@ -220,6 +230,10 @@
       },
       getUser() {
         this.$store.dispatch('load', {route: 'merckUsers/whoAmI', target: 'user'})
+      },
+      selectLang(name) {
+        let lang = this.$tools.lang(name)
+        this.$store.commit('setLang', {lang, name})
       }
     },
     created() {
@@ -252,9 +266,9 @@
 
 <style lang="less">
   // Variables for Merck CI;
-  @import "assets/less/colors";
-  @import "assets/less/mixins";
-  @import "assets/less/transitions";
+  @import "style/colors";
+  @import "style/mixins";
+  @import "style/transitions";
 
   // global settings
   #app {
@@ -445,6 +459,13 @@
     .vn-title {
       font-size: .9rem;
     }
+  }
+
+  #langSel__BV_toggle_ {
+    background: none;
+    font-size: .7rem;
+    border: none;
+    box-shadow: none;
   }
 
 </style>

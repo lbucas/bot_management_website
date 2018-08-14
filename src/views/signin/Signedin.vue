@@ -2,7 +2,7 @@
   <div id="signin">
     <div class="card" id="loginCard">
       <img src="../../assets/logo/emdgreen.png"/>
-      <h6>Signing you in automatically..</h6>
+      <h6>{{l.singinAuto}}</h6>
     </div>
   </div>
 </template>
@@ -19,6 +19,11 @@
       this.$tools.cookies.set('access_token_validUntil', today.setDate(today.getDate() + 14))
       this.$parent.projectCheck()
       this.$router.push('/')
+    },
+    computed: {
+      l() {
+        return this.$store.state.lang.signin
+      }
     }
   }
 </script>

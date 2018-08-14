@@ -1,14 +1,14 @@
 <template>
-  <fr-blank label="Custom Calculation">
-    <b-button v-if="calc === null && onEdit" variant="outline-primary" size="sm" @click="addCalculation">Add custom
-      calculation
+  <fr-blank :label="l.customCalc">
+    <b-button v-if="calc === null && onEdit" variant="outline-primary" size="sm" @click="addCalculation">
+      {{l.addCalc}}
     </b-button>
     <div v-else>
-      <p v-if="onEdit">Please provide a valid SQL calculation containing your selected values:</p>
+      <p v-if="onEdit">{{l.validSqlHint}}</p>
       <b-form-textarea v-model="calc" :plaintext="!onEdit" :rows="3" id="customCalc"/>
       <div v-if="onEdit">
-        <b-button variant="outline-secondary" size="sm" @click="addCalculation">Reset</b-button>
-        <b-button variant="outline-secondary" size="sm" @click="calc = null">Cancel</b-button>
+        <b-button variant="outline-secondary" size="sm" @click="addCalculation">{{$root.l.reset}}</b-button>
+        <b-button variant="outline-secondary" size="sm" @click="calc = null">{{$root.l.cancel}}</b-button>
       </div>
     </div>
   </fr-blank>
@@ -22,6 +22,9 @@
     name: "CustomCalculation",
     components: {CenterButton, FormRowBlank},
     computed: {
+      l() {
+        return this.$store.state.lang.intents
+      },
       calc: {
         get() {
           return this.$store.state.detailItem.intents.calculationNeeded

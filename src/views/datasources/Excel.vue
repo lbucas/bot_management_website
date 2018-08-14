@@ -1,17 +1,18 @@
 <template>
-  <master-detail tableheading="Available Excel Files" route="excelFiles" :on-item-change="emptyParsedFile">
+  <master-detail :tableheading="l.excel" route="excelFiles"
+                 :on-item-change="emptyParsedFile">
     <b-tabs>
-      <b-tab class="tab-title" title="General">
+      <b-tab class="tab-title" :title="$root.l.general">
         <b-row id="excelFileDetails">
           <b-col>
             <custom-form route="excelFiles">
-              <fr-input model-key="name" label="Title"/>
-              <fr-display model-key="uploaded" label="Last updated" filter="date"/>
+              <fr-input model-key="name" :label="$root.l.title"/>
+              <fr-display model-key="uploaded" :label="l.lastUpd" filter="date"/>
             </custom-form>
             <div v-if="onEdit">
               <excel-input v-model="parsedFile" v-if="!fileParsed"/>
               <div v-else>
-                <h6>Select the tables to import:</h6>
+                <h6>{{l.selTables}}</h6>
                 <ul class="sheetList">
                   <li v-for="(sheet, sheetName) in parsedFile.sTables">
                     <b>{{sheetName}}</b>
@@ -26,13 +27,13 @@
                       <span v-if="exTable.name"> - {{exTable.name}}</span>
                     </span>
                         <b-collapse :id="sheetName + '_' + startCell" class="mt-2">
-                          <b-form-group label="Table Name:" horizontal>
+                          <b-form-group :label="l.tabName" horizontal>
                             <b-form-input v-model="exTable.name"/>
                           </b-form-group>
-                          <b-form-group label="Detected Headers:" horizontal>
+                          <b-form-group :label="l.tabHeaders" horizontal>
                             <b-form-input readonly plaintext v-model="exTable.headers.join(', ')"/>
                           </b-form-group>
-                          <b-form-group label="Entries:" horizontal>
+                          <b-form-group :label="l.tabEntries" horizontal>
                             <b-form-input readonly plaintext v-model="exTable.entries"/>
                           </b-form-group>
 
@@ -50,7 +51,7 @@
           </b-col>
         </b-row>
       </b-tab>
-      <b-tab class="tabTitle" title="Tables">
+      <b-tab class="tabTitle" :title="l.tables">
         <tables :excelFile="file.id"/>
       </b-tab>
     </b-tabs>
@@ -74,6 +75,9 @@
       }
     },
     computed: {
+      l() {
+        return this.$store.state.lang.datasources
+      },
       onEdit() {
         return this.$store.state.onEdit.excelFiles
       },
@@ -133,7 +137,7 @@
 </script>
 
 <style lang="less">
-  @import "../../assets/less/mixins";
+  @import "../../style/mixins";
 
   #excelFileDetails {
     .detectedTables {

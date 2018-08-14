@@ -2,7 +2,7 @@
   <div id="signin">
     <div class="card" id="loginCard">
       <img src="../../assets/logo/emdgreen.png"/>
-      <h6>Signing you in automatically..</h6>
+      <h6>S{{l.singinAuto}}</h6>
     </div>
 
   </div>
@@ -26,6 +26,11 @@
           scope = 'management'
       }
       window.location.href = apiUrl + 'auth/' + scope + '/azure'
+    },
+    computed: {
+      l() {
+        return this.$store.state.lang.signin
+      }
     }
   }
 </script>

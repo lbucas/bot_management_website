@@ -1,32 +1,29 @@
 <template>
-  <b-row>
-    <b-col>
-      <input :class="{'suseInput': true, 'form-control': true, 'valueSelected': valueSelected}" autocomplete="off"
-             :disabled="disabled" v-model="inputValue" @click="suggestionsVisible=true"
-             @keyup.up="suggestionKeyChange(false)"
-             @keyup.down="suggestionKeyChange(true)" @keyup.enter="select" :placeholder="placeholder"/>
-      <div class="suggestions" v-if="suggestionsVisible" :valueSelected="valueSelected">
+  <input-add-button :show-add="addButton && inputValue.length>0" :on-add="addInputValue">
+    <input :class="{'suseInput': true, 'form-control': true, 'valueSelected': valueSelected}" autocomplete="off"
+           :disabled="disabled" v-model="inputValue" @click="suggestionsVisible=true"
+           @keyup.up="suggestionKeyChange(false)"
+           @keyup.down="suggestionKeyChange(true)" @keyup.enter="select" :placeholder="placeholder"/>
+    <div class="suggestions" v-if="suggestionsVisible" :valueSelected="valueSelected">
       <span class="closeSuggestions" @click.stop="suggestionsVisible=false"
             v-if="(Object.keys(suggestions).length !== 0)">×</span>
-        <ul class="suggestionList">
-          <li v-if="showNoItemsMsg" class="noItems">No items to select
-          </li>
-          <li v-for="(suggestion, id) in suggestions" :active="activeId == id" @mouseover="activeId=id"
-              @click="select">
-            {{suggestion[listDisplayValue]}}
-          </li>
-        </ul>
-      </div>
-    </b-col>
-    <b-col v-if="addButton && inputValue.length>0" cols="1">
-      <b-button variant="outline-primary" size="sm" @click="addInputValue">+</b-button>
-    </b-col>
-  </b-row>
+      <ul class="suggestionList">
+        <li v-if="showNoItemsMsg" class="noItems">{{$root.l.noItems}}
+        </li>
+        <li v-for="(suggestion, id) in suggestions" :active="activeId == id" @mouseover="activeId=id"
+            @click="select">
+          {{suggestion[listDisplayValue]}}
+        </li>
+      </ul>
+    </div>
+  </input-add-button>
 </template>
 
 <script>
+  import InputAddButton from "../InputAddButton"
   export default {
     name: 'SuggestionSelect',
+    components: {InputAddButton},
     props: {
       value: String,
       list: {

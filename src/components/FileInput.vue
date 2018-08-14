@@ -2,7 +2,7 @@
   <div>
     <div id="uploadProgress" v-if="uploading">
       <b-progress v-if="!fileIsProcessing" :value="progress" :max="1" show-progress animated/>
-      <p v-else>The file is being processed..</p>
+      <p v-else>{{$root.l.fileProcessing}}</p>
     </div>
     <vue-clip :options="options" :on-added-file="fileAdded" :on-complete="uploaded" :on-sending="beforeFileSend"
               :on-total-progress="totalProgress">
@@ -52,9 +52,9 @@
 </script>
 
 <style lang="less">
-  @import "../assets/less/mixins";
-  @import "../assets/less/colors";
-  @import "../assets/less/transitions";
+  @import "../style/mixins";
+  @import "../style/colors";
+  @import "../style/transitions";
 
   .dz-clickable {
     width: 100%;

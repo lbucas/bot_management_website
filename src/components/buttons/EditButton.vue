@@ -1,5 +1,5 @@
 <template>
-  <b-button variant="primary" @click="$store.commit('editing', route)" v-if="!onEdit">Edit</b-button>
+  <b-button variant="primary" @click="$store.commit('editing', route)" v-if="!onEdit">{{$root.l.edit}}</b-button>
 </template>
 
 <script>

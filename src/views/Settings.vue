@@ -3,23 +3,21 @@
     <loader :loading="loading"/>
     <b-row>
       <b-col lg="6">
-        <h5>Project Settings</h5>
-        <form>
-          <form-row-input v-model="project.name" label="Project Name"/>
-          <fr-blank big  label="Collaborators">
-
-          </fr-blank>
-          <b-button @click="saveProject" variant="primary">Save</b-button>
-          <b-button @click="" variant="secondary">Reset</b-button>
-        </form>
+        <h5>{{l.projectSettings}}</h5>
+        <label> {{l.team}}</label>
+        <input-add-button :show-add="validTeamMember" :on-add="addMember">
+          <b-input v-model="nextTeamMember" :placeholder="l.addMember"/>
+        </input-add-button>
+        <badges :values="team" :remove="removeMember"/>
       </b-col>
       <b-col></b-col>
       <b-col lg="5">
         <h5>Danger Zone</h5>
-        <delete-button :on-delete="deleteProject"/>
+        <center-button>
+          <delete :on-delete="deleteProject"/>
+        </center-button>
       </b-col>
     </b-row>
-
 
 
   </div>
@@ -27,52 +25,67 @@
 </template>
 
 <script>
-  import FormRowInput from "../components/form/FormRowInput"
-  import FormRowBlank from "../components/form/FormRowBlank"
-  import Loader from "../components/Loader"
-  import DeleteButton from "../components/buttons/DeleteButton"
+  import InputAddButton from "../components/InputAddButton"
+  import Badges from "../components/Badges"
+  import CenterButton from "../components/buttons/CenterButton"
+
   export default {
     name: 'settings',
-    components: {DeleteButton, Loader, FormRowBlank, FormRowInput},
+    components: {CenterButton, Badges, InputAddButton},
     data() {
       return {
+        nextTeamMember: '',
         loading: false
       }
     },
     computed: {
+      l() {
+        return this.$store.state.lang.settings
+      },
       projectId() {
         return this.$store.state.projectId
       },
       project() {
         return this.$store.state.projects[this.projectId]
       },
-      collaborators() {
-        return {}
+      team() {
+        return this.project ? this.project.teamMemberIds : []
+      },
+      validTeamMember() {
+        return !this.team.includes(this.nextTeamMember) &&
+          this.nextTeamMember.length === 7 &&
+          ['m', 'M', 'x', 'X'].includes(this.nextTeamMember.substring(0, 1)) &&
+          Number.isInteger(parseInt(this.nextTeamMember.substring(1)))
       }
     },
-    created() {},
+    created() {
+    },
     methods: {
-      saveProject() {
-        var t = this
-        var toSend = {
-          name: t.project.name,
-          merckUserId: t.project.merckUserId
-        }
-        t.loading = true
-        this.$root.patch(
-          'projects/' + this.project.id,
-          toSend,
-          function () {
-            t.loading = false
-          }
-        )
+      async addMember() {
+        this.loading = true
+        await this.$store.dispatch('post', {
+          route: `projects/${this.projectId}/addMember`,
+          toPost: {MUID: this.nextTeamMember}
+        })
+        let p = {}
+        this.$tools.clone(p, this.project)
+        p.teamMemberIds.push(this.nextTeamMember)
+        this.$store.commit('set', {route: 'projects', item: this.$tools.arrayToObject([p])})
+        this.nextTeamMember = ''
+        this.loading = false
       },
-      deleteProject() {
-        var t = this
-        t.$store.dispatch('delete', {route: 'projects', toDelete: t.projectId})
-          .then(() => {
-            t.$root.modalOpen('projectModal')
-          })
+      async deleteProject() {
+        await this.$store.dispatch('delete', {route: 'projects', toDelete: this.projectId})
+        this.$root.modalOpen('projectModal')
+      },
+      removeMember(i) {
+      }
+    },
+    watch: {
+      nextTeamMember(v) {
+        v = v.replace('m', 'M')
+        v = v.replace('x', 'X')
+        this.nextTeamMember = v
       }
     }
   }

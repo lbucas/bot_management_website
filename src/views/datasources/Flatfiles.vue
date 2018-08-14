@@ -1,16 +1,16 @@
 <template>
-  <master-detail tableheading="Available Flat Files" route="flatfiles">
+  <master-detail :tableheading="l.flatfiles" route="flatfiles">
     <b-row id="excelFileDetails">
       <b-col>
         <custom-form route="flatfiles">
           <fr-input model-key="name" label="Title"/>
-          <fr-display model-key="uploaded" label="Last updated" filter="date"/>
+          <fr-display model-key="uploaded" :label="l.lastUpd" filter="date"/>
         </custom-form>
         <div v-if="onEdit">
           <file-input v-model="file.name" :options="options" :uploaded="fileUploaded">
             <div>
               <icon icon="file" size="xl"/>
-              <div class="dz-message">Click or drop .csv, .tsv, or .json here to upload</div>
+              <div class="dz-message">{{l.uploadFlatfile}}</div>
             </div>
           </file-input>
         </div>
@@ -19,7 +19,7 @@
         <cancel route="flatfiles" v-if="onEdit"/>
       </b-col>
     </b-row>
-    </master-detail>
+  </master-detail>
 </template>
 
 <script>
@@ -39,6 +39,9 @@
       FileInput
     },
     computed: {
+      l() {
+        return this.$store.state.lang.datasources
+      },
       file() {
         return this.$store.state.detailItem.flatfiles
       },
@@ -52,7 +55,8 @@
           url() {
             return file.id
               ? `${api.url()}flatfiles/${file.id}/analyze?access_token=${api.token}&projectId=${api.projectId}`
-              : `${api.url()}flatfiles/analyze?access_token=${api.token}&projectId=${api.projectId}`
+              : `${api.url()}flatfiles/upload?access_token=${api.token}&projectId=${api.projectId}` +
+              `&name=${file.name}`
           },
           paramName: 'file'
         }
@@ -60,11 +64,30 @@
     },
     methods: {
       fileUploaded(file, status, xhr) {
-        // TODO
+        let st = this.$store
+        let res = JSON.parse(xhr.response)
+        let ff = {}
+        ff[res.id] = res
+        if (status === 'success') {
+          let route = 'flatfiles'
+          st.commit('set', {route, item: ff})
+          st.commit('endEditing', route)
+          st.commit('setDetailItem', {route, item: res})
+        } else {
+          let error = {
+            status: xhr.status,
+            message: res.message,
+            route: 'Flatfiles'
+          }
+          st.dispatch('errorHandling', {route: 'flatfiles', error})
+        }
       },
       deleteFlatfile() {
-        // TODO
+        this.$store.dispatch('delete', {route: 'flatfiles', toDelete: this.file.id})
       }
+    },
+    created() {
+      this.$store.dispatch('load', 'flatfiles')
     }
   }
 </script>

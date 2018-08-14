@@ -8,7 +8,7 @@
         </option>
       </select>
     </div>
-    <span v-else class="selectNote">Please choose a table from the {{leftRight}} side</span>
+    <span v-else class="selectNote">{{chooseATable}}</span>
 
   </b-col>
 </template>
@@ -33,8 +33,8 @@
           this.$emit("input", v)
         }
       },
-      leftRight() {
-        return this.left ? 'left' : 'right'
+      chooseATable() {
+        return this.left ? this.$root.l.leftSide : this.$root.l.rightSide
       },
       table() {
         return this.tableId ? this.$store.getters.tables[this.tableId] : null

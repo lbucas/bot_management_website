@@ -1,0 +1,109 @@
+{
+  "global": {
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "edit": "Bearbeiten",
+    "update": "Aktualisieren",
+    "general": "Allgemein",
+    "title": "Name",
+    "clear": "Zurücksetzen",
+    "delete": "Löschen",
+    "confirm": "Bestätigen",
+    "add": "Hinzufügen",
+    "reset": "Zurücksetzen",
+    "remove": "Löschen",
+    "noItems": "Keine Treffer..",
+    "leftSide": "Wählen Sie eine Tabelle von der linken Seite",
+    "rightSide": "Wählen Sie eine Tabelle von der rechten Seite",
+    "fileProcessing": "Die Datei wird verarbeitet",
+    "noEntries": "Keine vorhanden..",
+    "page": "Seite",
+    "of": "von",
+    "noAttrs": "Noch keine Attribute für diese Tabelle importiert",
+    "schemaNotImp": "Das Schema wurde noch nicht importiert",
+    "updateAttrs": "Attribute aktualisieren",
+    "updateTables": "Tabellen aktualisieren"
+  },
+  "app": {
+    "Datasources": "Datenquellen",
+    "Connections": "Verbindungen",
+    "Entities": "Entitäten",
+    "Questions": "Fragen",
+    "Users": "User",
+    "Settings": "Einstellungen",
+    "Home": "Home"
+  },
+  "connections": {
+    "standard": "Standard",
+    "visual": "Visuell",
+    "chooseAttr": "Wählen Sie Attribute aus um die Tabellen zu verbinden"
+  },
+  "datasources": {
+    "databases": "Datenbanken",
+    "excel": "Excel Dateien",
+    "flatfiles": "Weitere Dateien",
+    "lastUpd": "Zuletzt hochgeladen",
+    "selTables": "Wählen Sie zu importierende Tabellen aus",
+    "tabName": "Tabellen-Name",
+    "tabHeaders": "Spalten-Namen",
+    "tabEntries": "Einträge",
+    "tables": "Tabellen",
+    "exUploadHelp": "Klicken oder .xlsx Dateien hierhin ziehen zum Hochladen",
+    "host": "Host",
+    "dbType": "Datenbank-Typ",
+    "dbName": "Datenbank-Name",
+    "port": "Port",
+    "password": "Passwort",
+    "user": "User",
+    "testLabel": "Verbindung testen",
+    "testing": "Testet..",
+    "success": "Erfolgreich!",
+    "errMsg": "Fehlermeldung:",
+    "conFailed": "Verbindung zu der angegebenen Datenbank konnte nicht hergestellt werden. ",
+    "uploadFlatfile": "Klicken oder .csv, .tsv, or .json Dateien hierhin ziehen zum Hochladen"
+  },
+  "entities": {
+    "entities": "Entitäten",
+    "desc": "Beschreibung",
+    "connectedAttr": "Verbundenes Attribut",
+    "loadKeywords": "Schlagwörter aus der Datenquelle laden",
+    "noKeywords": "Noch keine Schlagwörter hinzugefügt",
+    "summarize": "Wählen Sie aus um sie umzubennen oder markieren Sie mehrere um sie zu einem geteilten Schlagwort zusammenzufassen.",
+    "keywords": "Schlagwörter"
+  },
+  "intents": {
+    "questions": "Fragen",
+    "training": "Trainingssätze",
+    "aggregation": "Aggregation",
+    "charttype": "Art des Diagramms",
+    "groupBy": "Gruppieren",
+    "filterBy": "Filtern",
+    "filterByHint": "Entitäten zum Filtern hinzufügen",
+    "customCalc": "Angepasste Berechnung",
+    "addCalc": "Berechnung angeben",
+    "validSqlHint": "Geben Sie einen gültigen SQL Befehl ein, der Ihre ausgewählten Zielwerte enthält",
+    "fixedFilter": "Feste Filter",
+    "enterFilterVal": "Geben Sie einen Filterwert ein",
+    "addFFilter": "Festen Filter hinzufügen",
+    "targetValues": "Zielwerte",
+    "addTarget": "Zielwert hinzufügen",
+    "addSentence": "Neuer Trainingssatz",
+    "trainingSentence": "Trainingssatz:",
+    "markHint": "Markieren Sie Satzteile im Eingabefeld um Annotationen hinzuzufügen.",
+    "value": "Wert",
+    "entity": "Entität",
+    "noTrainings": "Noch keine Trainingssätze hinzugefügt",
+    "trainedSentences": "Trainingssätze"
+  },
+  "home": {
+    "welcome": "Willkommen bei Ihrem Bot Management Dashboard!"
+  },
+  "signin": {
+    "signinAuto": "Sie werden automatisch angemeldet.."
+  },
+  "settings": {
+    "projectSettings": "Projekteinstellungen:",
+    "team": "Team:",
+    "addMember": "Fügen Sie ein Teammitglied per MUID hizu"
+  }
+}

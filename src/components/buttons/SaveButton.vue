@@ -1,6 +1,6 @@
 <template>
   <b-button variant="primary" @click="onSave" :disabled="disabled">
-    {{text}}
+    {{textOnButton}}
   </b-button>
 </template>
 
@@ -15,7 +15,12 @@
       },
       text: {
         type: String,
-        default: 'Save'
+        default: null
+      }
+    },
+    computed: {
+      textOnButton() {
+        return this.text || this.$root.l.save
       }
     }
   }

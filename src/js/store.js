@@ -268,6 +268,8 @@ export default new Vuex.Store({
       excelFiles: false
     },
     notifications: {},
+    lang: {},
+    selectedLang: '',
     // subroute specific
     onPage: {
       keywords: {},
@@ -563,6 +565,17 @@ export default new Vuex.Store({
     },
     error(state, error) {
       Vue.set(state, 'error', error)
+    },
+    setLang(state, {lang, name}) {
+      state.selectedLang = name
+      for (let view in lang) {
+        if (!state.lang[view]) {
+          Vue.set(state.lang, view, {})
+        }
+        for (let sentence in lang[view]) {
+          Vue.set(state.lang[view], sentence, lang[view][sentence])
+        }
+      }
     }
   },
   actions: {
@@ -856,22 +869,26 @@ export default new Vuex.Store({
         resolve()
       })
     },
-    errorHandling(context, {err, route, data}) {
-      let errMsg
-      try {
-        errMsg = err.response.data.error.message
-      } catch (e) {
-        errMsg = err.message
+    errorHandling(context, {err, route, data, router}) {
+      if (err.response.status === 401) {
+        router.push('/signin')
+      } else {
+        let errMsg
+        try {
+          errMsg = err.response.data.error.message
+        } catch (e) {
+          errMsg = err.message
+        }
+        let error = {
+          route,
+          sentData: JSON.stringify(data),
+          message: errMsg,
+          status: err.request.status + ' ' + err.request.statusText,
+          full: err
+        }
+        context.commit('error', error)
+        context.commit('finishedLoading', route.split('/')[0])
       }
-      let error = {
-        route,
-        sentData: JSON.stringify(data),
-        message: errMsg,
-        status: err.request.status + ' ' + err.request.statusText,
-        full: err
-      }
-      context.commit('error', error)
-      context.commit('finishedLoading', route.split('/')[0])
     }
   }
 })

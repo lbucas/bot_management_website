@@ -18,7 +18,10 @@
         type: Boolean,
         default: false
       },
-      route: String
+      route: {
+        type: String,
+        default: null
+      }
     },
     computed: {
       errors() {
@@ -36,7 +39,7 @@
 </script>
 
 <style lang="less" scoped>
-  @import "../../assets/less/colors";
+  @import "../../style/colors";
   /* first child no top border */
   .formTable {
     tbody {

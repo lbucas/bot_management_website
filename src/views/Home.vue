@@ -1,6 +1,6 @@
 <template>
   <div id="home">
-    <h3>Welcome to your Bot Management Dashboard</h3>
+    <h3>{{l.welcome}}</h3>
   </div>
 
 </template>
@@ -15,6 +15,11 @@
     components: {FormRowInput, FormRowSelect, CustomForm, UpdateButton},
     data() {
       return {}
+    },
+    computed: {
+      l() {
+        return this.$store.state.lang.home
+      }
     },
     created() {}
   }
