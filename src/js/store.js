@@ -43,6 +43,9 @@ const update = (oldItem, newItem) => {
 let excelDatasourceId = null
 let flatfileDatasourceId = null
 
+let notificationTries = 0
+let sse
+
 export default new Vuex.Store({
   state: {
     apiUrl: api.url(),
@@ -132,6 +135,10 @@ export default new Vuex.Store({
         projectId: 0,
         datasourceId: 0
       },
+      botUsers: {
+        MUID: '',
+        role: ''
+      },
       keywords: {},
       trainings: {}
     },
@@ -188,6 +195,10 @@ export default new Vuex.Store({
         key: "",
         projectId: 0,
         datasourceId: 0
+      },
+      botUsers: {
+        MUID: '',
+        role: 'Standard'
       }
     },
     errorChecks: {
@@ -235,7 +246,8 @@ export default new Vuex.Store({
       entities: false,
       intents: false,
       excelFiles: false,
-      flatfiles: false
+      flatfiles: false,
+      botUsers: false
     },
     loaded: {
       projects: false,
@@ -257,6 +269,7 @@ export default new Vuex.Store({
       joins: false,
       excelFiles: false,
       flatfiles: false,
+      botUsers: false,
       keywords: {},
       trainings: {}
     },
@@ -265,7 +278,8 @@ export default new Vuex.Store({
       entities: false,
       intents: false,
       joins: false,
-      excelFiles: false
+      excelFiles: false,
+      botUsers: false
     },
     notifications: {},
     lang: {},
@@ -459,6 +473,22 @@ export default new Vuex.Store({
         tpf[t.flatfileId][tid] = t
       }
       return tpf
+    },
+    botUsers: state => {
+      try {
+        let userArr = state.projects[state.projectId].botUserIds
+        let users = {}
+        for (let user of userArr) {
+          users[user] = {
+            id: user,
+            name: user,
+            role: 'Standard'
+          }
+        }
+        return users
+      } catch (e) {
+        return {}
+      }
     }
   },
   mutations: {
@@ -651,10 +681,8 @@ export default new Vuex.Store({
     },
     updateProjectDependent(context) {
       for (let item in context.state.loaded) {
-        if (context.state.loaded[item]) {
-          if (api.dependentFromProject[item]) {
-            context.dispatch('update', item)
-          }
+        if (context.state.loaded[item] && api.dependentFromProject[item]) {
+          context.dispatch('update', item)
         }
       }
     },
@@ -832,7 +860,7 @@ export default new Vuex.Store({
       context.dispatch('calculateOnPage', {subroute, id})
     },
     async notificationStream(context, notify) {
-      let sse = await api.serverSentEvent('notifications/startNotifications')
+      sse = await api.serverSentEvent('notifications/startNotifications')
       sse.addEventListener('data', async event => {
         let d = JSON.parse(event.data)
         d.data.timestamp = new Date().getDate()
@@ -845,6 +873,15 @@ export default new Vuex.Store({
         })
         context.commit('set', {route: 'notifications', item})
       })
+      sse.onerror = async (e, stream) => {
+        if (e) {
+          sse.close()
+          // If an error occurs and the stream stops, there will be 5 attempts to restart it
+          await setTimeout(2000)
+          notificationTries++
+          if (notificationTries < 6) context.dispatch('notificationStream', notify)
+        }
+      }
     },
     notificationHandler(context, {message, ctx}) {
       switch (message) {
@@ -892,8 +929,7 @@ export default new Vuex.Store({
       })
     },
     errorHandling(context, {err, route, data, router}) {
-      if (err.response.status === 401) {
-        debugger
+      if (err.respone && err.response.status === 401) {
         router.push('/signin')
       } else {
         let errMsg

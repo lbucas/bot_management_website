@@ -1,3 +1,4 @@
+<template></template>
 <script>
   export default {
     name: "FormComponent",
@@ -9,12 +10,21 @@
         default: false
       }
     },
-    data() {
-      return {
-        inputValue: null
-      }
-    },
     computed: {
+      inputValue: {
+        get() {
+          return this.target
+        },
+        set(value) {
+          if (value !== this.target && value !== undefined) {
+            this.$store.commit('updateDetailItem', {
+              route: this.route,
+              key: this.modelKey,
+              value
+            })
+          }
+        }
+      },
       onEdit() {
         let oe = this.$parent.onEdit
         if (oe === undefined) {
@@ -39,23 +49,6 @@
       },
       target() {
         return this.$tools.deepValue(this.$store.state.detailItem[this.route], this.modelKey)
-      }
-    },
-    created() {
-      this.inputValue = this.$tools.deepValue(this.$store.state.detailItem[this.route], this.modelKey)
-    },
-    watch: {
-      target(value) {
-        this.inputValue = value
-      },
-      inputValue(value, old) {
-        if (value !== old && value) {
-          this.$store.commit('updateDetailItem', {
-            route: this.route,
-            key: this.modelKey,
-            value
-          })
-        }
       }
     }
   }

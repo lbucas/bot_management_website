@@ -31,7 +31,13 @@
     "Questions": "Fragen",
     "Users": "User",
     "Settings": "Einstellungen",
-    "Home": "Home"
+    "Home": "Home",
+    "chooseProject": "Projektauswahl",
+    "yourRole": "Ihre Rolle",
+    "provideName": "Geben Sie einen Projektnamen an",
+    "createAProject": "Projekt erstellen",
+    "selectLang": "Sprachauswahl",
+    "errorOccured": "Es ist ein Fehler aufgetreten:"
   },
   "connections": {
     "standard": "Standard",
@@ -68,7 +74,7 @@
     "connectedAttr": "Verbundenes Attribut",
     "loadKeywords": "Schlagwörter aus der Datenquelle laden",
     "noKeywords": "Noch keine Schlagwörter hinzugefügt",
-    "summarize": "Wählen Sie aus um sie umzubennen oder markieren Sie mehrere um sie zu einem geteilten Schlagwort zusammenzufassen.",
+    "summarize": "Wählen Sie ein Schlagwort aus um es umzubennen oder markieren Sie mehrere um sie zu einem geteilten Schlagwort zusammenzufassen.",
     "keywords": "Schlagwörter"
   },
   "intents": {
@@ -99,12 +105,23 @@
     "welcome": "Willkommen bei Ihrem Bot Management Dashboard!"
   },
   "signin": {
-    "singinAuto": "Sie werden automatisch angemeldet.."
+    "signinAuto": "Sie werden automatisch angemeldet.."
   },
   "settings": {
     "projectSettings": "Projekteinstellungen:",
     "team": "Team:",
     "addMember": "Fügen Sie ein Teammitglied per MUID hizu",
     "deleteProj": "Projekt löschen"
+  },
+  "checks": {
+    "entName": "[[ Please provide a title for the entity ]]",
+    "entDescription": "[[ Please provide a description for the entity ]]",
+    "entAttributeId": "[[ Please select a connected attribute ]]",
+    "intName": "[[ Please provide a title for the question ]]"
+  },
+  "users": {
+    "muid": "MUID",
+    "role": "Rolle",
+    "botUsers": "Bot Users"
   }
 }

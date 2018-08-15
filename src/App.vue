@@ -14,68 +14,76 @@
           <icon class="projectIcon" icon="Projects"/>
           {{project.name}}
         </h6>
+        <h6>{{userDisplayName}}</h6>
         <div class="links">
-          <ul v-for="nl in navLinks">
-            <li class="navLink font-weight-light" @click="route(navLinkKeys[nl] || nl)"
+          <ul>
+            <li v-for="nl in navLinks" class="navLink font-weight-light" @click="route(navLinkKeys[nl] || nl)"
                 :active="$route.name === (navLinkKeys[nl] || nl)">
               <icon :icon="navLinkKeys[nl] || nl" class="navIcon"/>
               {{l[nl]}}
             </li>
           </ul>
         </div>
-
+        <b-row id="langInfo" class="text-left">
+          <b-col>
+            <a @click="$root.modalOpen('langSelModal')">{{$store.state.selectedLang}}</a>
+          </b-col>
+        </b-row>
       </b-col>
+
       <b-col id="mainCol">
-        <b-row id="nav-info" class="shadow" v-if="!onSignIn">
-          <b-col id="currentPage" class="text-left">
-            <h4>
-              <icon id="currentPageIcon" :icon="navLinkKeys[$route.name] || $route.name"/>
-              {{l[$route.name]}}
-            </h4>
+        <b-row>
+          <b-col cols="12">
+            <b-row id="mobile-nav" class="shadow" v-if="!onSignIn">
+              <b-col id="currentPage" class="text-left">
+                <h4>
+                  <icon id="currentPageIcon" :icon="navLinkKeys[$route.name] || $route.name"/>
+                  {{l[$route.name]}}
+                </h4>
+              </b-col>
+              <b-col id="mobileMenuIconCol" class="text-right">
+                <div @click="mobileMenuOpen = !mobileMenuOpen">
+                  <icon id="mobileMenuIcon" icon="menu"/>
+                </div>
+              </b-col>
+            </b-row>
           </b-col>
-          <b-col id="userInfo" class="text-right">
-            <b-dropdown id="langSel" :text="$store.state.selectedLang">
-              <b-dropdown-item v-for="(dispLang, lang) in langs" @click="selectLang(lang)">
-                {{dispLang}}
-              </b-dropdown-item>
-            </b-dropdown>
-            {{userDisplayName}}
+          <b-col cols="12">
+            <transition name="fade">
+              <div id="mobileMenu" v-if="mobileMenuOpen">
+                <h6>{{userDisplayName}}</h6>
+                <h6 class="projectTitleMobile" @click=" $root.modalOpen('projectModal')">
+                  <icon class="projectIcon" icon="Projects"/>
+                  {{project.name}}
+                </h6>
+                <div class="links">
+                  <ul>
+                    <li v-for="nl in navLinks" class="navLink font-weight-light"
+                        @click="route(navLinkKeys[nl] || nl); mobileMenuOpen = false"
+                        :active="$route.name === (navLinkKeys[nl] || nl)">
+                      <icon :icon="navLinkKeys[nl] || nl" class="navIcon"/>
+                      {{nl}}
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </transition>
           </b-col>
-          <b-col id="mobileMenuIconCol" class="text-right">
-            <div @click="mobileMenuOpen = !mobileMenuOpen">
-              <icon id="mobileMenuIcon" icon="menu"/>
+
+          <b-col>
+            <div id="routerContent">
+              <transition name="view" mode="out-in">
+                <keep-alive>
+                  <router-view/>
+                </keep-alive>
+              </transition>
             </div>
           </b-col>
         </b-row>
-        <transition name="fade">
-          <div id="mobileMenu" v-if="mobileMenuOpen">
-            <h6>{{userDisplayName}}</h6>
-            <h6 class="projectTitleMobile" @click=" $root.modalOpen('projectModal')">
-              <icon class="projectIcon" icon="Projects"/>
-              {{project.name}}
-            </h6>
-            <div class="links">
-              <ul v-for="nl in navLinks">
-                <li class="navLink font-weight-light" @click="route(navLinkKeys[nl] || nl); mobileMenuOpen = false"
-                    :active="$route.name === (navLinkKeys[nl] || nl)">
-                  <icon :icon="navLinkKeys[nl] || nl" class="navIcon"/>
-                  {{nl}}
-                </li>
-              </ul>
-            </div>
-          </div>
-        </transition>
-        <div id="routerContent">
-          <transition name="view" mode="out-in">
-            <keep-alive>
-              <router-view/>
-            </keep-alive>
-          </transition>
-        </div>
       </b-col>
     </b-row>
 
-    <b-modal size="lg" id="projectModal" title="Choose your project" cancel-disabled no-close-on-esc
+    <b-modal size="lg" id="projectModal" :title="l.chooseProject" cancel-disabled no-close-on-esc
              no-close-on-backdrop
              hide-header-close ok-disabled>
       <div class="table-responsive">
@@ -83,8 +91,8 @@
         <table class="table table-hover">
           <thead>
           <thead>
-          <th>Title</th>
-          <th>Your Role</th>
+          <th>{{$root.l.title}}</th>
+          <th>{{l.yourRole}}</th>
           </thead>
           <tbody>
           <tr v-for="p in projects" @click="chooseProject(p, true)">
@@ -94,7 +102,7 @@
           <tr v-if="createProject">
             <td>
               <div class="form-group">
-                <input v-model="newProjectName" placeholder="Provide a name for the project" class="form-control">
+                <input v-model="newProjectName" :placeholder="l.provideName" class="form-control">
               </div>
             </td>
             <td>
@@ -103,10 +111,11 @@
           </tr>
           </tbody>
         </table>
-        <b-button variant="primary" class="cpButton" @click="createProject=true" v-if="!createProject">Create a
-          project
+        <b-button variant="primary" class="cpButton" @click="createProject=true" v-if="!createProject">
+          {{l.createAProject}}
         </b-button>
-        <b-button variant="secondary" class="cpButton" @click="createProject=false" v-if="createProject">Cancel
+        <b-button variant="secondary" class="cpButton" @click="createProject=false" v-if="createProject">
+          {{$root.l.cancel}}
         </b-button>
       </div>
     </b-modal>
@@ -127,12 +136,20 @@
     </notifications>
 
     <b-modal id="errorModal" title="An Error occurred" cancel-disabled>
-      <h6>It seems like an error occurred within the application:</h6>
+      <h6>{{l.errorOccured}}</h6>
       <br>
       <error-display :src="error.status" desc="Type"/>
       <error-display :src="error.message" desc="Message"/>
       <error-display :src="error.route" desc="Target"/>
       <error-display :src="error.sentData" desc="Sent Data"/>
+    </b-modal>
+
+    <b-modal id="langSelModal" :title="l.selectLang">
+      <Table>
+        <tr v-for="(dispLang, lang) in langs" class="langOption" @click="selectLang(lang)">
+          <td>{{dispLang}}</td>
+        </tr>
+      </Table>
     </b-modal>
 
     <div id="flaticon">Icons made by <a href="https://www.flaticon.com/authors/smashicons"
@@ -147,10 +164,11 @@
 <script>
   import ErrorDisplay from "./components/ErrorDisplay"
   import supportedLangs from './lang/support'
+  import Table from "./components/Table"
 
   export default {
     name: 'app',
-    components: {ErrorDisplay},
+    components: {Table, ErrorDisplay},
     data() {
       return {
         navLinks: [
@@ -235,6 +253,7 @@
         let lang = this.$tools.lang(name)
         this.$store.commit('setLang', {lang, name})
         this.$tools.cookies.set('langPreference', name)
+        this.$root.modalClose('langSelModal')
       }
     },
     created() {
@@ -289,7 +308,7 @@
       display: none;
     }
 
-    #userInfo {
+    #langInfo {
       display: none;
     }
   }
@@ -299,7 +318,7 @@
       display: none;
     }
 
-    #mobileMenuIconCol {
+    #mobile-nav {
       display: none;
     }
   }
@@ -313,10 +332,15 @@
     #noUserSelect
   }
 
-  #nav-info {
+  #mobile-nav {
     height: 3em;
-    padding: 0 1rem 0 1rem;
-    z-index: 10
+    #mobileMenuIcon {
+      cursor: pointer;
+    }
+    background: @richPurple;
+    color: white;
+    z-index: 5;
+    padding: .5rem 1rem 0 1rem;
   }
 
   #emdlogo {
@@ -333,7 +357,7 @@
   }
 
   .links {
-    margin-top: 7vh;
+    margin-top: 9vh;
     ul {
       list-style-type: none;
       padding-left: 1em;
@@ -342,6 +366,7 @@
       text-align: left;
       font-size: 1em;
       cursor: pointer;
+      margin-bottom: .7rem;
       transition: font-size 300ms;
       &[active] {
         font-size: 1.1em;
@@ -388,32 +413,22 @@
     cursor: pointer;
   }
 
-  #nav-info {
-    background: @richPurple;
-    color: white;
-    border-bottom: 2px solid @richPurple;
-    padding-top: .5em;
-    z-index: 5;
-  }
-
   #routerContent {
     text-align: left;
-    height: 93vh;
-    overflow-y: auto;
+    height: 100vh;
     padding-right: 2em;
     padding-left: 1em;
   }
 
-  #mainCol {
-    padding: 0;
-  }
 
-  #userInfo {
-    margin-right: 1em;
-  }
 
-  #mobileMenuIcon {
-    cursor: pointer;
+  #langInfo {
+    position: absolute;
+    bottom: 10px;
+    font-size: .7rem;
+    a {
+      cursor: pointer;
+    }
   }
 
   .btn {
@@ -440,7 +455,8 @@
     z-index: 4;
     background: @richPurple;
     position: absolute;
-    width: 100vw;
+    left: 0;
+    width: 100%;
     padding: .5rem 0 1rem 0;
   }
 
@@ -460,11 +476,14 @@
     }
   }
 
-  #langSel__BV_toggle_ {
-    background: none;
-    font-size: .7rem;
-    border: none;
-    box-shadow: none;
+  #langSelModal {
+    #noUserSelect;
+    tr {
+      cursor: pointer;
+    }
+    .modal-footer {
+      display: none !important;
+    }
   }
 
 </style>

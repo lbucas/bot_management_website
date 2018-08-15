@@ -2,30 +2,32 @@
   <div>
     <master-detail :tableheading="l.databases" route="databases">
       <b-tabs id="dsDetails">
-        <b-tab class="tabTitle" title="General" active>
-          <custom-form id="dsform" route="databases">
-            <fr-input :label="$root.l.title" model-key="name"/>
-            <fr-select model-key="databaseTypeId"
-                       :list="databasetypes" :label="l.dbType"/>
-            <fr-input :label="l.host" model-key="connectionObj.host" big/>
-            <fr-input :label="l.port" model-key="connectionObj.port"/>
-            <fr-input :label="l.dbName" model-key="connectionObj.db"/>
-            <fr-input :label="l.user" model-key="connectionObj.user"/>
-            <fr-input :label="l.password" model-key="connectionObj.password"
-                      inputtype="password"/>
-          </custom-form>
-          <edit route="databases"/>
-          <b-button variant="primary" id="saveDS" @click="createOrEditDs" v-if="onEdit">
-            {{$root.l.save}}
-          </b-button>
-          <b-button variant="info" @click="testConnection" v-if="!connectionTested">
-            {{connectionTestLabel}}
-          </b-button>
-          <b-button variant="success" v-if="connectionTested" @click="connectionTested=false">{{l.success}}
-          </b-button>
+        <b-tab class="tabTitle" :title="$root.l.general" active>
+          <scrollable pos="twoTab">
+            <custom-form id="dsform" route="databases">
+              <fr-input :label="$root.l.title" model-key="name"/>
+              <fr-select model-key="databaseTypeId"
+                         :list="databasetypes" :label="l.dbType"/>
+              <fr-input :label="l.host" model-key="connectionObj.host" big/>
+              <fr-input :label="l.port" model-key="connectionObj.port"/>
+              <fr-input :label="l.dbName" model-key="connectionObj.db"/>
+              <fr-input :label="l.user" model-key="connectionObj.user"/>
+              <fr-input :label="l.password" model-key="connectionObj.password"
+                        inputtype="password"/>
+            </custom-form>
+            <edit route="databases"/>
+            <b-button variant="primary" id="saveDS" @click="createOrEditDs" v-if="onEdit">
+              {{$root.l.save}}
+            </b-button>
+            <b-button variant="info" @click="testConnection" v-if="!connectionTested">
+              {{connectionTestLabel}}
+            </b-button>
+            <b-button variant="success" v-if="connectionTested" @click="connectionTested=false">{{l.success}}
+            </b-button>
 
-          <delete :on-delete="deleteDS" v-if="!onEdit"/>
-          <cancel route="databases"/>
+            <delete :on-delete="deleteDS" v-if="!onEdit"/>
+            <cancel route="databases"/>
+          </scrollable>
         </b-tab>
         <b-tab class="tabTitle" :title="l.tables" v-if="!onEdit">
           <tables :database="dsDetails.id"/>

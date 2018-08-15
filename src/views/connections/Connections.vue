@@ -3,31 +3,33 @@
     <loader :loading="connectionLoading"/>
     <b-tabs id="connectionTabs">
       <b-tab class="tabTitle" :title="l.standard" active>
-        <div>
-          <b-row>
-            <table-selection v-model="editJoin.table1"/>
-            <table-selection v-model="editJoin.table2" :joined="isJoined" :disabled="editJoin.table1"/>
-            <b-col lg="6" id="selectionCol">
-              <h6>{{l.chooseAttr}}</h6>
-              <b-row>
-                <attribute-select v-model="editJoin.attribute1" :table-id="editJoin.table1"
-                                  :disabled="editJoin.id && !editing"/>
-                <b-col cols="1">
-                  <icon icon="arrowtwoway"/>
-                  <button v-if="editJoin.id && !editing" @click="editing = true" type="button"
-                          id="editConnection" class="close">×
-                  </button>
-                </b-col>
-                <attribute-select v-model="editJoin.attribute2" :table-id="editJoin.table2"
-                                  :disabled="editJoin.id && !editing"/>
-              </b-row>
-              <div>
-                <save-button v-if="editing || !editJoin.id" class="connectionBtns" :on-save="saveJoin"/>
-                <delete-button class="connectionBtns" :on-delete="deleteConnection" v-if="editJoin.id"/>
-              </div>
-            </b-col>
-          </b-row>
-        </div>
+        <scrollable pos="oneTab">
+          <div>
+            <b-row>
+              <table-selection v-model="editJoin.table1"/>
+              <table-selection v-model="editJoin.table2" :joined="isJoined" :disabled="editJoin.table1"/>
+              <b-col lg="6" id="selectionCol">
+                <h6>{{l.chooseAttr}}</h6>
+                <b-row>
+                  <attribute-select v-model="editJoin.attribute1" :table-id="editJoin.table1"
+                                    :disabled="editJoin.id && !editing"/>
+                  <b-col cols="1">
+                    <icon icon="arrowtwoway"/>
+                    <button v-if="editJoin.id && !editing" @click="editing = true" type="button"
+                            id="editConnection" class="close">×
+                    </button>
+                  </b-col>
+                  <attribute-select v-model="editJoin.attribute2" :table-id="editJoin.table2"
+                                    :disabled="editJoin.id && !editing"/>
+                </b-row>
+                <div>
+                  <save-button v-if="editing || !editJoin.id" class="connectionBtns" :on-save="saveJoin"/>
+                  <delete-button class="connectionBtns" :on-delete="deleteConnection" v-if="editJoin.id"/>
+                </div>
+              </b-col>
+            </b-row>
+          </div>
+        </scrollable>
       </b-tab>
       <b-tab class="tabTitle" :title="l.visual">
         <b-row>

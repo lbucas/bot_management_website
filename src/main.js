@@ -10,6 +10,7 @@ import 'bootstrap-vue/dist/bootstrap-vue.css'
 import tools from './js/tools'
 import VueClip from 'vue-clip'
 import VueNotification from 'vue-notification'
+import Scrollbar from 'vue-perfect-scrollbar'
 // global components
 import Save from "./components/buttons/SaveButton"
 import Cancel from "./components/buttons/CancelButton"
@@ -26,6 +27,7 @@ import CustomForm from "./components/form/CustomForm"
 import Loader from "./components/Loader"
 import Icon from "./components/Icon"
 import Update from "./components/buttons/UpdateButton"
+import Scrollable from "./components/Scrollable"
 
 Vue.use(BootstrapVue)
 Vue.use(VueClip)
@@ -63,7 +65,9 @@ let components = {
   CustomForm,
   Loader,
   Icon,
-  Update
+  Update,
+  Scrollable,
+  Scrollbar
 }
 for (let key in components) Vue.component(toSnake(key), components[key])
 

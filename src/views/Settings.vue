@@ -1,27 +1,26 @@
 <template>
   <div id="settings">
     <loader :loading="loading"/>
-    <b-row>
-      <b-col lg="6">
-        <h5>{{l.projectSettings}}</h5>
-        <label> {{l.team}}</label>
-        <input-add-button :show-add="validTeamMember" :on-add="addMember">
-          <b-input v-model="nextTeamMember" :placeholder="l.addMember"/>
-        </input-add-button>
-        <badges :values="team" :remove="removeMember"/>
-      </b-col>
-      <b-col></b-col>
-      <b-col lg="5">
-        <h5>{{l.deleteProj}}</h5>
-        <center-button>
-          <delete :on-delete="deleteProject"/>
-        </center-button>
-      </b-col>
-    </b-row>
-
-
+    <scrollable pos="full">
+      <b-row>
+        <b-col lg="6">
+          <h5>{{l.projectSettings}}</h5>
+          <label> {{l.team}}</label>
+          <input-add-button :show-add="validTeamMember" :on-add="addMember">
+            <b-input v-model="nextTeamMember" :placeholder="l.addMember"/>
+          </input-add-button>
+          <badges :values="team" :remove="removeMember"/>
+        </b-col>
+        <b-col></b-col>
+        <b-col lg="5">
+          <h5>{{l.deleteProj}}</h5>
+          <center-button>
+            <delete :on-delete="deleteProject"/>
+          </center-button>
+        </b-col>
+      </b-row>
+    </scrollable>
   </div>
-
 </template>
 
 <script>

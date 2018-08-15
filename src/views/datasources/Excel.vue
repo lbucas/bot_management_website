@@ -3,56 +3,60 @@
                  :on-item-change="emptyParsedFile">
     <b-tabs>
       <b-tab class="tab-title" :title="$root.l.general">
-        <b-row id="excelFileDetails">
-          <b-col>
-            <custom-form route="excelFiles">
-              <fr-input model-key="name" :label="$root.l.title"/>
-              <fr-display model-key="uploaded" :label="l.lastUpd" filter="date"/>
-            </custom-form>
-            <div v-if="onEdit">
-              <excel-input v-model="parsedFile" v-if="!fileParsed"/>
-              <div v-else>
-                <h6>{{l.selTables}}</h6>
-                <ul class="sheetList">
-                  <li v-for="(sheet, sheetName) in parsedFile.sTables">
-                    <b>{{sheetName}}</b>
-                    <ul class="detectedTables">
-                      <li v-for="(exTable, startCell) in sheet">
-                        <b-form-checkbox v-model="exTable.selected">&#x2063;
-                        </b-form-checkbox>
-                        <span v-b-toggle="sheetName + '_' + startCell" class="exTableName"
-                              @click="expand(sheetName + '_' + startCell)">
+        <scrollable pos="twoTab">
+          <b-row id="excelFileDetails">
+            <b-col>
+              <custom-form route="excelFiles">
+                <fr-input model-key="name" :label="$root.l.title"/>
+                <fr-display model-key="uploaded" :label="l.lastUpd" filter="date"/>
+              </custom-form>
+              <div v-if="onEdit">
+                <excel-input v-model="parsedFile" v-if="!fileParsed"/>
+                <div v-else>
+                  <h6>{{l.selTables}}</h6>
+                  <ul class="sheetList">
+                    <li v-for="(sheet, sheetName) in parsedFile.sTables">
+                      <b>{{sheetName}}</b>
+                      <ul class="detectedTables">
+                        <li v-for="(exTable, startCell) in sheet">
+                          <b-form-checkbox v-model="exTable.selected">&#x2063;
+                          </b-form-checkbox>
+                          <span v-b-toggle="sheetName + '_' + startCell" class="exTableName"
+                                @click="expand(sheetName + '_' + startCell)">
                       <expand-icon :expanded="(sheetName+'_'+startCell in expanded)"/>
                       <span>{{exTable.startCell + ':' + exTable.endCell}}</span>
                       <span v-if="exTable.name"> - {{exTable.name}}</span>
                     </span>
-                        <b-collapse :id="sheetName + '_' + startCell" class="mt-2">
-                          <b-form-group :label="l.tabName" horizontal>
-                            <b-form-input v-model="exTable.name"/>
-                          </b-form-group>
-                          <b-form-group :label="l.tabHeaders" horizontal>
-                            <b-form-input readonly plaintext v-model="exTable.headers.join(', ')"/>
-                          </b-form-group>
-                          <b-form-group :label="l.tabEntries" horizontal>
-                            <b-form-input readonly plaintext v-model="exTable.entries"/>
-                          </b-form-group>
+                          <b-collapse :id="sheetName + '_' + startCell" class="mt-2">
+                            <b-form-group :label="l.tabName" horizontal>
+                              <b-form-input v-model="exTable.name"/>
+                            </b-form-group>
+                            <b-form-group :label="l.tabHeaders" horizontal>
+                              <b-form-input readonly plaintext v-model="exTable.headers.join(', ')"/>
+                            </b-form-group>
+                            <b-form-group :label="l.tabEntries" horizontal>
+                              <b-form-input readonly plaintext v-model="exTable.entries"/>
+                            </b-form-group>
 
-                        </b-collapse>
-                      </li>
-                    </ul>
-                  </li>
-                </ul>
+                          </b-collapse>
+                        </li>
+                      </ul>
+                    </li>
+                  </ul>
+                </div>
               </div>
-            </div>
-            <edit route="excelFiles"/>
-            <delete :on-delete="deleteExcel" v-if="!onEdit"/>
-            <save :on-save="importExcel" :disabled="!importable" text="Import" v-if="fileParsed"/>
-            <cancel :on-cancel="emptyParsedFile" route="excelFiles" v-if="fileParsed"/>
-          </b-col>
-        </b-row>
+              <edit route="excelFiles"/>
+              <delete :on-delete="deleteExcel" v-if="!onEdit"/>
+              <save :on-save="importExcel" :disabled="!importable" text="Import" v-if="fileParsed"/>
+              <cancel :on-cancel="emptyParsedFile" route="excelFiles" v-if="fileParsed"/>
+            </b-col>
+          </b-row>
+        </scrollable>
       </b-tab>
       <b-tab class="tabTitle" :title="l.tables">
-        <tables :excelFile="file.id"/>
+        <scrollable pos="twoTab">
+          <tables :excelFile="file.id"/>
+        </scrollable>
       </b-tab>
     </b-tabs>
 

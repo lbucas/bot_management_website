@@ -3,19 +3,23 @@
     <master-detail :tableheading="l.entities" route="entities">
       <b-tabs>
         <b-tab class="tabTitle" :title="$root.l.general" active>
-          <custom-form id="entityForm" route="entities" :errors-visible="errorsVisible">
-            <fr-input model-key="name" :label="$root.l.title" :editable="!(entityDetail.id)"/>
-            <fr-input model-key="description" :label="l.desc" big/>
-            <fr-attribute-select model-key="attributeId" :label="l.connectedAttr"/>
-          </custom-form>
-          <edit route="entities"/>
-          <delete :on-delete="deleteEntity" v-if="!onEdit"/>
-          <save :on-save="saveEntity" id="saveEntity" :disabled="notSaveable" v-if="onEdit"/>
-                       <!--@mouseover="test"-->
-          <cancel route="entities" v-if="onEdit"/>
+          <scrollable pos="twoTab">
+            <custom-form id="entityForm" route="entities" :errors-visible="errorsVisible">
+              <fr-input model-key="name" :label="$root.l.title" :editable="!(entityDetail.id)"/>
+              <fr-input model-key="description" :label="l.desc" big/>
+              <fr-attribute-select model-key="attributeId" :label="l.connectedAttr"/>
+            </custom-form>
+            <edit route="entities"/>
+            <delete :on-delete="deleteEntity" v-if="!onEdit"/>
+            <save :on-save="saveEntity" id="saveEntity" :disabled="notSaveable" v-if="onEdit"/>
+            <!--@mouseover="test"-->
+            <cancel route="entities" v-if="onEdit"/>
+          </scrollable>
         </b-tab>
         <b-tab class="tabTitle" :title="l.keywords" v-if="!onEdit">
-          <keywords/>
+          <scrollable pos="twoTab">
+            <keywords/>
+          </scrollable>
         </b-tab>
       </b-tabs>
     </master-detail>

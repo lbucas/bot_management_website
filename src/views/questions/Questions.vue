@@ -3,32 +3,37 @@
     <div>
       <b-tabs>
         <b-tab class="tabTitle" :title="$root.l.general" active>
-          <custom-form id="intentDetails" route="intents">
-            <fr-input model-key="name" :editable="!intentDetail.id" :label="$root.l.title"/>
-            <target-values/>
-            <transition name="view" mode="out-in">
-              <fr-select v-if="intentDetail.calculationNeeded === null"
-                         model-key="aggregationId" :label="l.aggregation" :disabled="targetValueLength > 1"
-                         list-display-value="operation" :list="aggregations"/>
-            </transition>
-            <custom-calculation/>
-            <fr-select model-key="charttypeId" :label="l.charttype" :list="charttypes" list-display-value="displayName"
-                       :disabled="targetValueLength > 1 && !intentDetail.calculationNeeded"/>
-            <transition name="view" mode="out-in">
-              <fr-attribute-select v-if="groupByVisible" model-key="groupById" :label="l.groupBy"
-                                   :datatype="groupByDatatype"/>
-            </transition>
-            <fr-array-input model-key="filterByIds" :lookup-list="entitiesWithoutGroupedBy"
-                            :label="l.filterBy" :placeholder="l.filterByHint"/>
-            <fixed-filters/>
-          </custom-form>
-          <save :on-save="saveIntent" v-if="onEdit" :disabled="!savable"/>
-          <cancel route="intents"/>
-          <edit route="intents"/>
-          <delete v-if="!onEdit" :on-delete="deleteIntent"/>
+          <scrollable pos="twoTab">
+            <custom-form id="intentDetails" route="intents">
+              <fr-input model-key="name" :editable="!intentDetail.id" :label="$root.l.title"/>
+              <target-values/>
+              <transition name="view" mode="out-in">
+                <fr-select v-if="intentDetail.calculationNeeded === null"
+                           model-key="aggregationId" :label="l.aggregation" :disabled="targetValueLength > 1"
+                           list-display-value="operation" :list="aggregations"/>
+              </transition>
+              <custom-calculation/>
+              <fr-select model-key="charttypeId" :label="l.charttype" :list="charttypes"
+                         list-display-value="displayName"
+                         :disabled="targetValueLength > 1 && !intentDetail.calculationNeeded"/>
+              <transition name="view" mode="out-in">
+                <fr-attribute-select v-if="groupByVisible" model-key="groupById" :label="l.groupBy"
+                                     :datatype="groupByDatatype"/>
+              </transition>
+              <fr-array-input model-key="filterByIds" :lookup-list="entitiesWithoutGroupedBy"
+                              :label="l.filterBy" :placeholder="l.filterByHint"/>
+              <fixed-filters/>
+            </custom-form>
+            <save :on-save="saveIntent" v-if="onEdit" :disabled="!savable"/>
+            <cancel route="intents"/>
+            <edit route="intents"/>
+            <delete v-if="!onEdit" :on-delete="deleteIntent"/>
+          </scrollable>
         </b-tab>
         <b-tab v-if="!onEdit" class="tabTitle" :title="l.training">
-          <training :intentId="intentDetail.id"/>
+          <scrollable pos="twoTab">
+            <training :intentId="intentDetail.id"/>
+          </scrollable>
         </b-tab>
       </b-tabs>
 

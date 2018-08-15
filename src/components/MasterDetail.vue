@@ -3,12 +3,12 @@
     <b-row>
       <b-col lg="4" class="mdtable">
         <h5 class="mdtableHeader">
-          <span class="tabHeading">{{theading}} ({{tlength}})</span>
+          <span class="tabHeading">{{theading}} ({{tclength}})</span>
           <b-button size="sm" variant="primary" @click="addNew">+</b-button>
           <update :loading="loading" :update="update" size="sm" variant="secondary"></update>
         </h5>
-        <div class="table-responsive">
-          <table class="table table-hover">
+        <scrollable pos="twoTab">
+          <Table>
             <span v-if="!loading && tclength == 0">{{$root.l.noEntries}}</span>
             <tr v-for="(t, id) in tablecontent" @click="chooseEntry(t)" v-bind:active="(id == activeId)">
               <td>
@@ -17,7 +17,7 @@
               </td>
             </tr>
           </table>
-        </div>
+        </scrollable>
       </b-col>
       <b-col lg="8">
         <transition name="unfold">
@@ -32,7 +32,10 @@
 </template>
 
 <script>
+  import Table from "./Table"
+
   export default {
+    components: {Table},
     props: {
       route: String,
       tableheading: {
@@ -45,7 +48,8 @@
       },
       onItemChange: {
         type: Function,
-        default() {}
+        default() {
+        }
       }
     },
     name: "masterdetail",
@@ -74,7 +78,7 @@
     },
     computed: {
       tablecontent() {
-        return this.$store.state[this.route]
+        return this.$store.state[this.route] || this.$store.getters[this.route]
       },
       tclength() {
         return Object.keys(this.tablecontent).length
@@ -83,21 +87,13 @@
         return this.$store.state.loaders[this.route]
       },
       theading() {
-        let th = this.$props.tableheading
-        if (!th) {
-          th = this.$props.route
-        }
-        return th
+        return this.tableheading || this.route
       },
       detailsVisible() {
-        let route = this.route
-        return this.$store.state.detailsVisible[route]
+        return this.$store.state.detailsVisible[this.route]
       },
       activeId() {
         return this.$store.state.detailItem[this.route].id
-      },
-      tlength() {
-        return Object.keys(this.tablecontent).length
       }
     }
   }
@@ -140,14 +136,14 @@
         background: rgba(0, 0, 0, .075);
       }
     }
-  @media-bottom (max-width: 991 px) {
-    margin-bottom: 2em;
-  }
+    @media (max-width: 991px) {
+      margin-bottom: 2em;
+    }
     button {
       margin-bottom: 1em;
     }
     @media (min-width: 992px) {
-      min-height: 93vh;
+      min-height: 100vh;
       border-right: 1px solid lightgrey;
     }
   }
@@ -159,7 +155,7 @@
   .mddetail {
     z-index: 1;
     padding-top: 1em;
-    font-size: .9rem
+    font-size: .9rem;
   }
 
 

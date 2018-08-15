@@ -31,7 +31,13 @@
     "Questions": "Questions",
     "Users": "Users",
     "Settings": "Settings",
-    "Home": "Home"
+    "Home": "Home",
+    "chooseProject": "Project Selection",
+    "yourRole": "Your role",
+    "provideName": "Provide a name for the project",
+    "createAProject": "Create a project",
+    "selectLang": "Language Selection",
+    "errorOccured": "It seems like an error occurred within the application:"
   },
   "connections": {
     "standard": "Standard",
@@ -106,6 +112,11 @@
     "team": "Team Members:",
     "addMember": "Add a team member by MUID",
     "deleteProj": "Delete Project"
+  },
+  "users": {
+    "botUsers": "Bot Users",
+    "muid": "MUID",
+    "role": "Role"
   },
   "checks": {
     "entName": "Please provide a title for the entity",
