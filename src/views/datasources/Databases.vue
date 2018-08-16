@@ -3,7 +3,7 @@
     <master-detail :tableheading="l.databases" route="databases">
       <b-tabs id="dsDetails">
         <b-tab class="tabTitle" :title="$root.l.general" active>
-          <scrollable pos="twoTab">
+          <scrollable pos="threeTab">
             <custom-form id="dsform" route="databases">
               <fr-input :label="$root.l.title" model-key="name"/>
               <fr-select model-key="databaseTypeId"
@@ -15,19 +15,16 @@
               <fr-input :label="l.password" model-key="connectionObj.password"
                         inputtype="password"/>
             </custom-form>
-            <edit route="databases"/>
-            <b-button variant="primary" id="saveDS" @click="createOrEditDs" v-if="onEdit">
-              {{$root.l.save}}
-            </b-button>
-            <b-button variant="info" @click="testConnection" v-if="!connectionTested">
-              {{connectionTestLabel}}
-            </b-button>
-            <b-button variant="success" v-if="connectionTested" @click="connectionTested=false">{{l.success}}
-            </b-button>
-
-            <delete :on-delete="deleteDS" v-if="!onEdit"/>
-            <cancel route="databases"/>
           </scrollable>
+          <edit route="databases"/>
+          <save :on-save="createOrEditDs" id="saveDS" v-if="onEdit"/>
+          <b-button variant="info" @click="testConnection" v-if="!connectionTested">
+            {{connectionTestLabel}}
+          </b-button>
+          <b-button variant="success" v-if="connectionTested" @click="connectionTested=false">{{l.success}}
+          </b-button>
+          <delete :on-delete="deleteDS" v-if="!onEdit"/>
+          <cancel route="databases"/>
         </b-tab>
         <b-tab class="tabTitle" :title="l.tables" v-if="!onEdit">
           <tables :database="dsDetails.id"/>

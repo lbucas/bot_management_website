@@ -24,6 +24,7 @@
     overflow-x: hidden;
     padding-right: 5px;
     width: 100%;
+    margin-bottom: 1rem;
   }
 
   @media (min-width: 768.1px) {
@@ -32,7 +33,11 @@
     }
 
     .scroll-twoTab {
-      height: calc(100vh - 110px);
+      height: calc(100vh - 120px);
+    }
+
+    .scroll-threeTab {
+      height: calc(100vh - 170px);
     }
 
     .scroll-full {

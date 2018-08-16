@@ -3,7 +3,6 @@
     <loader :loading="connectionLoading"/>
     <b-tabs id="connectionTabs">
       <b-tab class="tabTitle" :title="l.standard" active>
-        <scrollable pos="oneTab">
           <div>
             <b-row>
               <table-selection v-model="editJoin.table1"/>
@@ -29,33 +28,34 @@
               </b-col>
             </b-row>
           </div>
-        </scrollable>
       </b-tab>
       <b-tab class="tabTitle" :title="l.visual">
         <b-row>
           <b-col cols="3">
-            <table class="table connectionTable">
-              <tbody>
-              <tr v-for="(ds, id) in datasources">
-                <td>
+            <scrollable pos="oneTab">
+              <table class="table connectionTable">
+                <tbody>
+                <tr v-for="(ds, id) in datasources">
+                  <td>
                 <span v-b-toggle="'tablesFor3' + id" @click="expand(3, id)">
                   <b-form-checkbox @change="checkboxDs(id)"/>
                   <expand-icon :expanded="(ds.id in expanded)"/>
                   {{ds.name}}
                 </span>
-                  <b-collapse v-bind:id="'tablesFor3' + id" class="mt-2">
-                    <ul class="tableListCheckBox">
-                      <li v-for="t in ds.tables">
-                        <b-form-checkbox v-model="t.visible">
-                          {{t.name}}
-                        </b-form-checkbox>
-                      </li>
-                    </ul>
-                  </b-collapse>
-                </td>
-              </tr>
-              </tbody>
-            </table>
+                    <b-collapse v-bind:id="'tablesFor3' + id" class="mt-2">
+                      <ul class="tableListCheckBox">
+                        <li v-for="t in ds.tables">
+                          <b-form-checkbox v-model="t.visible">
+                            {{t.name}}
+                          </b-form-checkbox>
+                        </li>
+                      </ul>
+                    </b-collapse>
+                  </td>
+                </tr>
+                </tbody>
+              </table>
+            </scrollable>
           </b-col>
           <b-col ref="dragDrop">
             <connections-visual/>
@@ -72,13 +72,15 @@
   import ExpandIcon from "../../components/ExpandIcon"
   import Icon from "../../components/Icon"
   import ConnectionsVisual from "./ConnectionsVisual"
-  import TableSelection from "../../components/TableSelection"
-  import AttributeSelect from "../../components/AttributeSelect"
+  import TableSelection from "./TableSelection"
+  import AttributeSelect from "./AttributeSelection"
   import SaveButton from "../../components/buttons/SaveButton"
+  import Scrollable from "../../components/Scrollable"
 
   export default {
     name: "connections",
     components: {
+      Scrollable,
       SaveButton,
       AttributeSelect,
       TableSelection,

@@ -99,7 +99,15 @@
     "value": "Value",
     "entity": "Entity",
     "noTrainings": "No trainings added yet.",
-    "trainedSentences": "Trained Sentences"
+    "trainedSentences": "Trained Sentences",
+    "dateFilter": "Date Filter",
+    "addEndDate": "Add End Date Attribute",
+    "attrForStart": "Attribute representing the start date:",
+    "attrForEnd": "Attribute representing the end date:",
+    "attrForDate": "Attribute representing the date:",
+    "start": "Start:",
+    "end": "End:",
+    "addDateFilter": "Add a Date Filter"
   },
   "home": {
     "welcome": "Welcome to your Bot Management Dashboard!"

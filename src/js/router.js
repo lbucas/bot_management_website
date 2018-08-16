@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Home from '@/views/Home'
+import Botselection from '@/views/Botselection'
 import Datasources from '@/views/datasources/Datasources'
 import Questions from '@/views/questions/Questions'
 import Connections from '@/views/connections/Connections'
@@ -17,36 +18,41 @@ export default new Router({
   routes: [
     {
       path: '/',
+      name: 'Databots',
+      component: Botselection
+    },
+    {
+      path: '/admin',
       name: 'Home',
       component: Home
     },
     {
-      path: '/questions',
+      path: '/admin/questions',
       name: 'Questions',
       component: Questions
     },
     {
-      path: '/connections',
+      path: '/admin/connections',
       name: 'Connections',
       component: Connections
     },
     {
-      path: '/entities',
+      path: '/admin/entities',
       name: 'Entities',
       component: Entities
     },
     {
-      path: '/settings',
+      path: '/admin/settings',
       name: 'Settings',
       component: Settings
     },
     {
-      path: '/users',
+      path: '/admin/users',
       name: 'Users',
       component: Users
     },
     {
-      path: '/datasources',
+      path: '/admin/datasources',
       name: 'Datasources',
       component: Datasources
     },

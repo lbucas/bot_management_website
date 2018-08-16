@@ -22,16 +22,17 @@
               </transition>
               <fr-array-input model-key="filterByIds" :lookup-list="entitiesWithoutGroupedBy"
                               :label="l.filterBy" :placeholder="l.filterByHint"/>
+              <date-filter/>
               <fixed-filters/>
             </custom-form>
-            <save :on-save="saveIntent" v-if="onEdit" :disabled="!savable"/>
-            <cancel route="intents"/>
-            <edit route="intents"/>
-            <delete v-if="!onEdit" :on-delete="deleteIntent"/>
           </scrollable>
+          <save :on-save="saveIntent" v-if="onEdit" :disabled="!savable"/>
+          <cancel route="intents"/>
+          <edit route="intents"/>
+          <delete v-if="!onEdit" :on-delete="deleteIntent"/>
         </b-tab>
         <b-tab v-if="!onEdit" class="tabTitle" :title="l.training">
-          <scrollable pos="twoTab">
+          <scrollable pos="oneTab">
             <training :intentId="intentDetail.id"/>
           </scrollable>
         </b-tab>
@@ -48,9 +49,10 @@
   import TargetValues from "./TargetValues"
   import CustomCalculation from "./CustomCalculation"
   import FixedFilters from "./FixedFilters"
+  import DateFilter from "./DateFilter"
 
   export default {
-    components: {FixedFilters, CustomCalculation, TargetValues, Training},
+    components: {DateFilter, FixedFilters, CustomCalculation, TargetValues, Training},
     mixins: [StoreItems],
     name: "intents",
     computed: {

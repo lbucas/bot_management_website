@@ -1,7 +1,7 @@
 <template>
   <b-container fluid id="app">
     <b-row>
-      <b-col md="3" lg="2" id="sidenavigation" v-if="!onSignIn">
+      <b-col md="3" lg="2" id="sidenavigation" v-if="sidebarVisible">
         <b-row>
           <b-col>
             <div id="logoDiv">
@@ -26,7 +26,10 @@
         </div>
         <b-row id="langInfo" class="text-left">
           <b-col>
-            <a @click="$root.modalOpen('langSelModal')">{{$store.state.selectedLang}}</a>
+            <span @click="$root.modalOpen('langSelModal')">
+              <icon icon="lang"/>
+              {{$store.state.selectedLang}}
+            </span>
           </b-col>
         </b-row>
       </b-col>
@@ -34,7 +37,7 @@
       <b-col id="mainCol">
         <b-row>
           <b-col cols="12">
-            <b-row id="mobile-nav" class="shadow" v-if="!onSignIn">
+            <b-row id="mobile-nav" class="shadow" v-if="sidebarVisible">
               <b-col id="currentPage" class="text-left">
                 <h4>
                   <icon id="currentPageIcon" :icon="navLinkKeys[$route.name] || $route.name"/>
@@ -209,14 +212,14 @@
       error() {
         return this.$store.state.error
       },
-      onSignIn() {
-        return this.$route.name === 'Signin' || this.$route.name === 'Signedin'
+      sidebarVisible() {
+        return !(['Signin', 'Signedin', 'Databots'].includes(this.$route.name))
       }
     },
     methods: {
       route(togo) {
         togo = togo.toLowerCase()
-        this.$router.push('/' + togo)
+        this.$router.push('/admin/' + togo)
       },
       projectCheck() {
         this.loadProjects()
@@ -272,7 +275,7 @@
       }
     },
     mounted() {
-      if (!this.onSignIn) this.projectCheck()
+      if (!this.sidebarVisible) this.projectCheck()
     },
     watch: {
       error() {
@@ -287,6 +290,7 @@
   @import "style/colors";
   @import "style/mixins";
   @import "style/transitions";
+  @import "style/scrollbar";
 
   // global settings
   #app {
@@ -426,8 +430,11 @@
     position: absolute;
     bottom: 10px;
     font-size: .7rem;
-    a {
+    span {
       cursor: pointer;
+    }
+    img {
+      width: .8rem
     }
   }
 

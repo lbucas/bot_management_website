@@ -99,7 +99,15 @@
     "value": "Wert",
     "entity": "Entität",
     "noTrainings": "Noch keine Trainingssätze hinzugefügt",
-    "trainedSentences": "Trainingssätze"
+    "trainedSentences": "Trainingssätze",
+    "dateFilter": "Datumsfilter",
+    "addEndDate": "Enddatums-Attribut hinzufügen",
+    "attrForStart": "Startdatums-Attribut:",
+    "attrForEnd": "Enddatums-Attribut:",
+    "attrForDate": "Datums-Attribut:",
+    "start": "Start:",
+    "end": "Ende:",
+    "addDateFilter": "Datumsfilter hinzufügen"
   },
   "home": {
     "welcome": "Willkommen bei Ihrem Bot Management Dashboard!"

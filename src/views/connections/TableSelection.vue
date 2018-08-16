@@ -1,8 +1,9 @@
 <template>
   <b-col>
+    <scrollable pos="oneTab">
     <table class="table connectionTable">
       <tbody>
-      <tr v-for="(ds, id) in datasources">
+      <tr v-for="(ds, id) in datasources" v-if="Object.keys(ds.tables).length >0">
         <td>
           <span v-b-toggle="(cid + 'tables' + id)" @click="expand(2, id)">
             <expand-icon :expanded="(id in expanded)"/>
@@ -20,14 +21,16 @@
       </tr>
       </tbody>
     </table>
+    </scrollable>
   </b-col>
 </template>
 
 <script>
-  import ExpandIcon from "./ExpandIcon"
+  import ExpandIcon from "../../components/ExpandIcon"
+  import Scrollable from "../../components/Scrollable"
   export default {
     name: "TableSelection",
-    components: {ExpandIcon},
+    components: {Scrollable, ExpandIcon},
     props: {
       value: {},
       joined: {
@@ -82,8 +85,8 @@
 </script>
 
 <style lang="less" scoped>
-  @import "../style/mixins";
-  @import "../style/colors";
+  @import "../../style/mixins";
+  @import "../../style/colors";
 
   .connectionTable {
     #noUserSelect !important;
