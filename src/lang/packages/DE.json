@@ -42,7 +42,7 @@
   "connections": {
     "standard": "Standard",
     "visual": "Visuell",
-    "chooseAttr": "Wählen Sie Attribute aus um die Tabellen zu verbinden"
+    "chooseAttr": "Wählen Sie Attribute aus, um die Tabellen zu verbinden"
   },
   "datasources": {
     "databases": "Datenbanken",
@@ -66,7 +66,7 @@
     "success": "Erfolgreich!",
     "errMsg": "Fehlermeldung:",
     "conFailed": "Verbindung zu der angegebenen Datenbank konnte nicht hergestellt werden. ",
-    "uploadFlatfile": "Klicken oder .csv, .tsv, or .json Dateien hierhin ziehen zum Hochladen"
+    "uploadFlatfile": "Klicken oder .csv, .tsv, oder .json Dateien hierhin ziehen zum Hochladen"
   },
   "entities": {
     "entities": "Entitäten",
@@ -74,7 +74,7 @@
     "connectedAttr": "Verbundenes Attribut",
     "loadKeywords": "Schlagwörter aus der Datenquelle laden",
     "noKeywords": "Noch keine Schlagwörter hinzugefügt",
-    "summarize": "Wählen Sie ein Schlagwort aus um es umzubennen oder markieren Sie mehrere um sie zu einem geteilten Schlagwort zusammenzufassen.",
+    "summarize": "Wählen Sie ein Schlagwort aus, um es umzubennen oder markieren Sie mehrere, um sie zu einem geteilten Schlagwort zusammenzufassen.",
     "keywords": "Schlagwörter"
   },
   "intents": {
@@ -95,7 +95,7 @@
     "addTarget": "Zielwert hinzufügen",
     "addSentence": "Neuer Trainingssatz",
     "trainingSentence": "Trainingssatz:",
-    "markHint": "Markieren Sie Satzteile im Eingabefeld um Annotationen hinzuzufügen.",
+    "markHint": "Markieren Sie Satzteile im Eingabefeld, um Annotationen hinzuzufügen.",
     "value": "Wert",
     "entity": "Entität",
     "noTrainings": "Noch keine Trainingssätze hinzugefügt",
@@ -110,7 +110,7 @@
     "addDateFilter": "Datumsfilter hinzufügen"
   },
   "home": {
-    "welcome": "Willkommen bei Ihrem Bot Management Dashboard!"
+    "welcome": "Willkommen in Ihrem Bot Management Dashboard!"
   },
   "signin": {
     "signinAuto": "Sie werden automatisch angemeldet.."
