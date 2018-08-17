@@ -16,5 +16,9 @@
 </script>
 
 <style scoped>
+  p {
+    width: 100%;
+    overflow-x: auto;
+  }
 
 </style>

@@ -1,41 +1,47 @@
 <template>
   <master-detail :tableheading="l.flatfiles" route="flatfiles">
-    <b-row id="excelFileDetails">
-      <b-col>
-        <custom-form route="flatfiles">
-          <fr-input model-key="name" label="Title"/>
-          <fr-display model-key="uploaded" :label="l.lastUpd" filter="date"/>
-        </custom-form>
-        <div v-if="onEdit">
-          <file-input v-model="file.name" :options="options" :uploaded="fileUploaded">
-            <div>
-              <icon icon="file" size="xl"/>
-              <div class="dz-message">{{l.uploadFlatfile}}</div>
-            </div>
-          </file-input>
-        </div>
+    <b-tabs>
+      <b-tab class="tabTitle" :title="$root.l.general">
+        <scrollable pos="threeTab">
+          <b-row id="excelFileDetails">
+            <b-col>
+              <custom-form route="flatfiles">
+                <fr-input model-key="name" label="Title"/>
+                <fr-display model-key="uploaded" :label="l.lastUpd" filter="date"/>
+              </custom-form>
+              <div v-if="onEdit">
+                <file-input v-model="file.name" :options="options" :uploaded="fileUploaded">
+                  <div>
+                    <icon icon="file" size="xl"/>
+                    <div class="dz-message">{{l.uploadFlatfile}}</div>
+                  </div>
+                </file-input>
+              </div>
+            </b-col>
+          </b-row>
+        </scrollable>
         <edit route="flatfiles" v-if="!onEdit"/>
         <delete :on-delete="deleteFlatfile" v-if="!onEdit"/>
         <cancel route="flatfiles" v-if="onEdit"/>
-      </b-col>
-    </b-row>
+      </b-tab>
+      <b-tab class="tabTitle" :title="l.tables" v-if="!onEdit">
+        <scrollable pos="twoTab">
+          <tables :flatfile="file.id"/>
+        </scrollable>
+      </b-tab>
+    </b-tabs>
+
   </master-detail>
 </template>
 
 <script>
   import FileInput from "../../components/FileInput"
-  import FormRowInput from "../../components/form/FormRowInput"
-  import FormRowDisplay from "../../components/form/FormRowDisplay"
-  import CustomForm from "../../components/form/CustomForm"
-  import EditButton from "../../components/buttons/EditButton"
-  import DeleteButton from "../../components/buttons/DeleteButton"
-  import CancelButton from "../../components/buttons/CancelButton"
-  import Masterdetail from "../../components/MasterDetail"
-  import Icon from "../../components/Icon"
+  import Tables from "../../components/Tables"
 
   export default {
     name: "Flatfiles",
     components: {
+      Tables,
       FileInput
     },
     computed: {

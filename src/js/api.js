@@ -80,7 +80,8 @@ const api = {
     entities: true,
     intents: true,
     excelFiles: true,
-    flatfiles: true
+    flatfiles: true,
+    bot: true
   },
   fireCall({type, route, data}) {
     return new Promise(function (resolve, reject) {
@@ -111,6 +112,7 @@ const api = {
   },
   queue: [],
   flushQueue() {
+    debugger
     let call, args
     for (let i = 0; i < this.queue.length; i++) {
       call = this.queue.pop()

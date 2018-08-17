@@ -6,7 +6,7 @@
           {{startHeading}}
         </b-col>
         <b-col>
-          <attribute-select v-model="start"/>
+          <attribute-select v-model="start" datatype="datetime"/>
         </b-col>
         <b-col md="1">
           <a @click="removeStart" class="remove">×</a>
@@ -17,7 +17,7 @@
           {{l.attrForEnd}}
         </b-col>
         <b-col>
-          <attribute-select v-model="end"/>
+          <attribute-select v-model="end"  datatype="datetime"/>
         </b-col>
         <b-col md="1">
           <a @click="removeEnd" class="remove">×</a>

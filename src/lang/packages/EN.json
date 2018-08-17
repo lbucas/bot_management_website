@@ -26,7 +26,7 @@
   },
   "app": {
     "Datasources": "Datasources",
-    "Connections": "Conncections",
+    "Connections": "Connections",
     "Entities": "Entities",
     "Questions": "Questions",
     "Users": "Users",
@@ -54,6 +54,7 @@
     "tabHeaders": "Detected Headers:",
     "tabEntries": "Entries:",
     "tables": "Tables",
+    "table": "Table",
     "exUploadHelp": "Click or drop .xlsx files here to upload",
     "host": "Host",
     "dbType": "Database Type",
@@ -112,14 +113,14 @@
   "home": {
     "welcome": "Welcome to your Bot Management Dashboard!"
   },
-  "signin": {
-    "signinAuto": "Signing you in automatically.."
-  },
   "settings": {
     "projectSettings": "Project Settings:",
     "team": "Team Members:",
     "addMember": "Add a team member by MUID",
-    "deleteProj": "Delete Project"
+    "deleteProj": "Delete Project",
+    "deployment": "Bot Deployment:",
+    "location": "Find your bot at:",
+    "deploy": "Publish Bot"
   },
   "users": {
     "botUsers": "Bot Users",
@@ -131,5 +132,10 @@
     "entDescription": "Please provide a description for the entity",
     "entAttributeId": "Please select a connected attribute",
     "intName": "Please provide a title for the question"
+  },
+  "notifications": {
+    "schemaBuildStarted": "Schema is beeing built in the background",
+    "schemaBuilt": "Schema was built",
+    "filename": "Filename:"
   }
 }

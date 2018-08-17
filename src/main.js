@@ -10,7 +10,6 @@ import 'bootstrap-vue/dist/bootstrap-vue.css'
 import tools from './js/tools'
 import VueClip from 'vue-clip'
 import VueNotification from 'vue-notification'
-import Scrollbar from 'vue-perfect-scrollbar'
 // global components
 import Save from "./components/buttons/SaveButton"
 import Cancel from "./components/buttons/CancelButton"
@@ -66,8 +65,7 @@ let components = {
   Loader,
   Icon,
   Update,
-  Scrollable,
-  Scrollbar
+  Scrollable
 }
 for (let key in components) Vue.component(toSnake(key), components[key])
 

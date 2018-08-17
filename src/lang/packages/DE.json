@@ -16,7 +16,7 @@
     "leftSide": "Wählen Sie eine Tabelle von der linken Seite",
     "rightSide": "Wählen Sie eine Tabelle von der rechten Seite",
     "fileProcessing": "Die Datei wird verarbeitet",
-    "noEntries": "Keine vorhanden..",
+    "noEntries": "Keine vorhanden",
     "page": "Seite",
     "of": "von",
     "noAttrs": "Noch keine Attribute für diese Tabelle importiert",
@@ -66,7 +66,8 @@
     "success": "Erfolgreich!",
     "errMsg": "Fehlermeldung:",
     "conFailed": "Verbindung zu der angegebenen Datenbank konnte nicht hergestellt werden. ",
-    "uploadFlatfile": "Klicken oder .csv, .tsv, oder .json Dateien hierhin ziehen zum Hochladen"
+    "uploadFlatfile": "Klicken oder .csv, .tsv, oder .json Dateien hierhin ziehen zum Hochladen",
+    "table": "Tabelle"
   },
   "entities": {
     "entities": "Entitäten",
@@ -112,9 +113,6 @@
   "home": {
     "welcome": "Willkommen in Ihrem Bot Management Dashboard!"
   },
-  "signin": {
-    "signinAuto": "Sie werden automatisch angemeldet.."
-  },
   "settings": {
     "projectSettings": "Projekteinstellungen:",
     "team": "Team:",
@@ -131,5 +129,10 @@
     "muid": "MUID",
     "role": "Rolle",
     "botUsers": "Bot Users"
+  },
+  "notifications": {
+    "schemaBuildStarted": "Schema wird im Hintergrund erstellt",
+    "schemaBuilt": "Schema wurde erstellt",
+    "filename": "Dateiname:"
   }
 }

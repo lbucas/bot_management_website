@@ -139,12 +139,14 @@
     </notifications>
 
     <b-modal id="errorModal" title="An Error occurred" cancel-disabled>
-      <h6>{{l.errorOccured}}</h6>
-      <br>
-      <error-display :src="error.status" desc="Type"/>
-      <error-display :src="error.message" desc="Message"/>
-      <error-display :src="error.route" desc="Target"/>
-      <error-display :src="error.sentData" desc="Sent Data"/>
+      <div id="errorInfo">
+        <h6>{{l.errorOccured}}</h6>
+        <br>
+        <error-display :src="error.status" desc="Type"/>
+        <error-display :src="error.message" desc="Message"/>
+        <error-display :src="error.route" desc="Target"/>
+        <error-display :src="error.sentData" desc="Sent Data"/>
+      </div>
     </b-modal>
 
     <b-modal id="langSelModal" :title="l.selectLang">
@@ -262,6 +264,7 @@
     created() {
       this.getUser()
       this.$store.dispatch('notificationStream', this.$notify)
+      this.$store.dispatch('checkDeploymentState')
       if (!(this.$route.name === 'Signin' || this.$route.name === 'Signedin')) {
         let at = this.$tools.cookies.get('access_token')
         let expires = this.$tools.cookies.get('access_token_validUntil')
@@ -270,16 +273,20 @@
           this.$store.dispatch('setAccessToken', at)
           this.projectCheck()
         } else {
+          this.$tools.cookies.set('locBeforeSignin', this.$route.path)
           this.$router.push('/signin')
         }
       }
     },
     mounted() {
-      if (!this.sidebarVisible) this.projectCheck()
+      if (this.sidebarVisible) this.projectCheck()
     },
     watch: {
-      error() {
-        this.$root.modalOpen('errorModal')
+      error: {
+        handler() {
+          this.$root.modalOpen('errorModal')
+        },
+        deep: true
       }
     }
   }
@@ -423,8 +430,6 @@
     padding-right: 2em;
     padding-left: 1em;
   }
-
-
 
   #langInfo {
     position: absolute;

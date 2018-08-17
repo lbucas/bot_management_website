@@ -49,9 +49,10 @@
           <delete :on-delete="deleteExcel" v-if="!onEdit"/>
           <save :on-save="importExcel" :disabled="!importable" text="Import" v-if="fileParsed"/>
           <cancel :on-cancel="emptyParsedFile" route="excelFiles" v-if="fileParsed"/>
+          <cancel route="excelFiles" v-else/>
         </div>
       </b-tab>
-      <b-tab class="tabTitle" :title="l.tables">
+      <b-tab class="tabTitle" :title="l.tables" v-if="!onEdit">
         <scrollable pos="twoTab">
           <tables :excelFile="file.id"/>
         </scrollable>

@@ -4,19 +4,32 @@
     <scrollable pos="full">
       <b-row>
         <b-col lg="6">
-          <h5>{{l.projectSettings}}</h5>
-          <label> {{l.team}}</label>
-          <input-add-button :show-add="validTeamMember" :on-add="addMember">
-            <b-input v-model="nextTeamMember" :placeholder="l.addMember"/>
-          </input-add-button>
-          <badges :values="team" :remove="removeMember"/>
+
+          <div class="settingsSection">
+            <h5>{{l.deployment}}</h5>
+            <label> {{l.location}}</label>
+            <p>{{botLocation}}</p>
+            <badges :values="team" :remove="removeMember"/>
+          </div>
+
+          <div class="settingsSection">
+            <h5>{{l.projectSettings}}</h5>
+            <label> {{l.team}}</label>
+            <input-add-button :show-add="validTeamMember" :on-add="addMember">
+              <b-input v-model="nextTeamMember" :placeholder="l.addMember"/>
+            </input-add-button>
+            <badges :values="team" :remove="removeMember"/>
+          </div>
+
+          <div class="settingsSection">
+            <h5>{{l.deleteProj}}</h5>
+            <center-button>
+              <delete :on-delete="deleteProject"/>
+            </center-button>
+          </div>
         </b-col>
         <b-col></b-col>
         <b-col lg="5">
-          <h5>{{l.deleteProj}}</h5>
-          <center-button>
-            <delete :on-delete="deleteProject"/>
-          </center-button>
         </b-col>
       </b-row>
     </scrollable>
@@ -34,7 +47,8 @@
     data() {
       return {
         nextTeamMember: '',
-        loading: false
+        loading: false,
+        botLocation: ''
       }
     },
     computed: {
@@ -93,5 +107,8 @@
 <style lang="less" scoped>
   #settings {
     padding-top: 1em;
+    .settingsSection {
+      margin-bottom: 4rem;
+    }
   }
 </style>

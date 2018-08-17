@@ -19,7 +19,7 @@
                 {{a.name}} ({{a.datatype}})
               </li>
               <li>
-                <update-button class="updateAttribute" :text="$root.l.updateAttrs"
+                <update class="updateAttribute" :text="$root.l.updateAttrs"
                                :update="function(){updateAttributes(t.id)}" v-if="database"
                                :loading="updatingAttr[t.id] || tablesLoading || false" size="sm"/>
               </li>
@@ -35,12 +35,11 @@
 
 <script>
   import Expandable from './mixins/Expandable'
-  import UpdateButton from "./buttons/UpdateButton"
   import ExpandIcon from "./ExpandIcon"
 
   export default {
     name: "Tables",
-    components: {ExpandIcon, UpdateButton},
+    components: {ExpandIcon},
     mixins: [Expandable],
     props: {
       database: {

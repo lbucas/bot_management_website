@@ -284,7 +284,7 @@ export default new Vuex.Store({
     notifications: {},
     lang: {},
     selectedLang: '',
-    // subroute specific
+    bot: null,
     onPage: {
       keywords: {},
       trainings: {}
@@ -465,7 +465,7 @@ export default new Vuex.Store({
         }
         if (!found) return {}
       }
-      let flatfileDs = state.datasources[excelDatasourceId]
+      let flatfileDs = state.datasources[flatfileDatasourceId]
       let tpf = {}
       for (let tid in flatfileDs.tables) {
         let t = flatfileDs.tables[tid]
@@ -628,6 +628,9 @@ export default new Vuex.Store({
           Vue.set(state.lang[view], sentence, lang[view][sentence])
         }
       }
+    },
+    setDeploymentState(state, deplState) {
+      state.deploymentState = deplState
     }
   },
   actions: {
@@ -791,17 +794,14 @@ export default new Vuex.Store({
           })
       })
     },
-    getKeywordsFromDs(context, {attributeId, entityId}) {
-      return new Promise(function (resolve, reject) {
-        context.commit('loading', {route: 'keywords', valId: attributeId})
-        api.call("POST", 'attributeValues/updateValues', {attributeId, entityId})
-          .then(() => {
-            context.commit('finishedLoading', {route: 'keywords', valId: attributeId})
-            resolve()
-          }, (err) => {
-            reject(err)
-          })
+    async getKeywordsFromDs(context, {attributeId, entityId}) {
+      context.commit('loading', {route: 'keywords', valId: attributeId})
+      await api.call("POST", 'attributeValues/updateValues', {
+        attributeId,
+        entityId,
+        projectId: context.state.projectId
       })
+      context.commit('finishedLoading', {route: 'keywords', valId: attributeId})
     },
     setAccessToken(context, token) {
       api.setToken(token)
@@ -823,30 +823,23 @@ export default new Vuex.Store({
         context.commit('setDetailItem', {route, item: context.state.newItem[route]})
       }
     },
-    createPagination(context, {subroute, id}) {
-      return new Promise(function (resolve, reject) {
-        context.commit('createPagination', {subroute, id})
-        context.dispatch('calculateOnPage', {subroute, id})
-          .then(() => {
-            resolve()
-          })
-      })
+    async createPagination(context, {subroute, id}) {
+      context.commit('createPagination', {subroute, id})
+      await context.dispatch('calculateOnPage', {subroute, id})
     },
     calculateOnPage(context, {subroute, id}) {
-      return new Promise(function (resolve, reject) {
-        let page = context.state.page[subroute][id]
-        let epp = context.state.entriesPerPage
-        let max = Math.min(page * epp, context.state.loadLimitedCount[subroute][id])
-        let op = {}
-        let list = context.state[subroute][id]
-        let index = context.state.loadLimitedIndex[subroute][id]
-        let next
-        for (let i = (page - 1) * epp; i < max; i++) {
-          next = list[index[i]]
-          op[next.id] = next
-        }
-        context.commit('setOnPage', {subroute, id, onPage: op})
-      })
+      let page = context.state.page[subroute][id]
+      let epp = context.state.entriesPerPage
+      let max = Math.min(page * epp, context.state.loadLimitedCount[subroute][id])
+      let op = {}
+      let list = context.state[subroute][id]
+      let index = context.state.loadLimitedIndex[subroute][id]
+      let next
+      for (let i = (page - 1) * epp; i < max; i++) {
+        next = list[index[i]]
+        op[next.id] = next
+      }
+      context.commit('setOnPage', {subroute, id, onPage: op})
     },
     page(context, {subroute, id, forward}) {
       let toAdd = (forward ? 1 : -1)
@@ -884,18 +877,19 @@ export default new Vuex.Store({
       }
     },
     notificationHandler(context, {message, ctx}) {
+      let l = context.state.lang.notifications
       switch (message) {
         case 'GLUE_JOB_DONE': {
           context.dispatch('update', 'datasources')
           return {
-            title: 'Schema was built',
-            detail: 'Filename: ' + ctx.value
+            title: l.schemaBuilt,
+            detail: `${l.filename} ${ctx.value}`
           }
         }
         case 'GLUE_JOB_STARTED': {
           return {
-            title: 'Schema is beeing built in the background',
-            detail: 'Filename: ' + ctx.value
+            title: l.schemaBuildStarted,
+            detail: `${l.filename} ${ctx.value}`
           }
         }
       }
@@ -929,7 +923,7 @@ export default new Vuex.Store({
       })
     },
     errorHandling(context, {err, route, data, router}) {
-      if (err.respone && err.response.status === 401) {
+      if (err.response && err.response.status === 401) {
         router.push('/signin')
       } else {
         let errMsg
@@ -948,6 +942,10 @@ export default new Vuex.Store({
         context.commit('error', error)
         context.commit('finishedLoading', route.split('/')[0])
       }
+    },
+    async checkDeploymentState(context) {
+      let bot = await api.call('GET', 'bot')
+      console.log(bot)
     }
   }
 })

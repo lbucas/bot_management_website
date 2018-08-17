@@ -1,7 +1,7 @@
 <template>
   <b-col class="text-center">
     <div v-if="table">
-      <span>{{table.name}}</span>
+      <span>{{table.displayName}}</span>
       <select class="form-control" v-model="attributeId" :disabled="disabled">
         <option value="null"></option>
         <option v-for="a in table.attributes" :value="a.id">{{a.name}} ({{a.datatype}})
