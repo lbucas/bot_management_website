@@ -1,12 +1,12 @@
 <template>
-  <login-display/>
+  <signin-display/>
 </template>
 
 <script>
-  import LoginDisplay from "./LoginDisplay"
+  import SigninDisplay from "./SigninDisplay"
   export default {
     name: "signin",
-    components: {LoginDisplay},
+    components: {SigninDisplay},
     created() {
       let apiUrl = this.$store.state.apiUrl
       let scope

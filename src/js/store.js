@@ -284,7 +284,7 @@ export default new Vuex.Store({
     notifications: {},
     lang: {},
     selectedLang: '',
-    bot: null,
+    bot: {},
     onPage: {
       keywords: {},
       trainings: {}
@@ -629,8 +629,8 @@ export default new Vuex.Store({
         }
       }
     },
-    setDeploymentState(state, deplState) {
-      state.deploymentState = deplState
+    setBotcontainer(state, bot) {
+      clone(state.bot, bot)
     }
   },
   actions: {
@@ -892,6 +892,22 @@ export default new Vuex.Store({
             detail: `${l.filename} ${ctx.value}`
           }
         }
+        case 'BOT_DEPLOY_STARTED': {
+          let b = {}
+          clone(b, this.$store.state.bot)
+          b.deploying = false
+          context.commit('setBotcontainer', b)
+          return {
+            title: l.deploymentDone,
+            detail: l.deploymentInDoneMsg
+          }
+        }
+        case 'BOT_DEPLOY_DONE': {
+          return {
+            title: l.deploymentInProgess,
+            detail: l.deploymentInProgessMsg
+          }
+        }
       }
     },
     updateKeyword(context, attributeId) {
@@ -944,8 +960,22 @@ export default new Vuex.Store({
       }
     },
     async checkDeploymentState(context) {
-      let bot = await api.call('GET', 'bot')
-      console.log(bot)
+      let pid = await api.waitforProjectId()
+      let bot = await api.call('GET', 'botcontainers', {
+        filter: {
+          where: {
+            projectId: pid
+          }
+        }
+      })
+      if (bot.length > 0) context.commit('setBotcontainer', bot[0])
+    },
+    async deployBot(context) {
+      let bot = api.call('POST', 'botcontainers/createContainer', {
+        projectId: context.state.projectId,
+        currentUser: context.state.user.user.id
+      })
+      context.commit('setBotcontainer', bot)
     }
   }
 })

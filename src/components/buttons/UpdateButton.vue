@@ -1,8 +1,10 @@
 <template>
   <b-button variant="primary" :size="size" :variant="variant" @click="startUpdate" :disabled="spinning">
-    <img class="updateImg" src="../../assets/icons/update.svg" v-if="!spinning && !done"/>
-    <img class="updateImg" src="../../assets/icons/updating.svg" v-if="spinning" :size="size" :variant="variant"/>
-    <img class="updateImg" src="../../assets/icons/done.svg" v-if="done && !spinning" :size="size" :variant="variant"/>
+    <img class="updateImg" src="../../assets/icons/update.svg" v-if="iconVisible && !spinning && !done"/>
+    <img class="updateImg" src="../../assets/icons/updating.svg" v-if="iconVisible && spinning" :size="size"
+         :variant="variant"/>
+    <img class="updateImg" src="../../assets/icons/done.svg" v-if="iconVisible && done && !spinning" :size="size"
+         :variant="variant"/>
     {{text}}
   </b-button>
 </template>
@@ -24,6 +26,10 @@
       text: {
         type: String,
         default: ''
+      },
+      iconVisible: {
+        type: Boolean,
+        default: true
       }
     },
     data() {

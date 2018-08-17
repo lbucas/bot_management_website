@@ -45,7 +45,7 @@ const api = {
         return 'intents/' + id + '/trainings'
     }
   },
-  get (route, data) {
+  get(route, data) {
     return new Promise(function (resolve, reject) {
       api.call('GET', route, data)
         .then((data) => {
@@ -84,7 +84,7 @@ const api = {
     bot: true
   },
   fireCall({type, route, data}) {
-    return new Promise(function (resolve, reject) {
+    return new Promise((resolve, reject) => {
       data = data || {}
       let params = {
         access_token: api.token
@@ -112,7 +112,6 @@ const api = {
   },
   queue: [],
   flushQueue() {
-    debugger
     let call, args
     for (let i = 0; i < this.queue.length; i++) {
       call = this.queue.pop()
@@ -134,6 +133,13 @@ const api = {
       }
     }
   },
+  notifyQueue: [],
+  waitforProjectId() {
+    return new Promise((resolve, reject) => {
+      if (api.projectId) resolve(api.projectId)
+      api.notifyQueue.push(resolve)
+    })
+  },
   arrayToObject(toTransform, akey) {
     if (Array.isArray(toTransform)) {
       akey = akey || 'id'
@@ -152,6 +158,7 @@ const api = {
   setProjectId(projectId) {
     api.projectId = projectId
     this.flushQueue()
+    for (let resolve of api.notifyQueue) resolve(projectId)
   },
   setErrorHandler(handler) {
     api.errorHandler = handler

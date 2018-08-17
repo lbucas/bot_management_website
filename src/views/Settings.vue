@@ -3,13 +3,18 @@
     <loader :loading="loading"/>
     <scrollable pos="full">
       <b-row>
-        <b-col lg="6">
+        <b-col lg="8">
 
           <div class="settingsSection">
             <h5>{{l.deployment}}</h5>
             <label> {{l.location}}</label>
-            <p>{{botLocation}}</p>
-            <badges :values="team" :remove="removeMember"/>
+            <p id="botUrl">{{location}}</p>
+            <div v-if="deployState<2">
+              <center-button>
+                <update :update="deployBot" :loading="deployState===1" variant="info" :text="deployButtonText"
+                        :icon-visible="deployState === 1"/>
+              </center-button>
+            </div>
           </div>
 
           <div class="settingsSection">
@@ -28,8 +33,7 @@
             </center-button>
           </div>
         </b-col>
-        <b-col></b-col>
-        <b-col lg="5">
+        <b-col lg="4">
         </b-col>
       </b-row>
     </scrollable>
@@ -47,7 +51,7 @@
     data() {
       return {
         nextTeamMember: '',
-        loading: false,
+        loading: true,
         botLocation: ''
       }
     },
@@ -69,9 +73,25 @@
           this.nextTeamMember.length === 7 &&
           ['m', 'M', 'x', 'X'].includes(this.nextTeamMember.substring(0, 1)) &&
           Number.isInteger(parseInt(this.nextTeamMember.substring(1)))
+      },
+      bot() {
+        return this.$store.state.bot
+      },
+      deployState() {
+        let dep = this.bot.deploying
+        if (dep === false) return 2 // is ready
+        if (dep) return 1 // is deploying
+        return 0 // not deployed yet
+      },
+      location() {
+        return this.bot.url || this.l.notDeployedYet
+      },
+      deployButtonText() {
+        return this.deployState === 1 ? this.l.deploymentInProgess : this.l.deploy
       }
     },
     created() {
+      this.checkbot()
     },
     methods: {
       async addMember() {
@@ -92,6 +112,13 @@
         this.$root.modalOpen('projectModal')
       },
       removeMember(i) {
+      },
+      async checkbot() {
+        await this.$store.dispatch('checkDeploymentState')
+        this.loading = false
+      },
+      deployBot() {
+        this.$store.dispatch('deployBot')
       }
     },
     watch: {
@@ -110,5 +137,10 @@
     .settingsSection {
       margin-bottom: 4rem;
     }
+  }
+
+  #botUrl {
+    display: inline;
+    font-style: italic;
   }
 </style>

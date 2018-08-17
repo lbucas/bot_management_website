@@ -264,7 +264,6 @@
     created() {
       this.getUser()
       this.$store.dispatch('notificationStream', this.$notify)
-      this.$store.dispatch('checkDeploymentState')
       if (!(this.$route.name === 'Signin' || this.$route.name === 'Signedin')) {
         let at = this.$tools.cookies.get('access_token')
         let expires = this.$tools.cookies.get('access_token_validUntil')

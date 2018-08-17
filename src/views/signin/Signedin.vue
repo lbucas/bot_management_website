@@ -1,13 +1,13 @@
 <template>
-  <login-display/>
+  <signin-display/>
 </template>
 
 <script>
-  import LoginDisplay from "./LoginDisplay"
+  import SigninDisplay from "./SigninDisplay"
 
   export default {
     name: "signedin",
-    components: {LoginDisplay},
+    components: {SigninDisplay},
     created() {
       this.$tools.cookies.clear('signingIn')
       let token = this.$route.query.accessToken

@@ -120,7 +120,9 @@
     "deleteProj": "Delete Project",
     "deployment": "Bot Deployment:",
     "location": "Find your bot at:",
-    "deploy": "Publish Bot"
+    "deploy": "Publish Bot",
+    "deploymentInProgess": "Publishing in Progress",
+    "notDeployedYet": "Bot is not published yet."
   },
   "users": {
     "botUsers": "Bot Users",
@@ -136,6 +138,10 @@
   "notifications": {
     "schemaBuildStarted": "Schema is beeing built in the background",
     "schemaBuilt": "Schema was built",
-    "filename": "Filename:"
+    "filename": "Filename:",
+    "deploymentInProgess": "Publishing in Progress",
+    "deploymentInProgessMsg": "Your bot will be available shortly!",
+    "deploymentDone": "Bot published",
+    "deploymentDoneMsg": "You can use the bot now!"
   }
 }

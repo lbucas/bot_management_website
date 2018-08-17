@@ -117,7 +117,12 @@
     "projectSettings": "Projekteinstellungen:",
     "team": "Team:",
     "addMember": "Fügen Sie ein Teammitglied per MUID hizu",
-    "deleteProj": "Projekt löschen"
+    "deleteProj": "Projekt löschen",
+    "deployment": "Bot Deployment:",
+    "location": "Bot URL:",
+    "deploy": "Bot veröffentlichen",
+    "deploymentInProgess": "Veröffentlichung läuft",
+    "notDeployedYet": "Bot ist noch nicht veröffentlicht"
   },
   "checks": {
     "entName": "[[ Please provide a title for the entity ]]",
@@ -133,6 +138,10 @@
   "notifications": {
     "schemaBuildStarted": "Schema wird im Hintergrund erstellt",
     "schemaBuilt": "Schema wurde erstellt",
-    "filename": "Dateiname:"
+    "filename": "Dateiname:",
+    "deploymentInProgess": "Veröffentlichung gestarted",
+    "deploymentInProgessMsg": "Ihr Bot steht in Kürze zur Verfügung",
+    "deploymentDone": "Bot veröffentlicht",
+    "deploymentDoneMsg": "Sie können den Bot ab jetzt nutzen!"
   }
 }
