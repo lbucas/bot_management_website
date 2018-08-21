@@ -80,7 +80,9 @@
     "loadKeywords": "Load Keywords from Datasource",
     "noKeywords": "No keywords added yet.",
     "summarize": "Select entries from the table to rename them or to summarize multiple to one shared keyword",
-    "keywords": "Keywords"
+    "keywords": "Keywords",
+    "summarizeButton": "Summarize",
+    "unlink": "Unlink"
   },
   "intents": {
     "questions": "Questions",
@@ -142,7 +144,7 @@
     "deploymentDone": "Bot published",
     "deploymentDoneMsg": "You can use the bot now!"
   },
-  "validation-entitites": {
+  "validation-entities": {
     "name": "Please name the entity",
     "description": "Please provide a description for the entity",
     "attributeId": "Please select a connected attribute"

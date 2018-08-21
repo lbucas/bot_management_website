@@ -10,7 +10,7 @@
         <scrollable pos="twoTab">
           <Table>
             <span v-if="!loading && tclength == 0">{{$root.l.noEntries}}</span>
-            <tr v-for="(t, id) in tablecontent" @click="chooseEntry(t)" v-bind:active="(id == activeId)">
+            <tr v-for="(t, id) in tablecontentOrdered" @click="chooseEntry(t)" v-bind:active="(id == activeId)">
               <td>
                 <span class="tablePrimary float-left">{{t.name}}</span>
                 <span class="tableSecondary float-right">{{t[secondary]}}</span>
@@ -94,6 +94,9 @@
       },
       activeId() {
         return this.$store.state.detailItem[this.route].id
+      },
+      tablecontentOrdered() {
+        return this.$tools.sortObject(this.tablecontent, 'name')
       }
     }
   }

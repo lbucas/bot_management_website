@@ -63,7 +63,7 @@
     },
     methods: {
       gotoBot(url) {
-        window.location.href = `${url}/chat.html?accessToken=${this.$store.state.api.token}`
+        window.open(`${url}/chat.html?accessToken=${this.$store.state.api.token}`)
       },
       gotoAdmin() {
         window.location.href = window.location.href + 'admin/'

@@ -1,11 +1,35 @@
+/**
+ * This is the most important file of the project as it serves as central point for loading, storing and manipulating
+ * the dashboards data. The technology used is Vuex ("Vue store") which is the official state management implemtation
+ * for state management for the Vue.js framework.
+ *
+ * The store is initialized with an object containing 4 properties:
+ * -state: Defines the data which are in the store and which is used all over the application. Data here can be accessed
+ *    inside components via 'this.$store.state.<property>". It is the equivalent of the data option inside components.
+ * -getters: Defines values which are computed using the data in the stored in the state. It is reactive to changes in
+ *    the latter. The computed data can be accessed via 'this.$store.getters.<property>" inside components. It is the
+ *    equivalent of the 'computed' option.
+ * -mutations: Defines functions to manipulate the data in the store. Best practice is to only use mutations to change
+ *    the state data (opposed to directly changing it inside the components) as it provides better maintainability and
+ *    comprehensibility in large applications. These functions can be accessed triggered via
+ *    'this.$store.commit('<mutationName>", <parameters>)'.
+ * -actions: Defines functions which run asynchronous code. It is mainly used a central interface for the api in this
+ *    application. Functions can be triggered via 'this.$store.dispatch('<mutationName>", <parameters>)'.
+ * */
+
 import Vuex from 'vuex'
 import Vue from 'vue'
-import api from './api'
+import api from './api' // custom API wrapper
 import Promise from 'bluebird'
 import tools from './tools'
 
 Vue.use(Vuex)
 
+/**
+ * Helper function to set an object in the way that Vue is reacting to the changes reliably
+ * @param oldItem Object
+ * @param newItem Object
+ */
 const clone = (oldItem, newItem) => {
   for (let oldKey in oldItem) {
     if (!(oldKey in newItem)) {
@@ -16,6 +40,11 @@ const clone = (oldItem, newItem) => {
     Vue.set(oldItem, newKey, newItem[newKey])
   }
 }
+/**
+ * Similar to clone, but property which are non-existent in the new object are not deleted from the old item
+ * @param oldItem
+ * @param newItem
+ */
 const update = (oldItem, newItem) => {
   for (let newKey in newItem) {
     if (newItem[newKey] !== undefined) {
@@ -25,6 +54,9 @@ const update = (oldItem, newItem) => {
 }
 const timeout = ms => new Promise(resolve => setTimeout(resolve, ms))
 
+/**
+ * Stores the loopback filter parameters that are used in GET requests for the specified routes.
+ */
 const filters = {
   datasources: {
     "include": {
@@ -41,6 +73,15 @@ const filters = {
     "include": "attributeValues"
   }
 }
+/**
+ * Stores validation functions for specified routes by the model key. If true is given as value, the default validation
+ * function will be applied, which checks if the value is specified or if has atleast one value in the case of an array.
+ * Validation functions should return true if the validation succeeded and false if not. Alternatively a string value can
+ * be returned, if there are multiple possibilities for failed validations. The hints which are associated with the should
+ * be provided in the language files with the key 'validation-<route>.<modelkey>' or
+ * 'validation-<route>.<modelkey>-<identifier>'. The validation can receive the following as function properties:
+ * The current value of the validation target, the whole detail item for the current route, state, getters.
+ */
 const validations = {
   databases: {
     name: true,
@@ -90,9 +131,11 @@ let flatfileDatasourceId = null
 let notificationTries = 0
 let sse
 
+// The store is initialized here
 export default new Vuex.Store({
   state: {
     apiUrl: api.url(),
+    /* This section contains objects similar to the routes in the api */
     projects: {},
     projectId: '',
     databases: {},
@@ -113,8 +156,11 @@ export default new Vuex.Store({
     aggregations: {},
     keywords: {},
     trainings: {},
+    /* Reference to api and tools for use in components */
     api: api,
     tools: tools,
+    /* The detail items are used when route objects are edited or created by the user. Using this, changes by the user
+    can easily be reverted */
     detailItem: {
       databases: {
         name: '',
@@ -132,8 +178,7 @@ export default new Vuex.Store({
         id: null,
         name: '',
         description: '',
-        attributeId: null,
-        onEdit: false
+        attributeId: null
       },
       intents: {
         name: "",
@@ -186,6 +231,7 @@ export default new Vuex.Store({
       keywords: {},
       trainings: {}
     },
+    /* Blueprints of every route object which are copied to the detail item when the user wants to create a new item */
     newItem: {
       databases: {
         id: null,
@@ -253,6 +299,7 @@ export default new Vuex.Store({
       flatfiles: false,
       botUsers: false
     },
+    /* This values specify if the data has been loaded already in order to prevent redundant requsts */
     loaded: {
       projects: false,
       databases: false,
@@ -265,6 +312,8 @@ export default new Vuex.Store({
       excelFiles: false,
       flatfiles: false
     },
+    /* This values specify if request linked to this route is in progress in order to display visual loading
+    indicators */
     loaders: {
       projects: false,
       databases: false,
@@ -278,6 +327,8 @@ export default new Vuex.Store({
       keywords: {},
       trainings: {}
     },
+    /* This values specify if the detail section of the MasterDetail component is displayed for each route that uses
+    it */
     detailsVisible: {
       databases: false,
       entities: false,
@@ -286,11 +337,16 @@ export default new Vuex.Store({
       excelFiles: false,
       botUsers: false
     },
+    /* A copy of each notification is stored here */
     notifications: {},
+    /* All parts of the ui which have to be translated are stored here and are loaded dynamically based on the language
+    selection */
     lang: {},
     selectedLang: '',
+    /* Information concerning the bot deployment and usable bots */
     bot: {},
     bots: {},
+    /* This section contains help values which are used to display values in pages and to load them in stages */
     onPage: {
       keywords: {},
       trainings: {}
@@ -310,15 +366,18 @@ export default new Vuex.Store({
     loadlimit: 100,
     entriesPerPage: 10,
     keywordName: {},
+    /* Specifies if the validation hints are visible per route */
     validationsVisible: {
       databases: false,
       entities: false,
       intents: false,
       botUsers: false
     },
+    /* Stores errors emitted by the API */
     error: {}
   },
   getters: {
+    /* Calculates the tables as an object with ids as keys based on the datasources object */
     tables: state => {
       let tables = {}
       for (let dsid in state.datasources) {
@@ -330,6 +389,7 @@ export default new Vuex.Store({
       }
       return tables
     },
+    /* Calculates the attributes as an object with ids as keys based on the tables object */
     attributes: state => {
       let attr = {}
       for (let dsid in state.datasources) {
@@ -345,6 +405,8 @@ export default new Vuex.Store({
       }
       return attr
     },
+    /* Adds metainformation to the joins (Datasource, Table, Attribute for both joined attributes) for easier
+     in the components */
     joinsExtended: (state, getters) => {
       let je = {}
       let joins = state.joins
@@ -368,6 +430,7 @@ export default new Vuex.Store({
       }
       return je
     },
+    /* Computes which tables are joined per table */
     joinsPerTable: (state, getters) => {
       let jpt = {}
       let joins = getters.joinsExtended
@@ -395,6 +458,7 @@ export default new Vuex.Store({
       }
       return jpt
     },
+    /* Executes the validation checks for each validation specified and loads the associated hint */
     validationErrors: (state, getters) => {
       let start = new Date().getTime()
       let ve = {}
@@ -429,11 +493,12 @@ export default new Vuex.Store({
     },
     savable: (state, getters) => {
       let s = {}
-      for (let route in state.validations) {
+      for (let route in validations) {
         s[route] = Object.keys(getters.validationErrors[route]).length === 0
       }
       return s
     },
+    /* Computes which tables belong to an excel file */
     tablesPerExcel: state => {
       if (!excelDatasourceId) {
         let found = false
@@ -456,12 +521,14 @@ export default new Vuex.Store({
       }
       return tpe
     },
+    /* Computes the id of the charttype with the name table for easier access in the components */
     charttypeTable: state => {
       for (let ctk in state.charttypes) {
         if (state.charttypes[ctk].name === 'Table') return ctk
       }
       return null
     },
+    /* Computes which table belongs to a flat file */
     tablesPerFlatfile: state => {
       if (!flatfileDatasourceId) {
         let found = false
@@ -484,6 +551,7 @@ export default new Vuex.Store({
       }
       return tpf
     },
+    /* Retrieves the users from the bot object */
     botUsers: state => {
       try {
         let userArr = state.projects[state.projectId].botUserIds
@@ -606,6 +674,10 @@ export default new Vuex.Store({
     },
     keywordName(state, {newValue, attrId}) {
       Vue.set(this.state.keywordName, attrId, newValue)
+    },
+    clearKeywordDetail(state, attributeId) {
+      Vue.set(this.state.detailItem.keywords, attributeId, {})
+      Vue.set(this.state.keywordName, attributeId, '')
     },
     trainingSelected(state, {intentId, training}) {
       let t = state.detailItem.trainings[intentId]
@@ -770,50 +842,40 @@ export default new Vuex.Store({
     async get(context, {route, data}) {
       return await api.call('GET', route, data)
     },
-    getRouteSpecific(context, {subroute, id, forceReload}) {
-      return new Promise(async function (resolve, reject) {
-        context.commit('loading', {route: subroute, valId: id})
-        if (forceReload) {
-          context.commit('clearRouteSpecific', {subroute, id})
-        }
-        let list = context.state[subroute][id]
-        if (!(list) || list.length === 0) {
-          let route = api.getSubroute(subroute, id) + '/count'
-          let d = await api.call('GET', route)
-          context.commit('setLoadLimitedCount', {subroute, id, count: d.count})
-          await context.dispatch('getNextLoadLimited', {subroute, id})
-          await context.dispatch('createPagination', {subroute, id})
-          context.commit('finishedLoading', {route: subroute, valId: id})
-          resolve()
-        } else {
-          context.commit('finishedLoading', {route: subroute, valId: id})
-          resolve()
-        }
-      })
+    async getRouteSpecific(context, {subroute, id, forceReload}) {
+      context.commit('loading', {route: subroute, valId: id})
+      if (forceReload) {
+        context.commit('clearRouteSpecific', {subroute, id})
+      }
+      let list = context.state[subroute][id]
+      if (!(list) || list.length === 0) {
+        let route = api.getSubroute(subroute, id) + '/count'
+        let d = await api.call('GET', route)
+        context.commit('setLoadLimitedCount', {subroute, id, count: d.count})
+        await context.dispatch('getNextLoadLimited', {subroute, id})
+        await context.dispatch('createPagination', {subroute, id})
+        context.commit('finishedLoading', {route: subroute, valId: id})
+      } else {
+        context.commit('finishedLoading', {route: subroute, valId: id})
+      }
     },
-    getNextLoadLimited(context, {subroute, id}) {
-      return new Promise(function (resolve, reject) {
-        let alreadyLoaded
-        try {
-          alreadyLoaded = context.state.loadLimitedIndex[subroute][id].length
-        } catch (e) {
-          alreadyLoaded = 0
-        }
-        let nextLimit = alreadyLoaded + context.state.loadlimit
-        let filter = filters[subroute] || {}
-        filter.limit = nextLimit
-        filter.skip = alreadyLoaded
-        let route = api.getSubroute(subroute, id)
-        api.call('GET', route, {filter: filter})
-          .then((data) => {
-            data = api.arrayToObject(data)
-            context.commit('setRouteSpecific', {subroute, id, data})
-            context.commit('finishedLoading', {route: subroute, valId: id})
-            resolve(data)
-          }, (err) => {
-            reject(err)
-          })
-      })
+    async getNextLoadLimited(context, {subroute, id}) {
+      let alreadyLoaded
+      try {
+        alreadyLoaded = context.state.loadLimitedIndex[subroute][id].length
+      } catch (e) {
+        alreadyLoaded = 0
+      }
+      let nextLimit = alreadyLoaded + context.state.loadlimit
+      let filter = filters[subroute] || {}
+      filter.limit = nextLimit
+      filter.skip = alreadyLoaded
+      let route = api.getSubroute(subroute, id)
+      let data = await api.call('GET', route, {filter: filter})
+      data = api.arrayToObject(data)
+      context.commit('setRouteSpecific', {subroute, id, data})
+      context.commit('finishedLoading', {route: subroute, valId: id})
+      return (data)
     },
     async getKeywordsFromDs(context, {attributeId, entityId}) {
       context.commit('loading', {route: 'keywords', valId: attributeId})
@@ -931,11 +993,32 @@ export default new Vuex.Store({
         }
       }
     },
-    updateKeyword(context, attributeId) {
-      // TODO
+    async unlinkKeyword(context, attributeId) {
+      this.commit('loading', 'entities')
+      let detailItem = context.state.detailItem.keywords[attributeId]
+      let keywordId = detailItem[Object.keys(detailItem)[0]].id
+      await context.dispatch('post', {
+        route: 'keywords/unlinkKeywords',
+        toPost: {keywordId}
+      })
+      await context.dispatch('getRouteSpecific', {subroute: 'keywords', id: attributeId, forceReload: true})
+      this.commit('clearKeywordDetail', attributeId)
+      this.commit('finishedLoading', 'entities')
     },
-    summarizeKeyword(context, attributeId) {
-      // TODO
+    async summarizeKeyword(context, attributeId) {
+      this.commit('loading', 'entities')
+      let detailItem = context.state.detailItem.keywords[attributeId]
+      let keywordIds = Object.keys(detailItem)
+      await context.dispatch('post', {
+        route: 'keywords/linkKeywords',
+        toPost: {
+          keywordIds: Object.keys(detailItem),
+          newName: context.state.keywordName[attributeId] || detailItem[keywordIds[0]].name
+        }
+      })
+      await context.dispatch('getRouteSpecific', {subroute: 'keywords', id: attributeId, forceReload: true})
+      this.commit('clearKeywordDetail', attributeId)
+      this.commit('finishedLoading', 'entities')
     },
     async saveTraining(context, {intentId, patch}) {
       context.commit('loading', {route: 'trainings', valId: intentId})
@@ -994,7 +1077,7 @@ export default new Vuex.Store({
         projectId: context.state.projectId,
         currentUser: context.state.user.user.id
       })
-      context.commit('setBotcontainer', bot)
+      context.commit('setBotcontainer', bot.success)
     },
     async getOwnBots(context) {
       context.commit('loading', 'bots')

@@ -97,5 +97,15 @@ export default {
     } catch (e) {
       return ''
     }
+  },
+  sortObject(obj, key) {
+    let ar = this.objectToArray(obj)
+    let compare = (a, b) => {
+      if (a[key].toUpperCase() < b[key].toUpperCase()) return -1
+      if (a[key].toUpperCase() > b[key].toUpperCase()) return 1
+      return 0
+    }
+    ar.sort(compare)
+    return ar
   }
 }

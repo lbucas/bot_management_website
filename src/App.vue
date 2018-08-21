@@ -336,7 +336,6 @@
   // wrapper
   #sidenavigation {
     background: @richPurple;
-    height: 100vh;
     color: white;
     z-index: 1;
     #noUserSelect

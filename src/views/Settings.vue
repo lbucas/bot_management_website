@@ -8,7 +8,8 @@
           <div class="settingsSection">
             <h5>{{l.deployment}}</h5>
             <label> {{l.location}}</label>
-            <p id="botUrl">{{location}}</p>
+            <a v-if="location" :href="linkToBot" target="_blank" class="botUrl">{{location}}</a>
+            <p v-else class="botUrl">{{l.notDeployedYet}}</p>
             <div v-if="deployState<2">
               <center-button>
                 <update :update="deployBot" :loading="deployState===1" variant="info" :text="deployButtonText"
@@ -84,10 +85,13 @@
         return 0 // not deployed yet
       },
       location() {
-        return this.bot.url || this.l.notDeployedYet
+        return this.bot.url
       },
       deployButtonText() {
         return this.deployState === 1 ? this.l.deploymentInProgess : this.l.deploy
+      },
+      linkToBot() {
+        return `${this.location}/chat.html?accessToken=${this.$store.state.api.token}`
       }
     },
     created() {
@@ -139,7 +143,7 @@
     }
   }
 
-  #botUrl {
+  .botUrl {
     display: inline;
     font-style: italic;
   }

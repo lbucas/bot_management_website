@@ -29,7 +29,7 @@
 
 <script>
   // import Keywords from "./Keywords" use this for rename and summarize functionality
-  import Keywords from "./KeywordsLight"
+  import Keywords from "./Keywords"
   import StoreItems from '../../components/mixins/StoreItems'
 
   export default {

@@ -76,7 +76,9 @@
     "loadKeywords": "Schlagwörter aus der Datenquelle laden",
     "noKeywords": "Noch keine Schlagwörter hinzugefügt",
     "summarize": "Wählen Sie ein Schlagwort aus, um es umzubennen oder markieren Sie mehrere, um sie zu einem geteilten Schlagwort zusammenzufassen.",
-    "keywords": "Schlagwörter"
+    "keywords": "Schlagwörter",
+    "summarizeButton": "Zusammenfassen",
+    "unlink": "Verbindung auflösen"
   },
   "intents": {
     "questions": "Fragen",
@@ -142,7 +144,7 @@
     "availableBots": "Für Sie verfügbare Datenbots:",
     "toAdmin": "Zum Admin Dashboard"
   },
-  "validation-entitites": {
+  "validation-entities": {
     "name": "Bennennen Sie die Entität",
     "description": "Geben Sie eine Beschreibung fuer die Entität an",
     "attributeId": "Wählen Sie Sie das verbundene Attribut aus"

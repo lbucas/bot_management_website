@@ -1,6 +1,5 @@
 <template>
   <b-row id="keywords">
-    <loader :loading="loading"/>
     <b-col lg="6" class="mdtable">
       <div class="updateKeywordsWrapper">
         <center-button>
@@ -14,10 +13,11 @@
           <td>{{l.noKeywords}}</td>
         </tr>
         <tr v-for="(k, id) in keywordsOnPage"
-            @click="$store.commit('keywordSelected', {attrId: attributeId, keyword: k})"
+            @click="selectKeyword(k)"
             :class="{'keywordCol': true, 'activeKeyword': (id in selected)}">
           <td>
             {{k.value}}
+            <icon icon="linked" size="xs" v-if="k.attributeValues.length > 1"/>
           </td>
         </tr>
       </Table>
@@ -25,7 +25,9 @@
     <b-col lg="6">
       <h6 class="selectKwHint" v-show="selectedLength == 0">{{l.summarize}}</h6>
       <custom-form v-show="selectedLength > 0" :inline="false">
-        <fr-input label="New Keyword Name" v-model="keywordName"/>
+        <fr-blank label="New Keyword Name">
+          <input type="text" class="form-control" v-model="keywordName"/>
+        </fr-blank>
         <fr-blank label="Keywords to Summarize" v-show="selectedLength > 1">
           <div id="keywordsToSummarize">{{keywordsToSummarize}}</div>
         </fr-blank>
@@ -33,10 +35,9 @@
           <div id="connectedAttributeVals">{{connectedAttributeVals}}</div>
         </fr-blank>
       </custom-form>
-      <save v-show="selectedLength === 1" text="Update"
-                  @click="$store.dispatch('updateKeyword', attributeId)"></save>
-      <save v-show="selectedLength > 1" text="Summarize"
-                  @click="$store.dispatch('summarizeKeyword', attributeId)"></save>
+      <save v-if="selectedLength>0" :text="saveText" :on-save="summarize"/>
+      <b-button v-if="selectedLength===1 && attrValues.length > 1"
+                variant="danger" @click="unlink">{{l.unlink}}</b-button>
     </b-col>
   </b-row>
 </template>
@@ -70,9 +71,6 @@
       keywordsCount() {
         return this.$store.state.loadLimitedCount.keywords[this.attributeId] || 0
       },
-      loading() {
-        return this.$store.state.loaders.entities
-      },
       attributeId() {
         return this.$store.state.detailItem.entities.attributeId
       },
@@ -84,6 +82,9 @@
       },
       selectedLength() {
         return Object.keys(this.selected).length
+      },
+      attrValues() {
+        return this.selected[Object.keys(this.selected)[0]].attributeValues
       },
       keywordsToSummarize() {
         let kts = ''
@@ -104,6 +105,12 @@
         }
         return cav
       },
+      multipleKeywords() {
+        return this.selectedLength === 1
+      },
+      saveText() {
+        return this.multipleKeywords ? this.l.summarizeButton : this.$root.l.update
+      },
       keywordName: {
         get() {
           return this.$store.state.keywordName[this.attributeId] || ''
@@ -123,6 +130,15 @@
       async updateKeywords() {
         await this.$store.dispatch('getKeywordsFromDs', {entityId: this.entityId, attributeId: this.attributeId})
         this.loadKeywords(true)
+      },
+      summarize() {
+        this.$store.dispatch('summarizeKeyword', this.attributeId)
+      },
+      unlink() {
+        this.$store.dispatch('unlinkKeyword', this.attributeId)
+      },
+      selectKeyword(k) {
+        this.$store.commit('keywordSelected', {attrId: this.attributeId, keyword: k})
       }
     },
     watch: {
