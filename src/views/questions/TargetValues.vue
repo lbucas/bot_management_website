@@ -3,7 +3,7 @@
     <div v-if="onEdit">
       <b-row v-for="targetInd in targetIndex" class="targetValue">
         <b-col>
-          <attribute-select v-model="targets[targetInd]"/>
+          <attribute-select v-model="targets[targetInd]" :valid="!validation"/>
         </b-col>
         <b-col md="1" v-if="targets.length > 1">
           <a @click="targets.splice(targetInd, 1)">×</a>
@@ -14,6 +14,9 @@
     </div>
     <div v-else>
       <p v-for="t in targets">{{$tools.attributeFullName(t)}}</p>
+    </div>
+    <div class="validationMessage" v-if="validation">
+      {{validation}}
     </div>
   </fr-blank>
 </template>
@@ -51,6 +54,11 @@
       },
       onEdit() {
         return this.$store.state.onEdit.intents
+      },
+      validation() {
+        return this.$store.state.validationsVisible.intents
+          ? this.$store.getters.validationErrors.intents.targetValueIds
+          : false
       }
     },
     methods: {

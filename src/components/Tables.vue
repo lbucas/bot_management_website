@@ -29,7 +29,7 @@
       </tr>
       </tbody>
     </table>
-    <update-button v-if="database" :loading="tablesLoading" :update="updateTables" :text="$root.l.updateTables"/>
+    <update v-if="database" :loading="tablesLoading" :update="updateTables" :text="$root.l.updateTables"/>
   </div>
 </template>
 

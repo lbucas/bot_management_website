@@ -37,10 +37,12 @@
 </script>
 
 <style lang="less" scoped>
+  @import "../style/mixins";
   .pageNavigator {
     width: 100%;
     justify-content: center;
     text-align: center;
+    #noUserSelect;
   .back {
     float: left !important;
   }

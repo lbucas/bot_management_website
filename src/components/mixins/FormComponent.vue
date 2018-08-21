@@ -32,17 +32,19 @@
         }
         return oe
       },
-      error() {
-        let errs = this.$parent.errors
-        for (let target in errs) {
-          if (target === this.modelKey) {
-            return errs[target]
+      validation() {
+        if (this.$store.state.validationsVisible[this.route]) {
+          let errs = this.$parent.errors
+          for (let target in errs) {
+            if (target === this.modelKey) {
+              return errs[target]
+            }
           }
         }
-        return null
+        return false
       },
       valid() {
-        return !(this.error)
+        return !(this.validation)
       },
       route() {
         return this.$parent.$props.route

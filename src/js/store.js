@@ -6,6 +6,25 @@ import tools from './tools'
 
 Vue.use(Vuex)
 
+const clone = (oldItem, newItem) => {
+  for (let oldKey in oldItem) {
+    if (!(oldKey in newItem)) {
+      Vue.delete(oldItem, oldKey)
+    }
+  }
+  for (let newKey in newItem) {
+    Vue.set(oldItem, newKey, newItem[newKey])
+  }
+}
+const update = (oldItem, newItem) => {
+  for (let newKey in newItem) {
+    if (newItem[newKey] !== undefined) {
+      Vue.set(oldItem, newKey, newItem[newKey])
+    }
+  }
+}
+const timeout = ms => new Promise(resolve => setTimeout(resolve, ms))
+
 const filters = {
   datasources: {
     "include": {
@@ -22,20 +41,45 @@ const filters = {
     "include": "attributeValues"
   }
 }
-const clone = (oldItem, newItem) => {
-  for (let oldKey in oldItem) {
-    if (!(oldKey in newItem)) {
-      Vue.delete(oldItem, oldKey)
-    }
-  }
-  for (let newKey in newItem) {
-    Vue.set(oldItem, newKey, newItem[newKey])
-  }
-}
-const update = (oldItem, newItem) => {
-  for (let newKey in newItem) {
-    if (newItem[newKey] !== undefined) {
-      Vue.set(oldItem, newKey, newItem[newKey])
+const validations = {
+  databases: {
+    name: true,
+    databaseTypeId: true,
+    "connectionObj.host": true,
+    "connectionObj.port"(v) {
+      return !(!v || isNaN(v))
+    },
+    "connectionObj.db": true,
+    "connectionObj.user": true,
+    "connectionObj.password": true
+  },
+  entities: {
+    name: true,
+    description: true,
+    attributeId: true
+  },
+  intents: {
+    name: true,
+    targetValueIds(v) {
+      if (!v) return false
+      return (v.length > 0 && v.indexOf(null) === -1)
+    },
+    aggregationId: true,
+    charttypeId: true,
+    groupById(v, detailItem, state, getters) {
+      return !(!v) ||
+        (detailItem.targetValueLength > 1 && detailItem.calculationNeeded) ||
+        detailItem.charttypeId == getters.charttypeTable
+    },
+    fixedFilter(v) {
+      for (let i in v) {
+        try {
+          if (v[i].filters.length === 0) return false
+        } catch (e) {
+          if (v[i].length === 0) return false
+        }
+      }
+      return true
     }
   }
 }
@@ -201,46 +245,6 @@ export default new Vuex.Store({
         role: 'Standard'
       }
     },
-    errorChecks: {
-      databases: {},
-      entities: {
-        name: 'Please provide a title for the entity',
-        description: 'Please provide a description for the entity',
-        attributeId: 'Please select a connected attribute'
-      },
-      intents: {
-        name: 'Please provide a title for the question',
-        targetValueIds: {
-          msg: 'Please provide atleast one target value for the question',
-          check(v) {
-            return (v.length > 0 && v.indexOf(null) === -1)
-          }
-        },
-        aggregationId: 'Please select an aggregation method for the question',
-        charttypeId: "Please select a charttype for the visulization of the question's results",
-        groupById: {
-          msg: 'Please select an attribute by which the results will be grouped by',
-          check(v, detailItem, state, getters) {
-            return !(!v) ||
-              (detailItem.targetValueLength > 1 && detailItem.calculationNeeded) ||
-              detailItem.charttypeId == getters.charttypeTable
-          }
-        },
-        fixedFilter: {
-          msg: 'Please provide filter values for each fixed filter',
-          check(v) {
-            for (let i in v) {
-              try {
-                if (v[i].filters.length === 0) return false
-              } catch (e) {
-                if (v[i].length === 0) return false
-              }
-            }
-            return true
-          }
-        }
-      }
-    },
     onEdit: {
       databases: false,
       entities: false,
@@ -270,6 +274,7 @@ export default new Vuex.Store({
       excelFiles: false,
       flatfiles: false,
       botUsers: false,
+      bots: false,
       keywords: {},
       trainings: {}
     },
@@ -285,6 +290,7 @@ export default new Vuex.Store({
     lang: {},
     selectedLang: '',
     bot: {},
+    bots: {},
     onPage: {
       keywords: {},
       trainings: {}
@@ -302,8 +308,14 @@ export default new Vuex.Store({
       trainings: {}
     },
     loadlimit: 100,
-    entriesPerPage: 12,
+    entriesPerPage: 10,
     keywordName: {},
+    validationsVisible: {
+      databases: false,
+      entities: false,
+      intents: false,
+      botUsers: false
+    },
     error: {}
   },
   getters: {
@@ -384,42 +396,40 @@ export default new Vuex.Store({
       return jpt
     },
     validationErrors: (state, getters) => {
+      let start = new Date().getTime()
       let ve = {}
-      for (let route in state.errorChecks) {
+      for (let route in validations) {
         if (state.onEdit[route]) {
-          let checks = state.errorChecks[route]
+          let l = state.lang['validation-' + route]
+          let checks = validations[route]
           let errors = {}
           for (let target in checks) {
-            let checkObj = checks[target]
-            if (typeof checkObj === 'string') {
-              checkObj = {
-                msg: checkObj,
-                check(v) {
-                  if (Array.isArray(v)) return (v.length > 0)
-                  return !(!(v))
-                }
+            let checkFunction = checks[target]
+            if (checkFunction === true) {
+              checkFunction = v => {
+                if (Array.isArray(v)) return (v.length > 0)
+                return !(!(v))
               }
             }
-            let checkResult = checkObj.check(state.tools.deepValue(state.detailItem[route], target),
+            let checkResult = checkFunction(state.tools.deepValue(state.detailItem[route], target),
               state.detailItem[route], state, getters)
-            if (!checkResult) {
-              errors[target] = checkObj.msg
+            if (typeof checkResult === 'string') {
+              errors[target] = l[`${target}-${checkResult}`]
               continue
             }
-            if (typeof checkResult === 'string') {
-              errors[target] = checkObj.msg[checkResult]
-            }
+            if (!checkResult) errors[target] = l[target]
           }
           ve[route] = errors
         } else {
           ve[route] = {}
         }
       }
+      console.log(new Date().getTime() - start)
       return ve
     },
     savable: (state, getters) => {
       let s = {}
-      for (let route in state.errorChecks) {
+      for (let route in state.validations) {
         s[route] = Object.keys(getters.validationErrors[route]).length === 0
       }
       return s
@@ -509,6 +519,7 @@ export default new Vuex.Store({
       } else {
         let valId = route.valId
         route = route.route
+        state.loaders[route] = state.loaders[route] || {}
         Vue.set(state.loaders[route], valId, true)
       }
     },
@@ -631,6 +642,16 @@ export default new Vuex.Store({
     },
     setBotcontainer(state, bot) {
       clone(state.bot, bot)
+    },
+    setOwnBots(state, bots) {
+      bots = tools.objectToArray(bots)
+      update(state.bots, bots)
+    },
+    setValidationsVisible(state, route) {
+      state.validationsVisible[route] = true
+    },
+    hideValidations(state, route) {
+      state.validationsVisible[route] = false
     }
   },
   actions: {
@@ -870,7 +891,7 @@ export default new Vuex.Store({
         if (e) {
           sse.close()
           // If an error occurs and the stream stops, there will be 5 attempts to restart it
-          await setTimeout(2000)
+          await timeout(3000)
           notificationTries++
           if (notificationTries < 6) context.dispatch('notificationStream', notify)
         }
@@ -893,19 +914,19 @@ export default new Vuex.Store({
           }
         }
         case 'BOT_DEPLOY_STARTED': {
+          return {
+            title: l.deploymentInProgess,
+            detail: l.deploymentInProgessMsg
+          }
+        }
+        case 'BOT_DEPLOY_DONE': {
           let b = {}
-          clone(b, this.$store.state.bot)
+          clone(b, context.state.bot)
           b.deploying = false
           context.commit('setBotcontainer', b)
           return {
             title: l.deploymentDone,
-            detail: l.deploymentInDoneMsg
-          }
-        }
-        case 'BOT_DEPLOY_DONE': {
-          return {
-            title: l.deploymentInProgess,
-            detail: l.deploymentInProgessMsg
+            detail: l.deploymentDoneMsg
           }
         }
       }
@@ -916,17 +937,14 @@ export default new Vuex.Store({
     summarizeKeyword(context, attributeId) {
       // TODO
     },
-    saveTraining(context, {intentId, patch}) {
-      return new Promise(async function (resolve, reject) {
-        context.commit('loading', {route: 'trainings', valId: intentId})
-        let mode = (patch ? 'PATCH' : 'POST')
-        let d = context.state.detailItem.trainings[intentId]
-        let route = (patch ? 'trainings/' + d.id : 'trainings')
-        await api.call(mode, route, d)
-        await context.dispatch('getRouteSpecific', {subroute: 'trainings', id: intentId, forceReload: true})
-        context.commit('loading', {route: 'finishedLoading', valId: intentId})
-        resolve()
-      })
+    async saveTraining(context, {intentId, patch}) {
+      context.commit('loading', {route: 'trainings', valId: intentId})
+      let mode = (patch ? 'PATCH' : 'POST')
+      let d = context.state.detailItem.trainings[intentId]
+      let route = (patch ? 'trainings/' + d.id : 'trainings')
+      await api.call(mode, route, d)
+      await context.dispatch('getRouteSpecific', {subroute: 'trainings', id: intentId, forceReload: true})
+      context.commit('finishedLoading', {route: 'trainings', valId: intentId})
     },
     deleteTraining(context, intentId) {
       return new Promise(async function (resolve, reject) {
@@ -939,25 +957,25 @@ export default new Vuex.Store({
       })
     },
     errorHandling(context, {err, route, data, router}) {
-      if (err.response && err.response.status === 401) {
+      /* if (err.response && err.response.status === 401) {
         router.push('/signin')
-      } else {
-        let errMsg
-        try {
-          errMsg = err.response.data.error.message
-        } catch (e) {
-          errMsg = err.message
-        }
-        let error = {
-          route,
-          sentData: JSON.stringify(data),
-          message: errMsg,
-          status: err.request.status + ' ' + err.request.statusText,
-          full: err
-        }
-        context.commit('error', error)
-        context.commit('finishedLoading', route.split('/')[0])
+      } else { */
+      let errMsg
+      try {
+        errMsg = err.response.data.error.message
+      } catch (e) {
+        errMsg = err.message
       }
+      let error = {
+        route,
+        sentData: JSON.stringify(data),
+        message: errMsg,
+        status: err.request.status + ' ' + err.request.statusText,
+        full: err
+      }
+      context.commit('error', error)
+      context.commit('finishedLoading', route.split('/')[0])
+      // }
     },
     async checkDeploymentState(context) {
       let pid = await api.waitforProjectId()
@@ -971,11 +989,18 @@ export default new Vuex.Store({
       if (bot.length > 0) context.commit('setBotcontainer', bot[0])
     },
     async deployBot(context) {
-      let bot = api.call('POST', 'botcontainers/createContainer', {
+      context.commit('setBotcontainer', {deploying: true}) // to make sure the button is locked, even if the request takes longer
+      let bot = await api.call('POST', 'botcontainers/createContainer', {
         projectId: context.state.projectId,
         currentUser: context.state.user.user.id
       })
       context.commit('setBotcontainer', bot)
+    },
+    async getOwnBots(context) {
+      context.commit('loading', 'bots')
+      let bots = await api.call('GET', 'projects/getBotsPerUser')
+      context.commit('setOwnBots', bots)
+      context.commit('finishedLoading', 'bots')
     }
   }
 })

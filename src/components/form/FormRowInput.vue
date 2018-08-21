@@ -6,8 +6,8 @@
     <textarea v-if="big" :type="inputtype" v-bind:readonly="!onEdit"
               :class="{ 'form-control-plaintext': !onEdit || !editable, 'form-control': onEdit && editable, 'is-invalid': !valid }"
               v-model="inputValue" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
-    <div class="invalid-feedback">
-      {{error}}
+    <div class="invalid-feedback" v-if="!valid">
+      {{validation}}
     </div>
   </fr-blank>
 </template>

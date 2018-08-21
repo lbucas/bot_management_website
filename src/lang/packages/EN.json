@@ -16,7 +16,7 @@
     "leftSide": "Please choose a table from the left side",
     "rightSide": "Please choose a table from the right side",
     "fileProcessing": "The file is being processed..",
-    "noEntries": "There's nothing to show..",
+    "noEntries": "There's nothing to show",
     "page": "page",
     "of": "of",
     "noAttrs": "No attributes found for this table",
@@ -38,6 +38,10 @@
     "createAProject": "Create a project",
     "selectLang": "Language Selection",
     "errorOccured": "It seems like an error occurred within the application:"
+  },
+  "botselection": {
+    "availableBots": "Databots available for you:",
+    "toAdmin": "To Admin Dashboard"
   },
   "connections": {
     "standard": "Standard",
@@ -129,12 +133,6 @@
     "muid": "MUID",
     "role": "Role"
   },
-  "checks": {
-    "entName": "Please provide a title for the entity",
-    "entDescription": "Please provide a description for the entity",
-    "entAttributeId": "Please select a connected attribute",
-    "intName": "Please provide a title for the question"
-  },
   "notifications": {
     "schemaBuildStarted": "Schema is beeing built in the background",
     "schemaBuilt": "Schema was built",
@@ -143,5 +141,27 @@
     "deploymentInProgessMsg": "Your bot will be available shortly!",
     "deploymentDone": "Bot published",
     "deploymentDoneMsg": "You can use the bot now!"
+  },
+  "validation-entitites": {
+    "name": "Please name the entity",
+    "description": "Please provide a description for the entity",
+    "attributeId": "Please select a connected attribute"
+  },
+  "validation-intents": {
+    "name": "Please name the question",
+    "targetValueIds": "Please provide atleast one target value for the question",
+    "aggregationId": "Please select an aggregation method for the question",
+    "charttypeId": "Please select a charttype for the visulization of the question's results",
+    "fixedFilter": "Please provide filter values for each fixed filter",
+    "groupById": "Please select an attribute by which the results will be grouped by"
+  },
+  "validation-databases": {
+    "name": "Please name the database",
+    "databaseTypeId": "Please provide the type of the database",
+    "connectionObj.host": "Please provide the database host URL or IP address",
+    "connectionObj.port": "Please provide the connection port for the database",
+    "connectionObj.db": "Please provide name of the instance",
+    "connectionObj.user": "Please provide a user name for the database",
+    "connectionObj.password": "Please provide the password"
   }
 }

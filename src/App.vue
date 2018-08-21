@@ -10,11 +10,11 @@
           </b-col>
         </b-row>
         <h5>Bot Management</h5>
+        <h6>{{userDisplayName}}</h6>
         <h6 class="projectTitle" @click=" $root.modalOpen('projectModal')">
           <icon class="projectIcon" icon="Projects"/>
           {{project.name}}
         </h6>
-        <h6>{{userDisplayName}}</h6>
         <div class="links">
           <ul>
             <li v-for="nl in navLinks" class="navLink font-weight-light" @click="route(navLinkKeys[nl] || nl)"

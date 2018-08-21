@@ -4,20 +4,20 @@
       <b-tabs>
         <b-tab class="tabTitle" :title="$root.l.general" active>
           <scrollable pos="threeTab">
-            <custom-form id="entityForm" route="entities" :errors-visible="errorsVisible">
+            <custom-form id="entityForm" route="entities">
               <fr-input model-key="name" :label="$root.l.title" :editable="!(entityDetail.id)"/>
               <fr-input model-key="description" :label="l.desc" big/>
               <fr-attribute-select model-key="attributeId" :label="l.connectedAttr"/>
             </custom-form>
           </scrollable>
           <edit route="entities"/>
-          <delete :on-delete="deleteEntity" v-if="!onEdit"/>
-          <save :on-save="saveEntity" id="saveEntity" :disabled="notSaveable" v-if="onEdit"/>
+          <delete :on-delete="deleteEntity" v-if="!onEdit" />
+          <save :on-save="saveEntity" id="saveEntity" v-if="onEdit" route="entities"/>
           <!--@mouseover="test"-->
           <cancel route="entities" v-if="onEdit"/>
         </b-tab>
         <b-tab class="tabTitle" :title="l.keywords" v-if="!onEdit">
-          <scrollable pos="threeTab">
+          <scrollable pos="twoTab">
             <keywords/>
           </scrollable>
         </b-tab>
@@ -28,18 +28,14 @@
 </template>
 
 <script>
-  import Keywords from "./Keywords"
+  // import Keywords from "./Keywords" use this for rename and summarize functionality
+  import Keywords from "./KeywordsLight"
   import StoreItems from '../../components/mixins/StoreItems'
 
   export default {
     mixins: [StoreItems],
     components: {Keywords},
     name: "entities",
-    data() {
-      return {
-        errorsVisible: false
-      }
-    },
     computed: {
       l() {
         return this.$store.state.lang.entities
@@ -52,10 +48,6 @@
       },
       onEdit() {
         return this.$store.state.onEdit.entities
-      },
-      notSaveable() {
-        let ed = this.entityDetail
-        return (ed.name === '' || ed.description === '' || !ed.attributeId)
       }
     },
     created() {

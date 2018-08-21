@@ -1,10 +1,8 @@
 <template>
   <b-row>
-    <b-col/>
-    <b-col>
+    <b-col class="text-center">
       <slot></slot>
     </b-col>
-    <b-col></b-col>
   </b-row>
 </template>
 

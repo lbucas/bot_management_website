@@ -1,0 +1,23 @@
+{
+  "lookup": {
+    "localhost": "local",
+    "webdev.emd-databots.com": "dev",
+    "test.emd-databots.com": "test",
+    "emd-databots.com": "prod",
+    "webdev.merck-databots.com": "dev",
+    "test.merck-databots.com": "test",
+    "merck-databots.com": "prod"
+  },
+  "api": {
+    "local": "https://testapi.emd-databots.com/",
+    "dev": "https://dev.emd-databots.com/",
+    "test": "https://testapi.emd-databots.com/",
+    "prod": "https://api.emd-databots.com/"
+  },
+  "signin": {
+    "local": "local",
+    "dev": "webdev",
+    "test": "test",
+    "prod": "management"
+  }
+}

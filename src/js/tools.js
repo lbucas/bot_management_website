@@ -1,3 +1,5 @@
+/** This library collects functions which are used multiple times in the dashboard code */
+
 import Vue from 'vue'
 import lang from '../lang'
 
@@ -32,6 +34,11 @@ export default {
     return list.filter(item => item != toDelete) // eslint-disable-line eqeqeq
   },
   arrayToObject(toTransform, akey) {
+    /* Transforms [{id: 1, name: 'abc'}] to {1: {id: 1, name: 'abc'}}
+    * Used with almost every api call to improve search performance afterwards and because Vue works better with
+    * Objects than Arrays
+    * 'akey' when an other property than 'id' shall be used as Object key
+     */
     if (Array.isArray(toTransform)) {
       let isStringArray = false
       if (typeof toTransform[0] === 'string') {

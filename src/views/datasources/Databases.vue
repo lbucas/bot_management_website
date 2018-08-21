@@ -17,7 +17,7 @@
             </custom-form>
           </scrollable>
           <edit route="databases"/>
-          <save :on-save="createOrEditDs" id="saveDS" v-if="onEdit"/>
+          <save :on-save="createOrEditDs" id="saveDS" v-if="onEdit" route="databases"/>
           <b-button variant="info" @click="testConnection" v-if="!connectionTested">
             {{connectionTestLabel}}
           </b-button>
@@ -27,7 +27,9 @@
           <cancel route="databases"/>
         </b-tab>
         <b-tab class="tabTitle" :title="l.tables" v-if="!onEdit">
-          <tables :database="dsDetails.id"/>
+          <scrollable pos="twoTab">
+            <tables :database="dsDetails.id"/>
+          </scrollable>
         </b-tab>
       </b-tabs>
     </master-detail>
@@ -42,10 +44,12 @@
 <script>
   import StoreItems from '../../components/mixins/StoreItems'
   import Tables from "../../components/Tables"
+  import Scrollable from "../../components/Scrollable"
 
   export default {
     name: 'Databases',
     components: {
+      Scrollable,
       Tables
     },
     mixins: [StoreItems],

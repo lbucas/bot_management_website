@@ -14,10 +14,6 @@
         type: Boolean,
         default: true
       },
-      errorsVisible: {
-        type: Boolean,
-        default: false
-      },
       route: {
         type: String,
         default: null
@@ -25,11 +21,7 @@
     },
     computed: {
       errors() {
-        if (this.errorsVisible) {
-          return this.$store.getters.validationErrors[this.route] || {}
-        } else {
-          return false
-        }
+        return this.$store.getters.validationErrors[this.route] || {}
       },
       onEdit() {
         return this.$store.state.onEdit[this.route]

@@ -2,11 +2,11 @@
   <fr-blank :label="l.fixedFilter">
     <div v-for="filter in filters">
       <div v-if="currentActive == filter.attributeId && onEdit">
-        <attribute-select v-model="changeAttribute"/>
+        <attribute-select v-model="changeAttribute" :valid="!validation"/>
         <badges :values="currentValues" :remove="removeFromFilters"/>
         <suggestion-select v-if="currentActive != -1" v-model="addNext" :apilookup="apilookup"
                            :placeholder="l.enterFilterVal" class="filterInput"
-                           clear-after-select add-button/>
+                           clear-after-select add-button :valid="!validation"/>
       </div>
       <div v-else class="filterList">
         <div class="editFixedFilter" @click="edit(filter.attributeId)" v-if="onEdit">
@@ -22,6 +22,9 @@
       <b-button v-if="currentActive" variant="outline-danger" size="sm" @click="removeAttrFromFilters()">
         {{$root.l.remove}}
       </b-button>
+    </div>
+    <div class="validationMessage" v-if="validation">
+      {{validation}}
     </div>
   </fr-blank>
 </template>
@@ -114,6 +117,11 @@
       },
       currentActiveIndex() {
         return this.$tools.arrayIndexOf(this.filters, 'attributeId', this.currentActive)
+      },
+      validation() {
+        return this.$store.state.validationsVisible.intents
+          ? this.$store.getters.validationErrors.intents.fixedFilter
+          : false
       }
     },
     methods: {

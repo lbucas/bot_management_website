@@ -35,6 +35,7 @@
     display: block;
     margin-left: calc(50% - 50px);
     z-index: 100;
+    top: 10%;
   }
 
 </style>

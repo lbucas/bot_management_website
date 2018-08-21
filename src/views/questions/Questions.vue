@@ -26,7 +26,7 @@
               <fixed-filters/>
             </custom-form>
           </scrollable>
-          <save :on-save="saveIntent" v-if="onEdit" :disabled="!savable"/>
+          <save :on-save="saveIntent" v-if="onEdit" route="intents"/>
           <cancel route="intents"/>
           <edit route="intents"/>
           <delete v-if="!onEdit" :on-delete="deleteIntent"/>

@@ -124,12 +124,6 @@
     "deploymentInProgess": "Veröffentlichung läuft",
     "notDeployedYet": "Bot ist noch nicht veröffentlicht"
   },
-  "checks": {
-    "entName": "[[ Please provide a title for the entity ]]",
-    "entDescription": "[[ Please provide a description for the entity ]]",
-    "entAttributeId": "[[ Please select a connected attribute ]]",
-    "intName": "[[ Please provide a title for the question ]]"
-  },
   "users": {
     "muid": "MUID",
     "role": "Rolle",
@@ -139,9 +133,35 @@
     "schemaBuildStarted": "Schema wird im Hintergrund erstellt",
     "schemaBuilt": "Schema wurde erstellt",
     "filename": "Dateiname:",
-    "deploymentInProgess": "Veröffentlichung gestarted",
+    "deploymentInProgess": "Veröffentlichung gestartet",
     "deploymentInProgessMsg": "Ihr Bot steht in Kürze zur Verfügung",
     "deploymentDone": "Bot veröffentlicht",
     "deploymentDoneMsg": "Sie können den Bot ab jetzt nutzen!"
+  },
+  "botselection": {
+    "availableBots": "Für Sie verfügbare Datenbots:",
+    "toAdmin": "Zum Admin Dashboard"
+  },
+  "validation-entitites": {
+    "name": "Bennennen Sie die Entität",
+    "description": "Geben Sie eine Beschreibung fuer die Entität an",
+    "attributeId": "Wählen Sie Sie das verbundene Attribut aus"
+  },
+  "validation-intents": {
+    "name": "Bennennen Sie die Frage",
+    "targetValueIds": "Geben Sie mindestens einen Zielwert an",
+    "aggregationId": "Waehlen Sie die Aggregationmethode aus oder geben Sie eine Berechnung im naechsten Feld an",
+    "charttypeId": "Waehlen Sie aus, wie die Ergebnisse dargestellt werden sollen",
+    "fixedFilter": "Geben Sie fuer jeden festen Filter ein Attribut und mindestens einen Wert an",
+    "groupById": "Geben Sie ein Attribut zum Gruppieren der Ergebnisse an oder waehlen Sie die Aggregationsmethode 'NONE'"
+  },
+  "validation-databases": {
+    "name": "Bennennen Sie die Datenbank",
+    "connectionObj.host": "Geben Sie die Host-Adresse der Datenbank an",
+    "connectionObj.port": "Geben Sie den Verbindungsport der Datenbank an",
+    "connectionObj.db": "Geben Sie den Namen der Datenbank-Instanz an",
+    "connectionObj.user": "Geben Sie einen User-Namen zur Verbindung an",
+    "connectionObj.password": "Geben Sie das Passwort zur Verbindung an",
+    "databaseTypeId": "Geben Sie den Typ der Datenbank an"
   }
 }

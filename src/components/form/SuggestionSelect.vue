@@ -1,7 +1,7 @@
 <template>
   <input-add-button :show-add="addButton && inputValue.length>0" :on-add="addInputValue">
-    <input :class="{'suseInput': true, 'form-control': true, 'valueSelected': valueSelected}" autocomplete="off"
-           :disabled="disabled" v-model="inputValue" @click="suggestionsVisible=true"
+    <input :class="{'suseInput': true, 'form-control': true, 'valueSelected': valueSelected, 'is-invalid': !valid}"
+           autocomplete="off" :disabled="disabled" v-model="inputValue" @click="suggestionsVisible=true"
            @keyup.up="suggestionKeyChange(false)"
            @keyup.down="suggestionKeyChange(true)" @keyup.enter="select" :placeholder="placeholder"/>
     <div class="suggestions" v-if="suggestionsVisible" :valueSelected="valueSelected">
@@ -21,6 +21,7 @@
 
 <script>
   import InputAddButton from "../InputAddButton"
+
   export default {
     name: 'SuggestionSelect',
     components: {InputAddButton},
@@ -64,6 +65,10 @@
       clearAfterSelect: {
         type: Boolean,
         default: false
+      },
+      valid: {
+        type: Boolean,
+        default: true
       }
     },
     data() {

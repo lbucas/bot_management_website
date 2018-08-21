@@ -1,5 +1,6 @@
 import axios from 'axios'
 import Promise from 'bluebird'
+import urlConf from './urlConfig'
 
 const mainUrl = 'https://api.emd-databots.com/'
 const devUrl = 'https://dev.emd-databots.com/'
@@ -7,8 +8,10 @@ const devUrl = 'https://dev.emd-databots.com/'
 const api = {
   token: null,
   projectId: null,
+  mode: null,
   url() {
-    return (window.location.hostname === 'webdev.emd-databots.com' ? devUrl : mainUrl)
+    let mode = this.mode || urlConf.lookup[window.location.hostname]
+    return urlConf.api[mode]
   },
   getCallbacks: {
     datasources(data) {
@@ -81,7 +84,8 @@ const api = {
     intents: true,
     excelFiles: true,
     flatfiles: true,
-    bot: true
+    bot: true,
+    joins: true
   },
   fireCall({type, route, data}) {
     return new Promise((resolve, reject) => {
@@ -89,7 +93,7 @@ const api = {
       let params = {
         access_token: api.token
       }
-      let url = api.url() + api.translateRoute(route)
+      let url = api.url() + api.translateRoute(route, type)
       if (type === 'GET' && data) {
         for (let key in data) params[key] = data[key]
       }
@@ -102,8 +106,8 @@ const api = {
         })
     })
   },
-  translateRoute(route) {
-    if (route === 'projects') return 'projects/getOwnProjects' // Projects route requires special treatment
+  translateRoute(route, type) {
+    if (route === 'projects' && type === 'GET') return 'projects/getOwnProjects' // Projects route requires special treatment
     // If the requested route is connected to a project the route project/{projectId}/{requestedRoute} is used
     return (route in api.dependentFromProject ? 'projects/' + api.projectId + '/' + route : route)
   },

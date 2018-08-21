@@ -1,8 +1,8 @@
 /** This script takes the english language file as template and applies all new fields to the other language files.
  * All languages in the support.json file will be updated */
 
-const langs = require('./support')
-let template = require('./packages/EN.json')
+const langs = require('../src/lang/support')
+let template = require('../src/lang/packages/EN.json')
 let fs = require('fs')
 let path = process.cwd()
 
@@ -10,7 +10,7 @@ for (let lang in langs) {
   if (lang !== 'EN') {
     let toChange
     try {
-      toChange = require(`./packages/${lang}.json`)
+      toChange = require(`../src/lang/packages/${lang}.json`)
     } catch (e) {
       toChange = {}
     }

@@ -3,8 +3,8 @@
     <input v-if="!onEdit" type="text" readonly class="form-control-plaintext"
            v-model="currentAttributeFullName">
     <attribute-select v-else v-model="inputValue" :valid="valid" :datatype="datatype"/>
-    <div class="validationMessage" v-if="error">
-      {{error}}
+    <div class="validationMessage" v-if="!valid">
+      {{validation}}
     </div>
   </fr-blank>
 </template>

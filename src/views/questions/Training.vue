@@ -28,7 +28,7 @@
           </tr>
         </Table>
         <save id="saveTraining" class="trainingButton" :on-save="saveTraining"
-                     :text="(trainingDetail.id ? $root.l.update:$root.l.add)" :disabled="notSaveable"/>
+              :text="(trainingDetail.id ? $root.l.update:$root.l.add)" :disabled="notSaveable"/>
         <b-button variant="secondary" class="trainingButton" @click="addTraining">{{$root.l.clear}}</b-button>
         <delete v-show="trainingDetail.id" :on-delete="deleteTraining"/>
 
@@ -55,10 +55,11 @@
   import Table from "../../components/Table"
   import CenterButton from "../../components/buttons/CenterButton"
   import Pagination from "../../components/Pagination"
+  import Loader from "../../components/Loader"
 
   export default {
     name: "Training",
-    components: {Pagination, CenterButton, Table},
+    components: {Loader, Pagination, CenterButton, Table},
     props: {
       intentId: {}
     },
@@ -82,7 +83,7 @@
         return this.$store.state.detailItem.trainings[this.intentId]
       },
       loading() {
-        return this.$store.state.loaders.intents || this.$store.state.loaders.trainings[this.intentId]
+        return this.$store.state.loaders.trainings[this.intentId]
       },
       tableheader() {
         let count = this.$store.state.loadLimitedCount.trainings[this.intentId] || 0
@@ -115,6 +116,7 @@
     },
     methods: {
       async sentenceSelected(e) {
+        this.$store.commit('loading', 'intents')
         let s = this.trainingDetail.sentence
         let start = e.currentTarget.selectionStart
         let end = e.currentTarget.selectionEnd
@@ -130,18 +132,19 @@
             }
           }
           let whereFilter = {
-            filter: {
-              where: {
-                value: value,
-                projectId: this.$store.state.projectId,
-                entityId: {
-                  inq: this.usableEntities
-                }
+            where: {
+              value: value,
+              projectId: this.$store.state.projectId,
+              entityId: {
+                inq: this.usableEntities
               }
             }
           }
           let eid = null
-          let d = await this.$store.dispatch('get', {route: 'keywords', filter: whereFilter})
+          let d = await this.$store.dispatch('get', {
+            route: 'keywords',
+            data: {projectId: this.$store.state.projectId, filter: whereFilter}
+          })
           if (d[0]) eid = d[0].entityId
           this.trainingDetail._annotations.push({
             start: start,
@@ -150,9 +153,10 @@
             entityId: eid
           })
         }
+        this.$store.commit('finishedLoading', 'intents')
       },
       loadTrainings() {
-        (this.intentId) && (this.$store.dispatch('getRouteSpecific', {subroute: 'trainings', id: this.intentId}))
+        if (this.intentId) (this.$store.dispatch('getRouteSpecific', {subroute: 'trainings', id: this.intentId}))
       },
       addTraining() {
         this.$store.commit('newTraining', this.intentId)
@@ -161,11 +165,11 @@
         this.trainingDetail.id
           ? this.$store.dispatch('saveTraining', {intentId: this.intentId, patch: true})
           : this.$store.dispatch('saveTraining', {intentId: this.intentId, patch: false})
+      },
+      deleteTraining() {
+        this.$store.dispatch('deleteTraining', this.intentId)
+        this.addTraining()
       }
-    },
-    deleteTraining() {
-      this.$store.dispatch('deleteTraining', this.intentId)
-      this.addTraining()
     }
   }
 </script>
