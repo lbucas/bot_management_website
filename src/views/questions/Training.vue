@@ -7,7 +7,7 @@
       </center-button>
       <div v-else>
         <label for="trainingSentence">{{l.trainingSenctence}}</label>
-        <textarea class="form-control" id="trainingSentence" type="text" v-model="trainingDetail.sentence"
+        <textarea class="form-control" id="trainingSentence" type="text" v-model="sentence"
                   @select="sentenceSelected"/>
         <p id="markHint"><i>{{l.markHint}}</i></p>
         <Table :head="[l.value, l.entity, '']" v-show="trainingDetail._annotations.length > 0">
@@ -109,6 +109,26 @@
           if (a.entityId === null) return true
         }
         return false
+      },
+      sentence: {
+        get() {
+          return this.trainingDetail.sentence
+        },
+        set(value) {
+          value = value.replace('!', '')
+          value = value.replace('?', '')
+          value = value.replace('.', '')
+          value = value.replace(',', '')
+          value = value.replace(':', '')
+          value = value.replace(';', '')
+          value = value.replace('(', '')
+          value = value.replace(')', '')
+          this.$store.commit('updateDetailItem', {
+            route: 'trainings',
+            key: `${this.intentId}.sentence`,
+            value
+          })
+        }
       }
     },
     created() {

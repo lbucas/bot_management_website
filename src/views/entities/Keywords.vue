@@ -105,11 +105,8 @@
         }
         return cav
       },
-      multipleKeywords() {
-        return this.selectedLength === 1
-      },
       saveText() {
-        return this.multipleKeywords ? this.l.summarizeButton : this.$root.l.update
+        return this.selectedLength === 1 ? this.$root.l.update : this.l.summarizeButton
       },
       keywordName: {
         get() {

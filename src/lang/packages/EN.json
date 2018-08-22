@@ -22,7 +22,9 @@
     "noAttrs": "No attributes found for this table",
     "schemaNotImp": "The schema is not imported yet",
     "updateAttrs": "Update Attributes",
-    "updateTables": "Update Tables"
+    "updateTables": "Update Tables",
+    "owner": "Owner",
+    "member": "Member"
   },
   "app": {
     "Datasources": "Datasources",

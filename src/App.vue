@@ -98,9 +98,9 @@
           <th>{{l.yourRole}}</th>
           </thead>
           <tbody>
-          <tr v-for="p in projects" @click="chooseProject(p, true)">
+          <tr v-for="(p, id) in projects" @click="chooseProject(p, true)">
             <td>{{p.name}}</td>
-            <td>{{p.role}}</td>
+            <td>{{($store.getters.rolePerProject[id] || '')}}</td>
           </tr>
           <tr v-if="createProject">
             <td>

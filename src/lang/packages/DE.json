@@ -22,7 +22,9 @@
     "noAttrs": "Noch keine Attribute für diese Tabelle importiert",
     "schemaNotImp": "Das Schema wurde noch nicht importiert",
     "updateAttrs": "Attribute aktualisieren",
-    "updateTables": "Tabellen aktualisieren"
+    "updateTables": "Tabellen aktualisieren",
+    "owner": "[[ Owner ]]",
+    "member": "[[ Member ]]"
   },
   "app": {
     "Datasources": "Datenquellen",

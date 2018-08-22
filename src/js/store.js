@@ -22,6 +22,7 @@ import Vue from 'vue'
 import api from './api' // custom API wrapper
 import Promise from 'bluebird'
 import tools from './tools'
+import urlConf from './urlConfig'
 
 Vue.use(Vuex)
 
@@ -567,6 +568,18 @@ export default new Vuex.Store({
       } catch (e) {
         return {}
       }
+    },
+    /* Calculates which role the user has per project, can be owner or member */
+    rolePerProject: state => {
+      let rpp = {}
+      for (let projectId in state.projects) {
+        let project = state.projects[projectId]
+        let l = state.lang.global
+        let ownUserId = state.user.user.id
+        let role = project.merckUserId === ownUserId ? l.owner : l.member
+        rpp[projectId] = role
+      }
+      return rpp
     }
   },
   mutations: {
@@ -1040,25 +1053,25 @@ export default new Vuex.Store({
       })
     },
     errorHandling(context, {err, route, data, router}) {
-      /* if (err.response && err.response.status === 401) {
+      if (err.response && err.response.status === 401 && urlConf.lookup[window.location.hostname] === 'prod') {
         router.push('/signin')
-      } else { */
-      let errMsg
-      try {
-        errMsg = err.response.data.error.message
-      } catch (e) {
-        errMsg = err.message
+      } else {
+        let errMsg
+        try {
+          errMsg = err.response.data.error.message
+        } catch (e) {
+          errMsg = err.message
+        }
+        let error = {
+          route,
+          sentData: JSON.stringify(data),
+          message: errMsg,
+          status: err.request.status + ' ' + err.request.statusText,
+          full: err
+        }
+        context.commit('error', error)
+        context.commit('finishedLoading', route.split('/')[0])
       }
-      let error = {
-        route,
-        sentData: JSON.stringify(data),
-        message: errMsg,
-        status: err.request.status + ' ' + err.request.statusText,
-        full: err
-      }
-      context.commit('error', error)
-      context.commit('finishedLoading', route.split('/')[0])
-      // }
     },
     async checkDeploymentState(context) {
       let pid = await api.waitforProjectId()
